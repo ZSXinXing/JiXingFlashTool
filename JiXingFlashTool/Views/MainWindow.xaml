@@ -275,19 +275,25 @@
         </Style>
     </Window.Resources>
 
-    <Grid Background="{StaticResource PageBackgroundBrush}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+    <Border Background="{StaticResource PageBackgroundBrush}"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="0,1,0,0"
+            SnapsToDevicePixels="True"
+            TextOptions.TextRenderingMode="Grayscale"
+            RenderOptions.ClearTypeHint="Enabled">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0"
-                Width="{Binding SidebarPanelWidth}"
-                Background="{StaticResource SidebarBackgroundBrush}"
-                BorderBrush="{StaticResource SidebarBorderBrush}"
-                BorderThickness="0,0,1,0">
-            <Grid TextElement.FontFamily="Noto Sans SC"
-                  TextOptions.TextFormattingMode="Ideal">
+            <Border Grid.Column="0"
+                    Width="{Binding SidebarPanelWidth}"
+                    Background="{StaticResource SidebarBackgroundBrush}"
+                    BorderBrush="{StaticResource SidebarBorderBrush}"
+                    BorderThickness="0,0,1,0">
+                <Grid TextElement.FontFamily="Noto Sans SC"
+                      TextOptions.TextFormattingMode="Ideal">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="63.563" />
                     <RowDefinition Height="*" />
@@ -934,10 +940,10 @@
                     </Grid>
                 </Border>
             </Grid>
-        </Border>
+            </Border>
 
-        <Grid Grid.Column="1"
-              Background="{StaticResource PageBackgroundBrush}">
+            <Grid Grid.Column="1"
+                  Background="{StaticResource PageBackgroundBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="87" />
                 <RowDefinition Height="53.5" />
@@ -1376,6 +1382,7 @@
             </Border>
         </Grid>
     </Grid>
+    </Border>
 </Window>
 
 
