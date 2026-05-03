@@ -1,0 +1,17 @@
+# Visual Studio / build outputs
+.vs/
+**/bin/
+**/obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Generated temporary project files
+*wpftmp.csproj
+*wpftmp.csproj.*
+
+# Logs
+*.log

@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="JiXingFlashTool.Views.AdbListView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:JiXingFlashTool.Views"   xmlns:viewModel="clr-namespace:JiXingFlashTool.ViewModels" xmlns:hc="https://handyorg.github.io/handycontrol"
+             mc:Ignorable="d" 
+             Height="250" Width="450">
+    <UserControl.DataContext>
+        <viewModel:AdbListViewModel/>
+    </UserControl.DataContext>
+    <Border CornerRadius="4,4,4,4" Background="#ffffff">
+        <DockPanel>
+            <Border CornerRadius="4 4 0 0 " Background="#2D77FC" Height="40" DockPanel.Dock="Top">
+                <DockPanel >
+                    <TextBlock Text="常用指令" Margin="24 9 0 0 "  FontSize="16" Foreground="#FFFFFF" DockPanel.Dock="Left"/>
+                </DockPanel>
+            </Border>
+            <DockPanel DockPanel.Dock="Bottom" Height="90">
+                <StackPanel DockPanel.Dock="Top"  Orientation="Horizontal"  Margin="10 0 10 0">
+                    <TextBlock VerticalAlignment="Center" TextAlignment="Right" Text="自定义:" Grid.Row="0" Grid.Column="0"></TextBlock>
+                    <TextBox Height="30" Width="300" Margin="5 0 0 0" Text="{Binding CustomCommandTxt}" TextAlignment="Center" Grid.Row="0" Grid.Column="1"></TextBox>
+                    <Button Style="{StaticResource ButtonSuccess}" Content="执行" Command="{Binding ExecuteCustomCommand}" Width="80" Margin="5 0 0 0" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"  Margin="0 0 10 0" >
+                    <Button  Content="关闭" Background="#FFFFFF"  Command="hc:ControlCommands.Close"/>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Left" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Height="45" Margin="10 0 0 0">
+                    <TextBlock Text="选择数量:" Height="20"></TextBlock>
+                    <TextBlock Text="{Binding SelectDeviceList.Count}" Margin="2 0 0 0" Height="20"></TextBlock>
+                </StackPanel>
+                <Grid></Grid>
+            </DockPanel>
+            <ListBox Margin="10" Name="CommandListBox" ItemsSource="{Binding CommandCollection}" BorderThickness="0" Style="{DynamicResource StackPanelHorizontalListBox}">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" IsItemsHost="True"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Button Margin="5,0,0,5" Name="CommandBtn" Content="{Binding Name}" CommandParameter="{Binding ElementName=CommandBtn,Path=DataContext}" Command="{Binding DataContext.AdbCommand,ElementName=CommandListBox}"></Button>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </Border>
+</UserControl>

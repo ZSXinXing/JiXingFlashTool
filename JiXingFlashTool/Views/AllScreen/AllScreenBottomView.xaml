@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="JiXingFlashTool.Views.AllScreen.AllScreenBottomView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:JiXingFlashTool.Views.AllScreen" xmlns:hc="https://handyorg.github.io/handycontrol" xmlns:viewModel="clr-namespace:JiXingFlashTool.ViewModels.AllScreen"
+             mc:Ignorable="d" 
+             d:DesignHeight="32" d:DesignWidth="800"
+             Loaded="UserControl_Loaded"
+             >
+    <UserControl.DataContext>
+        <viewModel:AllScreenBottomViewModel/>
+    </UserControl.DataContext>
+    <DockPanel Background="#F6F6F6">
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Left" Margin="10 0 0 0">
+            <TextBlock Text="设备总数:" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+            <TextBlock Text="{Binding DeviceCount}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0 0 0"></TextBlock>
+
+            <TextBlock Text="已投屏:" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10 0 0 0"></TextBlock>
+            <TextBlock Text="{Binding CastScreenCount}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0 0 0"></TextBlock>
+
+            <!--<TextBlock Text="已选择:" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="10 0 0 0"></TextBlock>
+            <TextBlock Text="{Binding SelectCount}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0 0 0"></TextBlock>-->
+            
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" Margin="0 0 30 0">
+            <TextBlock Text="画面大小" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+            <Slider ValueChanged="PreviewSliderHorizontal_PreviewPositionChanged"
+                    Name="PreviewSliderHorizontal"
+                    Width="150"
+                    Margin="8 0 0 0"
+                    TickFrequency="1"
+                    IsSnapToTickEnabled="True"
+                    Value="{Binding ScreenCurrentWidth}"
+                    Maximum="{Binding ScreenMaxWidth}"
+                    Minimum="{Binding ScreenMiniWidth}" />
+            <Label Margin="8 0 0 0"
+                   VerticalAlignment="Center"
+                   Style="{StaticResource LabelPrimary}"
+                   Content="{Binding ElementName=PreviewSliderHorizontal,Path=Value}"
+                   ContentStringFormat="F0" />
+        </StackPanel>
+        <Grid></Grid>
+    </DockPanel>
+</UserControl>

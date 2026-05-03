@@ -1,0 +1,390 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using JiXingFlashTool.Model;
+using JiXingFlashTool.Models;
+using JiXingFlashTool.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Media;
+
+namespace JiXingFlashTool.ObservableModel
+{
+    /// <summary>
+    /// 设备列表中的单个设备展示模型，负责承载主页面表格展示所需的状态与样式数据。
+    /// </summary>
+    public class DeviceObservableModel : ObservableObject
+    {
+        private static readonly SolidColorBrush UsbTagBackgroundBrush = CreateBrush("#E3F2FD");
+        private static readonly SolidColorBrush UsbTagForegroundBrush = CreateBrush("#2196F3");
+        private static readonly SolidColorBrush EthernetTagBackgroundBrush = CreateBrush("#E0F7FA");
+        private static readonly SolidColorBrush EthernetTagForegroundBrush = CreateBrush("#00BCD4");
+        private static readonly SolidColorBrush SystemTagBackgroundBrush = CreateBrush("#E8F5E9");
+        private static readonly SolidColorBrush SystemTagForegroundBrush = CreateBrush("#4CAF50");
+        private static readonly SolidColorBrush RecoveryTagBackgroundBrush = CreateBrush("#FFF3E0");
+        private static readonly SolidColorBrush RecoveryTagForegroundBrush = CreateBrush("#FF9800");
+        private static readonly SolidColorBrush DownloadTagBackgroundBrush = CreateBrush("#F3E5F5");
+        private static readonly SolidColorBrush DownloadTagForegroundBrush = CreateBrush("#9C27B0");
+        private static readonly SolidColorBrush SideloadTagBackgroundBrush = CreateBrush("#FCE4EC");
+        private static readonly SolidColorBrush SideloadTagForegroundBrush = CreateBrush("#E91E63");
+        private static readonly SolidColorBrush OfflineTagBackgroundBrush = CreateBrush("#FFEBEE");
+        private static readonly SolidColorBrush OfflineTagForegroundBrush = CreateBrush("#F44336");
+        private static readonly SolidColorBrush DefaultTagBackgroundBrush = CreateBrush("#ECEFF1");
+        private static readonly SolidColorBrush DefaultTagForegroundBrush = CreateBrush("#607D8B");
+
+        protected DeviceModel device;
+        /// <summary>
+        /// 当前项对应的设备模型。
+        /// </summary>
+        public DeviceModel Device { get { return device; } }
+        private DeviceTaskService service;
+        /// <summary>
+        /// 当前设备任务服务，按需创建以降低初始化开销。
+        /// </summary>
+        public DeviceTaskService Service {
+            get {
+                if (service == null) service = new DeviceTaskService(this);
+                return service;
+            }
+        }
+
+        private int displayIndex;
+
+        /// <summary>
+        /// 列表序号，供主页面表格展示。
+        /// </summary>
+        public int DisplayIndex
+        {
+            get => displayIndex;
+            set => SetProperty(ref displayIndex, value);
+        }
+
+        /// <summary>
+        /// 设备序列号，网络连接时仅展示主机地址部分。
+        /// </summary>
+        public string Serial
+        {
+            get => Device.Serial;
+        }
+
+        /// <summary>
+        /// 设备型号。
+        /// </summary>
+        public string Model
+        {
+            get => Device.Model;
+        }
+
+        /// <summary>
+        /// 设备展示名称。
+        /// </summary>
+        public string ModelName
+        {
+            get => Device.Name;
+        }
+
+        /// <summary>
+        /// 设备品牌，优先展示 Product 字段。
+        /// </summary>
+        public string Brand
+        {
+            get => string.IsNullOrWhiteSpace(Device.Product) ? Device.Name : Device.Product;
+        }
+
+        /// <summary>
+        /// 安卓或 Recovery 版本信息。
+        /// </summary>
+        public string AndroidVersion
+        {
+            get {
+                if (Device.State == JXAdbCore.Enums.DeviceState.Recovery) return Device.TWRPVersion;
+                if(Device.State == JXAdbCore.Enums.DeviceState.Online) return Device.AndroidVersion;
+                return "";
+            }
+        }
+
+
+        /// <summary>
+        /// 系统版本号。
+        /// </summary>
+        public string SystemVersion {
+            get {
+                return Device.PolestarVersion;
+            }
+        }
+
+        /// <summary>
+        /// 设备名称。
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                return Device.Name;
+            }
+        }
+
+        /// <summary>
+        /// 列表中的显示名称。
+        /// </summary>
+        public string ShowName {
+            get => Device.Model;
+        }
+
+        /// <summary>
+        /// 当前设备状态的中文文案。
+        /// </summary>
+        public string DeviceState {
+            get
+            {
+                if (device.State == JXAdbCore.Enums.DeviceState.BootLoader)
+                {
+                    return "Download";
+                }
+
+                return device.StateChinese;
+            }
+        }
+
+        /// <summary>
+        /// 当前设备的连接方式文案。
+        /// </summary>
+        public string ConnectionType
+        {
+            get => Device.Serial != null && Device.Serial.Contains(":") ? "以太网" : "USB";
+        }
+
+        /// <summary>
+        /// 编译日期。
+        /// </summary>
+        public string BuildDate {
+            get {
+                return device.BuildDate;
+            }
+        }
+
+
+        private bool isSelect;
+        /// <summary>
+        /// 当前设备是否被选中。
+        /// </summary>
+        public bool IsSelect
+        {
+            get => isSelect;
+            set => SetProperty(ref isSelect, value);
+        }
+
+        private string taskDetailMessage;
+        /// <summary>
+        /// 当前任务详情文案。
+        /// </summary>
+        public string TaskDetailMessage
+        {
+            get => taskDetailMessage;
+            set
+            {
+                if (SetProperty(ref taskDetailMessage, value))
+                {
+                    OnPropertyChanged(nameof(TaskDetailDisplayMessage));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 任务详情展示文案，空值时显示默认空闲提示。
+        /// </summary>
+        public string TaskDetailDisplayMessage
+        {
+            get => string.IsNullOrWhiteSpace(TaskDetailMessage) ? "空闲中，等待指令" : TaskDetailMessage;
+        }
+
+        /// <summary>
+        /// 连接方式标签背景色。
+        /// </summary>
+        public SolidColorBrush ConnectionTagBackground
+        {
+            get => ConnectionType.Equals("以太网") ? EthernetTagBackgroundBrush : UsbTagBackgroundBrush;
+        }
+
+        /// <summary>
+        /// 连接方式标签前景色。
+        /// </summary>
+        public SolidColorBrush ConnectionTagForeground
+        {
+            get => ConnectionType.Equals("以太网") ? EthernetTagForegroundBrush : UsbTagForegroundBrush;
+        }
+
+        /// <summary>
+        /// 状态标签背景色。
+        /// </summary>
+        public SolidColorBrush DeviceStateTagBackground
+        {
+            get
+            {
+                switch (Device.State)
+                {
+                    case JXAdbCore.Enums.DeviceState.Online:
+                        return SystemTagBackgroundBrush;
+                    case JXAdbCore.Enums.DeviceState.Recovery:
+                        return RecoveryTagBackgroundBrush;
+                    case JXAdbCore.Enums.DeviceState.BootLoader:
+                        return DownloadTagBackgroundBrush;
+                    case JXAdbCore.Enums.DeviceState.Sideload:
+                        return SideloadTagBackgroundBrush;
+                    case JXAdbCore.Enums.DeviceState.Offline:
+                    case JXAdbCore.Enums.DeviceState.Unauthorized:
+                    case JXAdbCore.Enums.DeviceState.NoPermissions:
+                        return OfflineTagBackgroundBrush;
+                    default:
+                        return DefaultTagBackgroundBrush;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 状态标签前景色。
+        /// </summary>
+        public SolidColorBrush DeviceStateTagForeground
+        {
+            get
+            {
+                switch (Device.State)
+                {
+                    case JXAdbCore.Enums.DeviceState.Online:
+                        return SystemTagForegroundBrush;
+                    case JXAdbCore.Enums.DeviceState.Recovery:
+                        return RecoveryTagForegroundBrush;
+                    case JXAdbCore.Enums.DeviceState.BootLoader:
+                        return DownloadTagForegroundBrush;
+                    case JXAdbCore.Enums.DeviceState.Sideload:
+                        return SideloadTagForegroundBrush;
+                    case JXAdbCore.Enums.DeviceState.Offline:
+                    case JXAdbCore.Enums.DeviceState.Unauthorized:
+                    case JXAdbCore.Enums.DeviceState.NoPermissions:
+                        return OfflineTagForegroundBrush;
+                    default:
+                        return DefaultTagForegroundBrush;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 状态标签圆点颜色。
+        /// </summary>
+        public SolidColorBrush DeviceStateIndicatorBrush => DeviceStateTagForeground;
+
+        /// <summary>
+        /// 是否展示状态圆点。
+        /// </summary>
+        public bool ShowDeviceStateIndicator => true;
+
+        /// <summary>
+        /// 使用设备模型初始化展示模型。
+        /// </summary>
+        public DeviceObservableModel(DeviceModel device) => this.device = device;
+
+        #region 调用任务的方法
+        /// <summary>
+        /// 启动常用 ADB 指令。
+        /// </summary>
+        public void StartAdbCommand(AdbCommandModel adbModel) => Service.StartAdbCommand(adbModel);
+
+        /// <summary>
+        /// 执行 TWRP 指令。
+        /// </summary>
+        public void ExecuteTWRPCommand(CommandModel commandModel) => Service.ExecuteTWRPCommand(commandModel);
+        /// <summary>
+        /// 刷入系统更新包。
+        /// </summary>
+        public void UpdateSystem(string filePath) => Service.UpdateSystem(filePath);
+        /// <summary>
+        /// 删除设备中的更新文件。
+        /// </summary>
+        public void DeleteUpdateFile() => Service.DeleteUpdateFile();
+
+        /// <summary>
+        /// 恢复出厂设置。
+        /// </summary>
+        public void RestoreFactory() => Service.RestoreFactory();
+        #endregion
+
+        #region 样式
+        private SolidColorBrush itemBackgroundColor;
+        /// <summary>
+        /// 旧列表项背景色，保留给现有其它页面兼容使用。
+        /// </summary>
+        public SolidColorBrush ItemBackgroundColor
+        {
+            get
+            {
+
+                return IsSelect ?
+                    (SolidColorBrush)new BrushConverter().ConvertFrom("#2D77FC")
+                  : new SolidColorBrush(System.Windows.Media.Color.FromArgb(0, 0, 0, 0));
+            }
+        }
+
+        private SolidColorBrush itemForegroundColor;
+        /// <summary>
+        /// 旧列表项前景色，保留给现有其它页面兼容使用。
+        /// </summary>
+        public SolidColorBrush ItemForegroundColor
+        {
+            get
+            {
+                return IsSelect ?
+                    (SolidColorBrush)new BrushConverter().ConvertFrom("#FFFFFF")
+                  : (SolidColorBrush)new BrushConverter().ConvertFrom("#252525");
+            }
+        }
+
+        /// <summary>
+        /// 旧列表项边框厚度，保留给现有其它页面兼容使用。
+        /// </summary>
+        public int BorderThickness
+        {
+            get
+            {
+                return IsSelect ? 2 : 0;
+            }
+        }
+
+        /// <summary>
+        /// 刷新旧列表项背景色。
+        /// </summary>
+        public void RefreshItemBackgroundColor()
+        {
+            OnPropertyChanged(nameof(ItemBackgroundColor));
+        }
+
+        /// <summary>
+        /// 刷新旧列表项前景色。
+        /// </summary>
+        public void RefreshItemForegroundColor()
+        {
+            OnPropertyChanged(nameof(ItemForegroundColor));
+        }
+
+        /// <summary>
+        /// 刷新旧列表项边框厚度。
+        /// </summary>
+        public void RefreshItemBorderThickness()
+        {
+            OnPropertyChanged(nameof(BorderThickness));
+        }
+        #endregion
+
+        /// <summary>
+        /// 创建并冻结画刷，避免重复分配。
+        /// </summary>
+        /// <param name="colorValue">十六进制颜色值。</param>
+        /// <returns>冻结后的纯色画刷。</returns>
+        private static SolidColorBrush CreateBrush(string colorValue)
+        {
+            var brush = (SolidColorBrush)new BrushConverter().ConvertFrom(colorValue);
+            brush.Freeze();
+            return brush;
+        }
+    }
+}
