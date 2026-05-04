@@ -139,6 +139,9 @@
     <Compile Include="Utils\KeycodeHelper.cs" />
     <Compile Include="Utils\StaticConstant.cs" />
     <Compile Include="Utils\VideoStreamDecoder.cs" />
+    <Compile Include="Control\IconButton.xaml.cs">
+      <DependentUpon>IconButton.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModels\AdbListViewModel.cs" />
     <Compile Include="ViewModels\AllScreen\AllScreenBottomViewModel.cs" />
     <Compile Include="ViewModels\AllScreen\AllScreenLeftViewModel.cs" />
@@ -239,6 +242,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Control\IconButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -337,6 +344,69 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resource\Image\FigmaSidebar\sidebar_collapsed_preview.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\restart.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\shutdown.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\flash_on.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\flash_off.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\shell.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\root.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\update.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\maintenance_buttons_18_377.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\tool_panel_21_1016.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\Maintenance\tool_panel_21_1016_exact.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_reboot.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_wipe.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_clear_system.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_format_data.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_sideload.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_flash_file.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_update_kernel.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_update_twrp.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_decrypt.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_disable_developer.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resource\Image\TwrpPro\professional_skip_guide.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resource\Image\ic_close.png">
