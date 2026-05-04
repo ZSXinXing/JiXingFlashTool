@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converter="clr-namespace:JiXingFlashTool.Converters"
         xmlns:control="clr-namespace:JiXingFlashTool.Control"
+        xmlns:local="clr-namespace:JiXingFlashTool.Utils"
         xmlns:viewModel="clr-namespace:JiXingFlashTool.ViewModels"
         Title=""
         Width="1600"
@@ -23,25 +24,6 @@
     <Window.Resources>
         <converter:VisibilityBoolConverter x:Key="VisibilityBoolConverter" />
         <converter:InverseVisibilityBoolConverter x:Key="InverseVisibilityBoolConverter" />
-
-        <BitmapImage x:Key="MaintenanceRestartIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/Maintenance/restart.png" />
-        <BitmapImage x:Key="MaintenanceShutdownIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/Maintenance/shutdown.png" />
-        <BitmapImage x:Key="MaintenanceFlashOnIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/Maintenance/flash_on.png" />
-        <BitmapImage x:Key="MaintenanceFlashOffIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/Maintenance/flash_off.png" />
-        <BitmapImage x:Key="MaintenanceShellIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/Maintenance/shell.png" />
-        <BitmapImage x:Key="MaintenanceRootIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/Maintenance/root.png" />
-        <BitmapImage x:Key="MaintenanceUpdateIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/Maintenance/update.png" />
-        <BitmapImage x:Key="TwrpProRebootSystemIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_reboot.png" />
-        <BitmapImage x:Key="TwrpProWipeIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_wipe.png" />
-        <BitmapImage x:Key="TwrpProClearSystemIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_clear_system.png" />
-        <BitmapImage x:Key="TwrpProFormatDataIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_format_data.png" />
-        <BitmapImage x:Key="TwrpProSideloadIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_sideload.png" />
-        <BitmapImage x:Key="TwrpProFlashFileIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_flash_file.png" />
-        <BitmapImage x:Key="TwrpProUpdateKernelIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_update_kernel.png" />
-        <BitmapImage x:Key="TwrpProUpdateTwrpIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_update_twrp.png" />
-        <BitmapImage x:Key="TwrpProDecryptIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_decrypt.png" />
-        <BitmapImage x:Key="TwrpProDisableDeveloperIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_disable_developer.png" />
-        <BitmapImage x:Key="TwrpProSkipGuideIcon" UriSource="pack://application:,,,/JiXingFlashTool;component/Resource/Image/TwrpPro/professional_skip_guide.png" />
         <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#FAFAFA" />
         <SolidColorBrush x:Key="SidebarBorderBrush" Color="#E0E0E0" />
         <SolidColorBrush x:Key="PageBackgroundBrush" Color="#FFFFFF" />
@@ -937,7 +919,7 @@
                                                 Height="24.5"
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{StaticResource MaintenanceRestartIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.MaintenanceRestartIcon}"
                                                 ButtonText="重启设备"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="RebootDevice" />
@@ -946,7 +928,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#F44336"
                                                 ButtonBorderBrush="#F44336"
-                                                ButtonIcon="{StaticResource MaintenanceShutdownIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.MaintenanceShutdownIcon}"
                                                 ButtonText="关机"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="ShutdownDevice" />
@@ -955,7 +937,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#4CAF50"
                                                 ButtonBorderBrush="#4CAF50"
-                                                ButtonIcon="{StaticResource MaintenanceFlashOnIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.MaintenanceFlashOnIcon}"
                                                 ButtonText="打开手电筒"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="FlashOn" />
@@ -968,7 +950,7 @@
                                                 ButtonFontSize="10.5"
                                                 ButtonIconSize="12.25"
                                                 ButtonTextMargin="0,0,0,0"
-                                                ButtonIcon="{StaticResource MaintenanceFlashOffIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.MaintenanceFlashOffIcon}"
                                                 ButtonText="关闭手电筒"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="FlashOff" />
@@ -977,7 +959,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#5C82FD"
                                                 ButtonBorderBrush="#5C82FD"
-                                                ButtonIcon="{StaticResource MaintenanceShellIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.MaintenanceShellIcon}"
                                                 ButtonText="执行 Shell"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="ShellCommand" />
@@ -986,7 +968,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#9C27B0"
                                                 ButtonBorderBrush="#9C27B0"
-                                                ButtonIcon="{StaticResource MaintenanceRootIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.MaintenanceRootIcon}"
                                                 ButtonText="刷入 ROOT"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="RootDevice" />
@@ -995,7 +977,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#5C82FD"
                                                 ButtonBorderBrush="#5C82FD"
-                                                ButtonIcon="{StaticResource MaintenanceUpdateIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.MaintenanceUpdateIcon}"
                                                 ButtonText="检查系统更新"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="CheckSystemUpdate" />
@@ -1018,7 +1000,7 @@
                                                 Height="24.5"
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{StaticResource TwrpProRebootSystemIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProRebootSystemIcon}"
                                                 ButtonText="重启到系统"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="RebootSystem" />
@@ -1027,7 +1009,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#7B9EFF"
                                                 ButtonBorderBrush="#7B9EFF"
-                                                ButtonIcon="{StaticResource TwrpProRebootSystemIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProRebootSystemIcon}"
                                                 ButtonText="启动到 TWRP"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="RebootTwrp" />
@@ -1036,7 +1018,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#9C27B0"
                                                 ButtonBorderBrush="#9C27B0"
-                                                ButtonIcon="{StaticResource TwrpProRebootSystemIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProRebootSystemIcon}"
                                                 ButtonText="重启到 Download"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="RebootDownload" />
@@ -1045,7 +1027,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{StaticResource TwrpProWipeIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProWipeIcon}"
                                                 ButtonText="双清"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="Wipe" />
@@ -1054,7 +1036,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#F44336"
                                                 ButtonBorderBrush="#F44336"
-                                                ButtonIcon="{StaticResource TwrpProClearSystemIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProClearSystemIcon}"
                                                 ButtonText="清除系统"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="ClearSystem" />
@@ -1063,7 +1045,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#F44336"
                                                 ButtonBorderBrush="#F44336"
-                                                ButtonIcon="{StaticResource TwrpProFormatDataIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProFormatDataIcon}"
                                                 ButtonText="格式化 Data"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="FormatData" />
@@ -1072,7 +1054,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#7B9EFF"
                                                 ButtonBorderBrush="#7B9EFF"
-                                                ButtonIcon="{StaticResource TwrpProSideloadIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProSideloadIcon}"
                                                 ButtonText="进入侧载"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="Sideload" />
@@ -1081,7 +1063,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{StaticResource TwrpProFlashFileIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProFlashFileIcon}"
                                                 ButtonText="刷入文件"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="FlashFile" />
@@ -1090,7 +1072,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#5C82FD"
                                                 ButtonBorderBrush="#5C82FD"
-                                                ButtonIcon="{StaticResource TwrpProUpdateKernelIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProUpdateKernelIcon}"
                                                 ButtonText="更新内核"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="FlashKernel" />
@@ -1099,7 +1081,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#7B9EFF"
                                                 ButtonBorderBrush="#7B9EFF"
-                                                ButtonIcon="{StaticResource TwrpProUpdateTwrpIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProUpdateTwrpIcon}"
                                                 ButtonText="更新 TWRP"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="UpdateTwrp" />
@@ -1108,7 +1090,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{StaticResource TwrpProDecryptIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProDecryptIcon}"
                                                 ButtonText="解密"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="Decrypt" />
@@ -1117,7 +1099,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{StaticResource TwrpProDisableDeveloperIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProDisableDeveloperIcon}"
                                                 ButtonText="关闭开发者"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="DisableDeveloper" />
@@ -1126,7 +1108,7 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{StaticResource TwrpProSkipGuideIcon}"
+                                                ButtonIcon="{x:Static local:IconResources.TwrpProSkipGuideIcon}"
                                                 ButtonText="跳过向导"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="SkipGuide" />

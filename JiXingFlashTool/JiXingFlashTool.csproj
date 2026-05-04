@@ -137,6 +137,7 @@
     <Compile Include="Utils\D3DImageSource.cs" />
     <Compile Include="Utils\FileUtil.cs" />
     <Compile Include="Utils\KeycodeHelper.cs" />
+    <Compile Include="Utils\IconResources.cs" />
     <Compile Include="Utils\StaticConstant.cs" />
     <Compile Include="Utils\VideoStreamDecoder.cs" />
     <Compile Include="Control\IconButton.xaml.cs">
