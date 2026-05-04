@@ -960,7 +960,7 @@
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="FlashOn" />
                             <control:IconButton
-                                                Height="26.5"
+                                                Height="24.5"
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
@@ -1001,7 +1001,7 @@
                                                 ButtonCommandParameter="CheckSystemUpdate" />
                         </StackPanel>
                         <StackPanel Grid.Row="2"
-                                    Margin="14,0,14,0"
+                                    Margin="0,0,14,0"
                                     Panel.ZIndex="1"
                                     Orientation="Horizontal">
                             <TextBlock Text="TWRP 专业指令" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" />
@@ -1011,7 +1011,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="4"
-                                    Margin="14,0,14,0"
+                                    Margin="0,0,14,0"
                                     Panel.ZIndex="1"
                                     Orientation="Horizontal">
                             <control:IconButton
@@ -1393,6 +1393,7 @@
     </Grid>
     </Border>
 </Window>
+
 
 
 
