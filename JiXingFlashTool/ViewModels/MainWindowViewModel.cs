@@ -207,6 +207,8 @@ namespace JiXingFlashTool.ViewModels
                 if (SetProperty(ref _isSidebarExpanded, value))
                 {
                     OnPropertyChanged(nameof(SidebarPanelWidth));
+                    OnPropertyChanged(nameof(SidebarHeaderHeight));
+                    OnPropertyChanged(nameof(SidebarFooterHeight));
                     OnPropertyChanged(nameof(SidebarToggleIconGlyph));
                 }
             }
@@ -216,6 +218,16 @@ namespace JiXingFlashTool.ViewModels
         /// 侧边栏当前宽度。
         /// </summary>
         public double SidebarPanelWidth => IsSidebarExpanded ? 223D : 55D;
+
+        /// <summary>
+        /// 侧边栏顶部容器当前高度。
+        /// </summary>
+        public double SidebarHeaderHeight => IsSidebarExpanded ? 63.563D : 57D;
+
+        /// <summary>
+        /// 侧边栏底部容器当前高度。
+        /// </summary>
+        public double SidebarFooterHeight => IsSidebarExpanded ? 173.5D : 198D;
 
         /// <summary>
         /// 侧边栏折叠按钮图标。

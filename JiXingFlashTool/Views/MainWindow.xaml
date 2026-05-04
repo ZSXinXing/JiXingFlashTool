@@ -5,7 +5,7 @@
         xmlns:viewModel="clr-namespace:JiXingFlashTool.ViewModels"
         Title=""
         Width="1600"
-        Height="960"
+        Height="1066.5"
         MinWidth="1280"
         MinHeight="780"
         Icon="{x:Null}"
@@ -78,6 +78,59 @@
             <Setter Property="Height" Value="35" />
             <Setter Property="Padding" Value="10.5,0" />
             <Setter Property="FontSize" Value="12.25" />
+        </Style>
+
+        <Style x:Key="SidebarNavButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource SidebarButtonStyle}">
+            <Setter Property="Height" Value="38.5" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RootBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="3.5">
+                            <ContentPresenter Margin="10.5,0" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="#F5F8FF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="#E3EBFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SidebarNavIconButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource SidebarButtonStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RootBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="3.5">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="#F5F8FF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="#E3EBFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="SidebarIconButtonStyle"
@@ -249,7 +302,17 @@
                         <Setter Property="FontSize" Value="12.25" />
                         <Setter Property="Foreground" Value="#E6333333" />
                         <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Setter Property="Background" Value="White" />
                         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="White" />
+                                <Setter Property="Foreground" Value="#E6333333" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter Property="Background" Value="White" />
+                            </Trigger>
+                        </Style.Triggers>
                     </Style>
                 </Setter.Value>
             </Setter>
@@ -261,12 +324,13 @@
                         <Setter Property="BorderBrush" Value="#80E0E0E0" />
                         <Setter Property="BorderThickness" Value="0,0,0,1" />
                         <Setter Property="SnapsToDevicePixels" Value="True" />
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#FCFDFF" />
+                                <Setter Property="Background" Value="White" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#F7FBFF" />
+                                <Setter Property="Background" Value="White" />
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -289,659 +353,479 @@
 
             <Border Grid.Column="0"
                     Width="{Binding SidebarPanelWidth}"
-                    Background="{StaticResource SidebarBackgroundBrush}"
-                    BorderBrush="{StaticResource SidebarBorderBrush}"
+                    Background="White"
+                    BorderBrush="#E6E6E6"
                     BorderThickness="0,0,1,0">
-                <Grid TextElement.FontFamily="Noto Sans SC"
+                <Grid TextElement.FontFamily="Microsoft YaHei UI"
                       TextOptions.TextFormattingMode="Ideal">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="63.563" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="173.5" />
-                </Grid.RowDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="{Binding SidebarHeaderHeight}" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="{Binding SidebarFooterHeight}" />
+                    </Grid.RowDefinitions>
 
-                <Border Grid.Row="0"
-                        BorderBrush="{StaticResource SidebarBorderBrush}"
-                        BorderThickness="0,0,0,1"
-                        Padding="14,14,14,15">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="10.5" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
+                    <Border Grid.Row="0"
+                            BorderBrush="#E6E6E6"
+                            BorderThickness="0,0,0,1">
+                        <Grid Margin="7,7,7,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="7" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-                        <Viewbox Width="24.5"
-                                 Height="24.5"
-                                 HorizontalAlignment="Left"
-                                 VerticalAlignment="Top"
-                                 Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
-                            <Canvas Width="24.5" Height="24.5">
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M18.375 4.08333H6.125C4.99742 4.08333 4.08333 4.99742 4.08333 6.125V18.375C4.08333 19.5026 4.99742 20.4167 6.125 20.4167H18.375C19.5026 20.4167 20.4167 19.5026 20.4167 18.375V6.125C20.4167 4.99742 19.5026 4.08333 18.375 4.08333Z" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M14.2917 9.1875H10.2083C9.64454 9.1875 9.1875 9.64454 9.1875 10.2083V14.2917C9.1875 14.8555 9.64454 15.3125 10.2083 15.3125H14.2917C14.8555 15.3125 15.3125 14.8555 15.3125 14.2917V10.2083C15.3125 9.64454 14.8555 9.1875 14.2917 9.1875Z" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M15.3125 2.04167V4.08333" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M15.3125 20.4167V22.4583" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M2.04167 15.3125H4.08333" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M2.04167 9.1875H4.08333" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M20.4167 15.3125H22.4583" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M20.4167 9.1875H22.4583" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M9.1875 2.04167V4.08333" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.04167"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M9.1875 20.4167V22.4583" />
-                            </Canvas>
-                        </Viewbox>
+                            <Viewbox Width="28"
+                                     Height="28"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top"
+                                     Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
+                                <Canvas Width="24.5" Height="24.5">
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M18.375 4.08333H6.125C4.99742 4.08333 4.08333 4.99742 4.08333 6.125V18.375C4.08333 19.5026 4.99742 20.4167 6.125 20.4167H18.375C19.5026 20.4167 20.4167 19.5026 20.4167 18.375V6.125C20.4167 4.99742 19.5026 4.08333 18.375 4.08333Z" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M14.2917 9.1875H10.2083C9.64454 9.1875 9.1875 9.64454 9.1875 10.2083V14.2917C9.1875 14.8555 9.64454 15.3125 10.2083 15.3125H14.2917C14.8555 15.3125 15.3125 14.8555 15.3125 14.2917V10.2083C15.3125 9.64454 14.8555 9.1875 14.2917 9.1875Z" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M15.3125 2.04167V4.08333" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M15.3125 20.4167V22.4583" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.04167 15.3125H4.08333" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.04167 9.1875H4.08333" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M20.4167 15.3125H22.4583" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M20.4167 9.1875H22.4583" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M9.1875 2.04167V4.08333" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M9.1875 20.4167V22.4583" />
+                                </Canvas>
+                            </Viewbox>
+                            <Viewbox Width="31.5"
+                                     Height="31.5"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top"
+                                     Visibility="{Binding IsSidebarExpanded, Converter={StaticResource InverseVisibilityBoolConverter}}">
+                                <Canvas Width="28" Height="28">
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M21 4.66667H7C5.71134 4.66667 4.66667 5.71134 4.66667 7V21C4.66667 22.2887 5.71134 23.3333 7 23.3333H21C22.2887 23.3333 23.3333 22.2887 23.3333 21V7C23.3333 5.71134 22.2887 4.66667 21 4.66667Z" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M16.3333 10.5H11.6667C11.0223 10.5 10.5 11.0223 10.5 11.6667V16.3333C10.5 16.9777 11.0223 17.5 11.6667 17.5H16.3333C16.9777 17.5 17.5 16.9777 17.5 16.3333V11.6667C17.5 11.0223 16.9777 10.5 16.3333 10.5Z" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M17.5 2.33333V4.66667" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M17.5 23.3333V25.6667" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.33333 17.5H4.66667" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.33333 10.5H4.66667" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M23.3333 17.5H25.6667" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M23.3333 10.5H25.6667" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M10.5 2.33333V4.66667" />
+                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M10.5 23.3333V25.6667" />
+                                </Canvas>
+                            </Viewbox>
 
-                        <Viewbox Width="28"
-                                 Height="28"
-                                 HorizontalAlignment="Left"
-                                 VerticalAlignment="Top"
-                                 Visibility="{Binding IsSidebarExpanded, Converter={StaticResource InverseVisibilityBoolConverter}}">
-                            <Canvas Width="28" Height="28">
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M21 4.66667H7C5.71134 4.66667 4.66667 5.71134 4.66667 7V21C4.66667 22.2887 5.71134 23.3333 7 23.3333H21C22.2887 23.3333 23.3333 22.2887 23.3333 21V7C23.3333 5.71134 22.2887 4.66667 21 4.66667Z" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M16.3333 10.5H11.6667C11.0223 10.5 10.5 11.0223 10.5 11.6667V16.3333C10.5 16.9777 11.0223 17.5 11.6667 17.5H16.3333C16.9777 17.5 17.5 16.9777 17.5 16.3333V11.6667C17.5 11.0223 16.9777 10.5 16.3333 10.5Z" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M17.5 2.33333V4.66667" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M17.5 23.3333V25.6667" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M2.33333 17.5H4.66667" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M2.33333 10.5H4.66667" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M23.3333 17.5H25.6667" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M23.3333 10.5H25.6667" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M10.5 2.33333V4.66667" />
-                                <Path Fill="Transparent"
-                                      Stroke="#5C82FD"
-                                      StrokeThickness="2.33333"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round"
-                                      Data="M10.5 23.3333V25.6667" />
-                            </Canvas>
-                        </Viewbox>
+                            <StackPanel Grid.Column="2"
+                                        Width="96"
+                                        Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
+                                <TextBlock Text="极星系统工具"
+                                           FontSize="15.365"
+                                           FontWeight="SemiBold"
+                                           Foreground="#333333"
+                                           LineHeight="18.438" />
+                                <TextBlock Margin="0,2,0,0"
+                                           Text="系统更新维护工具"
+                                           FontSize="12.25"
+                                           Foreground="#8A333333"
+                                           LineHeight="15.313" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
 
-                        <StackPanel Grid.Column="2"
-                                    Width="98"
+                    <Grid Grid.Row="1">
+                        <StackPanel Margin="7,7,7,0"
                                     Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
-                            <TextBlock Text="极星系统工具"
-                                       FontSize="14"
-                                       FontWeight="Bold"
-                                       LineHeight="17.5"
-                                       Foreground="{StaticResource TextBrush}" />
-                            <TextBlock Margin="0,2,0,0"
-                                       Text="系统更新维护工具"
-                                       FontSize="12.25"
-                                       LineHeight="15.313"
-                                       Foreground="{StaticResource MutedTextBrush}" />
-                        </StackPanel>
-                    </Grid>
-                </Border>
-
-                <Grid Grid.Row="1">
-                    <StackPanel Margin="7,7,7,0"
-                                Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
-                        <Button Style="{StaticResource SidebarSelectedButtonStyle}"
-                                HorizontalAlignment="Stretch"
-                                Margin="0,0,0,3.5">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="17.5" />
-                                    <ColumnDefinition Width="10.5" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Viewbox Grid.Column="0" Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Left">
-                                    <Canvas Width="17.5" Height="17.5">
-                                        <Path Fill="Transparent"
-                                              Stroke="#5C82FD"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M12.3958 1.45833H5.10417C4.29875 1.45833 3.64583 2.11125 3.64583 2.91667V14.5833C3.64583 15.3887 4.29875 16.0417 5.10417 16.0417H12.3958C13.2012 16.0417 13.8542 15.3887 13.8542 14.5833V2.91667C13.8542 2.11125 13.2012 1.45833 12.3958 1.45833Z" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#5C82FD"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M8.75 13.125H8.75729" />
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Grid.Column="2"
-                                           Width="49"
-                                           FontSize="12.25"
-                                           FontWeight="Medium"
-                                           LineHeight="17.5"
-                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                           Text="设备管理"
-                                           TextAlignment="Center"
-                                           VerticalAlignment="Center" />
-                            </Grid>
-                        </Button>
-
-                        <Button Style="{StaticResource SidebarButtonStyle}"
-                                HorizontalAlignment="Stretch"
-                                Margin="0,0,0,3.5"
-                                Command="{Binding SingleScreenCommand}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="17.5" />
-                                    <ColumnDefinition Width="10.5" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Viewbox Grid.Column="0" Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Left">
-                                    <Canvas Width="17.5" Height="17.5">
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M14.5833 2.1875H2.91667C2.11125 2.1875 1.45833 2.84042 1.45833 3.64583V10.9375C1.45833 11.7429 2.11125 12.3958 2.91667 12.3958H14.5833C15.3887 12.3958 16.0417 11.7429 16.0417 10.9375V3.64583C16.0417 2.84042 15.3887 2.1875 14.5833 2.1875Z" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M5.83333 15.3125H11.6667" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M8.75 12.3958V15.3125" />
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Grid.Column="2"
-                                           Width="24.5"
-                                           FontSize="12.25"
-                                           FontWeight="Medium"
-                                           LineHeight="17.5"
-                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                           Text="投屏"
-                                           TextAlignment="Center"
-                                           VerticalAlignment="Center" />
-                            </Grid>
-                        </Button>
-
-                        <Button Style="{StaticResource SidebarButtonStyle}"
-                                HorizontalAlignment="Stretch"
-                                Command="{Binding SyncFileCommand}">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="17.5" />
-                                    <ColumnDefinition Width="10.5" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Viewbox Grid.Column="0" Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Left">
-                                    <Canvas Width="17.5" Height="17.5">
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M15.3125 10.9375V13.8542C15.3125 14.2409 15.1589 14.6119 14.8854 14.8854C14.6119 15.1589 14.2409 15.3125 13.8542 15.3125H3.64583C3.25906 15.3125 2.88813 15.1589 2.61464 14.8854C2.34115 14.6119 2.1875 14.2409 2.1875 13.8542V10.9375" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M12.3958 5.83333L8.75 2.1875L5.10417 5.83333" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M8.75 2.1875V10.9375" />
-                                    </Canvas>
-                                </Viewbox>
-                                <TextBlock Grid.Column="2"
-                                           Width="49"
-                                           FontSize="12.25"
-                                           FontWeight="Medium"
-                                           LineHeight="17.5"
-                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                           Text="文件传输"
-                                           TextAlignment="Center"
-                                           VerticalAlignment="Center" />
-                            </Grid>
-                        </Button>
-                    </StackPanel>
-
-                    <StackPanel Margin="7,7,7,0"
-                                HorizontalAlignment="Center"
-                                Visibility="{Binding IsSidebarExpanded, Converter={StaticResource InverseVisibilityBoolConverter}}">
-                            <Button Style="{StaticResource SidebarSelectedIconButtonStyle}">
-                                <Viewbox Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <Canvas Width="17.5" Height="17.5">
-                                        <Path Fill="Transparent"
-                                              Stroke="#5C82FD"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M12.3958 1.45833H5.10417C4.29875 1.45833 3.64583 2.11125 3.64583 2.91667V14.5833C3.64583 15.3887 4.29875 16.0417 5.10417 16.0417H12.3958C13.2012 16.0417 13.8542 15.3887 13.8542 14.5833V2.91667C13.8542 2.11125 13.2012 1.45833 12.3958 1.45833Z" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#5C82FD"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M8.75 13.125H8.75729" />
-                                    </Canvas>
-                                </Viewbox>
-                            </Button>
-
-                            <Button Style="{StaticResource SidebarIconButtonStyle}"
-                                    Command="{Binding SingleScreenCommand}">
-                                <Viewbox Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <Canvas Width="17.5" Height="17.5">
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M14.5833 2.1875H2.91667C2.11125 2.1875 1.45833 2.84042 1.45833 3.64583V10.9375C1.45833 11.7429 2.11125 12.3958 2.91667 12.3958H14.5833C15.3887 12.3958 16.0417 11.7429 16.0417 10.9375V3.64583C16.0417 2.84042 15.3887 2.1875 14.5833 2.1875Z" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M5.83333 15.3125H11.6667" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M8.75 12.3958V15.3125" />
-                                    </Canvas>
-                                </Viewbox>
-                            </Button>
-
-                            <Button Style="{StaticResource SidebarIconButtonStyle}"
-                                    Command="{Binding SyncFileCommand}">
-                                <Viewbox Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <Canvas Width="17.5" Height="17.5">
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M15.3125 10.9375V13.8542C15.3125 14.2409 15.1589 14.6119 14.8854 14.8854C14.6119 15.1589 14.2409 15.3125 13.8542 15.3125H3.64583C3.25906 15.3125 2.88813 15.1589 2.61464 14.8854C2.34115 14.6119 2.1875 14.2409 2.1875 13.8542V10.9375" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M12.3958 5.83333L8.75 2.1875L5.10417 5.83333" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.45833"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M8.75 2.1875V10.9375" />
-                                    </Canvas>
-                                </Viewbox>
-                            </Button>
-                    </StackPanel>
-                </Grid>
-
-                <Border Grid.Row="2"
-                        BorderBrush="{StaticResource SidebarBorderBrush}"
-                        BorderThickness="0,1,0,0">
-                    <Grid>
-                        <StackPanel Margin="7,8,7,8"
-                                    Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
-                            <Button Style="{StaticResource SidebarSmallButtonStyle}"
-                                    HorizontalAlignment="Stretch"
-                                    Margin="0,0,0,7">
+                            <Button Style="{StaticResource SidebarNavButtonStyle}"
+                                    Margin="0,0,0,3.5"
+                                    Background="#EBF0FF"
+                                    BorderThickness="0">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="14" />
+                                        <ColumnDefinition Width="17.5" />
                                         <ColumnDefinition Width="7" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <Viewbox Grid.Column="0" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left">
-                                        <Canvas Width="14" Height="14">
-                                            <Path Fill="Transparent"
-                                                  Stroke="#B3333333"
-                                                  StrokeThickness="1.16667"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Data="M2.91667 4.66667L6.41667 8.16667" />
-                                            <Path Fill="Transparent"
-                                                  Stroke="#B3333333"
-                                                  StrokeThickness="1.16667"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Data="M2.33333 8.16667L5.83333 4.66667L7 2.91667" />
-                                            <Path Fill="Transparent"
-                                                  Stroke="#B3333333"
-                                                  StrokeThickness="1.16667"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Data="M1.16667 2.91667H8.16667" />
-                                            <Path Fill="Transparent"
-                                                  Stroke="#B3333333"
-                                                  StrokeThickness="1.16667"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Data="M4.08333 1.16667H4.66667" />
-                                            <Path Fill="Transparent"
-                                                  Stroke="#B3333333"
-                                                  StrokeThickness="1.16667"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Data="M12.8333 12.8333L9.91667 7L7 12.8333" />
-                                            <Path Fill="Transparent"
-                                                  Stroke="#B3333333"
-                                                  StrokeThickness="1.16667"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Data="M8.16667 10.5H11.6667" />
+                                    <Viewbox Grid.Column="0" Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                        <Canvas Width="17.5" Height="17.5">
+                                            <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M12.3958 1.45833H5.10417C4.29875 1.45833 3.64583 2.11125 3.64583 2.91667V14.5833C3.64583 15.3887 4.29875 16.0417 5.10417 16.0417H12.3958C13.2012 16.0417 13.8542 15.3887 13.8542 14.5833V2.91667C13.8542 2.11125 13.2012 1.45833 12.3958 1.45833Z" />
+                                            <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M8.75 13.125H8.75729" />
                                         </Canvas>
                                     </Viewbox>
                                     <TextBlock Grid.Column="2"
-                                               Width="16.547"
+                                               Text="设备管理"
                                                FontSize="12.25"
                                                FontWeight="Medium"
-                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                               Text="EN"
-                                               TextAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                               Foreground="#5C82FD"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Left" />
                                 </Grid>
                             </Button>
 
-                            <Button Style="{StaticResource SidebarSmallButtonStyle}"
-                                    HorizontalAlignment="Stretch">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="14" />
-                                        <ColumnDefinition Width="7" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Viewbox Grid.Column="0" Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Left">
-                                        <Canvas Width="14" Height="14">
-                                            <Path Fill="Transparent"
-                                                  Stroke="#F44336"
-                                                  StrokeThickness="1.16667"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Data="M11.6667 7.58333C11.6667 10.5 9.625 11.9583 7.19833 12.8042C7.07126 12.8472 6.93323 12.8452 6.8075 12.7983C4.375 11.9583 2.33333 10.5 2.33333 7.58333V3.5C2.33333 3.34529 2.39479 3.19692 2.50419 3.08752C2.61358 2.97813 2.76196 2.91667 2.91667 2.91667C4.08333 2.91667 5.54167 2.21667 6.55667 1.33C6.68025 1.22442 6.83746 1.1664 7 1.1664C7.16254 1.1664 7.31975 1.22442 7.44333 1.33C8.46417 2.2225 9.91667 2.91667 11.0833 2.91667C11.238 2.91667 11.3864 2.97813 11.4958 3.08752C11.6052 3.19692 11.6667 3.34529 11.6667 3.5V7.58333Z" />
-                                        </Canvas>
-                                    </Viewbox>
-                                    <TextBlock Grid.Column="2"
-                                               Width="49"
-                                               FontSize="12.25"
-                                               FontWeight="Medium"
-                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                               Text="专业模式"
-                                               TextAlignment="Center"
-                                               VerticalAlignment="Center" />
-                                </Grid>
-                            </Button>
-
-                            <Border Margin="0,8,0,0"
-                                    Padding="10.5,8,10.5,0"
-                                    BorderBrush="{StaticResource SidebarBorderBrush}"
-                                    BorderThickness="0,1,0,0">
-                                <StackPanel>
-                                    <TextBlock Text="{Binding AppVersionText}"
-                                               FontSize="10.5"
-                                               LineHeight="14"
-                                               Foreground="{StaticResource MutedTextBrush}" />
-                                    <TextBlock Margin="0,3.5,0,0"
-                                               Text="{Binding SidebarDeviceCountText}"
-                                               FontSize="10.5"
-                                               LineHeight="14"
-                                               Foreground="{StaticResource MutedTextBrush}" />
-                                </StackPanel>
-                            </Border>
-
-                            <Button Height="28"
-                                    Margin="0,7,0,0"
-                                    Command="{Binding ToggleSidebarCommand}"
+                            <Button Style="{StaticResource SidebarNavButtonStyle}"
+                                    Margin="0,0,0,3.5"
                                     Background="Transparent"
-                                    BorderThickness="0"
-                                    Foreground="{StaticResource MutedTextBrush}">
-                                <Viewbox Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <Canvas Width="14" Height="14">
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.16667"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M8.75 10.5L5.25 7L8.75 3.5" />
-                                    </Canvas>
-                                </Viewbox>
+                                    Command="{Binding SingleScreenCommand}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="17.5" />
+                                        <ColumnDefinition Width="7" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Viewbox Grid.Column="0" Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                        <Canvas Width="17.5" Height="17.5">
+                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M14.5833 2.1875H2.91667C2.11125 2.1875 1.45833 2.84042 1.45833 3.64583V10.9375C1.45833 11.7429 2.11125 12.3958 2.91667 12.3958H14.5833C15.3887 12.3958 16.0417 11.7429 16.0417 10.9375V3.64583C16.0417 2.84042 15.3887 2.1875 14.5833 2.1875Z" />
+                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M5.83333 15.3125H11.6667" />
+                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M8.75 12.3958V15.3125" />
+                                        </Canvas>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="2"
+                                               Text="投屏"
+                                               FontSize="12.25"
+                                               FontWeight="Medium"
+                                               Foreground="#B3333333"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Left" />
+                                </Grid>
+                            </Button>
+
+                            <Button Style="{StaticResource SidebarNavButtonStyle}"
+                                    Background="Transparent"
+                                    Command="{Binding SyncFileCommand}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="17.5" />
+                                        <ColumnDefinition Width="7" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Viewbox Grid.Column="0" Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                        <Canvas Width="17.5" Height="17.5">
+                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M15.3125 10.9375V13.8542C15.3125 14.2409 15.1589 14.6119 14.8854 14.8854C14.6119 15.1589 14.2409 15.3125 13.8542 15.3125H3.64583C3.25906 15.3125 2.88813 15.1589 2.61464 14.8854C2.34115 14.6119 2.1875 14.2409 2.1875 13.8542V10.9375" />
+                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M12.3958 5.83333L8.75 2.1875L5.10417 5.83333" />
+                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M8.75 2.1875V10.9375" />
+                                        </Canvas>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="2"
+                                               Text="文件传输"
+                                               FontSize="12.25"
+                                               FontWeight="Medium"
+                                               Foreground="#B3333333"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Left" />
+                                </Grid>
                             </Button>
                         </StackPanel>
 
-                        <StackPanel Margin="7,8,7,8"
+                        <StackPanel Margin="7,7,7,0"
                                     HorizontalAlignment="Center"
                                     Visibility="{Binding IsSidebarExpanded, Converter={StaticResource InverseVisibilityBoolConverter}}">
-                            <Button Style="{StaticResource SidebarIconButtonStyle}" Height="31.5">
-                                <Viewbox Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <Canvas Width="14" Height="14">
+                            <Button Style="{StaticResource SidebarNavIconButtonStyle}"
+                                    Width="41"
+                                    Height="38.5"
+                                    Margin="0,0,0,3.5"
+                                    Background="#EBF0FF"
+                                    BorderThickness="0">
+                                <Viewbox Width="17.5" Height="17.5">
+                                    <Canvas Width="17.5" Height="17.5">
                                         <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.16667"
+                                              Stroke="#5C82FD"
+                                              StrokeThickness="1.45833"
                                               StrokeStartLineCap="Round"
                                               StrokeEndLineCap="Round"
                                               StrokeLineJoin="Round"
-                                              Data="M1.16667 2.91667H8.16667" />
+                                              Data="M12.3958 1.45833H5.10417C4.29875 1.45833 3.64583 2.11125 3.64583 2.91667V14.5833C3.64583 15.3887 4.29875 16.0417 5.10417 16.0417H12.3958C13.2012 16.0417 13.8542 15.3887 13.8542 14.5833V2.91667C13.8542 2.11125 13.2012 1.45833 12.3958 1.45833Z" />
                                         <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.16667"
+                                              Stroke="#5C82FD"
+                                              StrokeThickness="1.45833"
                                               StrokeStartLineCap="Round"
                                               StrokeEndLineCap="Round"
                                               StrokeLineJoin="Round"
-                                              Data="M4.08333 1.16667H4.66667" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.16667"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M2.91667 4.66667L6.41667 8.16667" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.16667"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M2.33333 8.16667L5.83333 4.66667L7 2.91667" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.16667"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M8.16667 10.5H11.6667" />
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.16667"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M12.8333 12.8333L9.91667 7L7 12.8333" />
+                                              Data="M8.75 13.125H8.75729" />
                                     </Canvas>
                                 </Viewbox>
                             </Button>
 
-                            <Button Style="{StaticResource SidebarIconButtonStyle}" Height="31.5">
-                                <Viewbox Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <Canvas Width="14" Height="14">
-                                        <Path Fill="Transparent"
-                                              Stroke="#F44336"
-                                              StrokeThickness="1.16667"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M11.6667 7.58333C11.6667 10.5 9.625 11.9583 7.19833 12.8042C7.07126 12.8472 6.93323 12.8452 6.8075 12.7983C4.375 11.9583 2.33333 10.5 2.33333 7.58333V3.5C2.33333 3.34529 2.39479 3.19692 2.50419 3.08752C2.61358 2.97813 2.76196 2.91667 2.91667 2.91667C4.08333 2.91667 5.54167 2.21667 6.55667 1.33C6.68025 1.22442 6.83746 1.1664 7 1.1664C7.16254 1.1664 7.31975 1.22442 7.44333 1.33C8.46417 2.2225 9.91667 2.91667 11.0833 2.91667C11.238 2.91667 11.3864 2.97813 11.4958 3.08752C11.6052 3.19692 11.6667 3.34529 11.6667 3.5V7.58333Z" />
-                                    </Canvas>
-                                </Viewbox>
-                            </Button>
+                                <Button Style="{StaticResource SidebarNavIconButtonStyle}"
+                                        Width="41"
+                                        Height="38.5"
+                                        Margin="0,0,0,3.5"
+                                        Background="Transparent"
+                                        Command="{Binding SingleScreenCommand}">
+                                    <Viewbox Width="17.5" Height="17.5">
+                                        <Canvas Width="17.5" Height="17.5">
+                                            <Path Fill="Transparent"
+                                                  Stroke="#B3333333"
+                                                  StrokeThickness="1.45833"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  Data="M14.5833 2.1875H2.91667C2.11125 2.1875 1.45833 2.84042 1.45833 3.64583V10.9375C1.45833 11.7429 2.11125 12.3958 2.91667 12.3958H14.5833C15.3887 12.3958 16.0417 11.7429 16.0417 10.9375V3.64583C16.0417 2.84042 15.3887 2.1875 14.5833 2.1875Z" />
+                                            <Path Fill="Transparent"
+                                                  Stroke="#B3333333"
+                                                  StrokeThickness="1.45833"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  Data="M5.83333 15.3125H11.6667" />
+                                            <Path Fill="Transparent"
+                                                  Stroke="#B3333333"
+                                                  StrokeThickness="1.45833"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  Data="M8.75 12.3958V15.3125" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
 
-                            <Button Width="41"
-                                    Margin="0,8,0,0"
-                                    Padding="0,8,0,0"
-                                    BorderBrush="{StaticResource SidebarBorderBrush}"
-                                    BorderThickness="0,1,0,0" />
-
-                            <Button Width="41"
-                                    Height="28"
-                                    Margin="0,7,0,0"
-                                    Command="{Binding ToggleSidebarCommand}"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Foreground="{StaticResource MutedTextBrush}">
-                                <Viewbox Width="14" Height="14" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                    <Canvas Width="14" Height="14">
-                                        <Path Fill="Transparent"
-                                              Stroke="#B3333333"
-                                              StrokeThickness="1.16667"
-                                              StrokeStartLineCap="Round"
-                                              StrokeEndLineCap="Round"
-                                              StrokeLineJoin="Round"
-                                              Data="M8.75 10.5L5.25 7L8.75 3.5" />
-                                    </Canvas>
-                                </Viewbox>
-                            </Button>
+                                <Button Style="{StaticResource SidebarNavIconButtonStyle}"
+                                        Width="41"
+                                        Height="38.5"
+                                        Background="Transparent"
+                                        Command="{Binding SyncFileCommand}">
+                                    <Viewbox Width="17.5" Height="17.5">
+                                        <Canvas Width="17.5" Height="17.5">
+                                            <Path Fill="Transparent"
+                                                  Stroke="#B3333333"
+                                                  StrokeThickness="1.45833"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  Data="M15.3125 10.9375V13.8542C15.3125 14.2409 15.1589 14.6119 14.8854 14.8854C14.6119 15.1589 14.2409 15.3125 13.8542 15.3125H3.64583C3.25906 15.3125 2.88813 15.1589 2.61464 14.8854C2.34115 14.6119 2.1875 14.2409 2.1875 13.8542V10.9375" />
+                                            <Path Fill="Transparent"
+                                                  Stroke="#B3333333"
+                                                  StrokeThickness="1.45833"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  Data="M12.3958 5.83333L8.75 2.1875L5.10417 5.83333" />
+                                            <Path Fill="Transparent"
+                                                  Stroke="#B3333333"
+                                                  StrokeThickness="1.45833"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  Data="M8.75 2.1875V10.9375" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
                         </StackPanel>
                     </Grid>
-                </Border>
-            </Grid>
-            </Border>
 
+                    <Border Grid.Row="2"
+                            BorderBrush="#E6E6E6"
+                            BorderThickness="0,1,0,0">
+                        <Grid>
+                            <StackPanel Margin="7,8,7,0"
+                                        Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
+                                <Button Style="{StaticResource SidebarNavButtonStyle}"
+                                        Height="35"
+                                        Margin="0,0,0,7"
+                                        Background="Transparent"
+                                        BorderThickness="0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="14" />
+                                            <ColumnDefinition Width="7" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Viewbox Grid.Column="0" Width="14" Height="14" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <Canvas Width="14" Height="14">
+                                                <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.91667 4.66667L6.41667 8.16667" />
+                                                <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.33333 8.16667L5.83333 4.66667L7 2.91667" />
+                                                <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M8.16667 10.5H11.6667" />
+                                            </Canvas>
+                                        </Viewbox>
+                                        <TextBlock Grid.Column="2"
+                                                   Text="EN"
+                                                   FontSize="12.25"
+                                                   FontWeight="Medium"
+                                                   Foreground="#B3333333"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Left" />
+                                    </Grid>
+                                </Button>
+
+                                <Button Style="{StaticResource SidebarNavButtonStyle}"
+                                        Height="35"
+                                        Margin="0,0,0,7"
+                                        Background="#FFF4F4"
+                                        BorderThickness="0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="14" />
+                                            <ColumnDefinition Width="7" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <Viewbox Grid.Column="0" Width="14" Height="14" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                            <Canvas Width="14" Height="14">
+                                                <Path Fill="Transparent" Stroke="#F44336" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M11.6667 7.58333C11.6667 10.5 9.625 11.9583 7.19833 12.8042C7.07126 12.8472 6.93323 12.8452 6.8075 12.7983C4.375 11.9583 2.33333 10.5 2.33333 7.58333V3.5C2.33333 3.34529 2.39479 3.19692 2.50419 3.08752C2.61358 2.97813 2.76196 2.91667 2.91667 2.91667C4.08333 2.91667 5.54167 2.21667 6.55667 1.33C6.68025 1.22442 6.83746 1.1664 7 1.1664C7.16254 1.1664 7.31975 1.22442 7.44333 1.33C8.46417 2.2225 9.91667 2.91667 11.0833 2.91667C11.238 2.91667 11.3864 2.97813 11.4958 3.08752C11.6052 3.19692 11.6667 3.34529 11.6667 3.5V7.58333Z" />
+                                            </Canvas>
+                                        </Viewbox>
+                                        <TextBlock Grid.Column="2"
+                                                   Text="专业模式"
+                                                   FontSize="12.25"
+                                                   FontWeight="Medium"
+                                                   Foreground="#F44336"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Left" />
+                                    </Grid>
+                                </Button>
+
+                                <Border Margin="0,8,0,0"
+                                        Padding="10.5,8,10.5,0"
+                                        BorderBrush="#E6E6E6"
+                                        BorderThickness="0,1,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="版本号：v1.0.0"
+                                                   FontSize="10.5"
+                                                   Foreground="#99333333" />
+                                        <TextBlock Margin="0,3.5,0,0"
+                                                   Text="已连接设备：3 台"
+                                                   FontSize="10.5"
+                                                   Foreground="#99333333" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Button Width="209"
+                                        Height="28"
+                                        Margin="0,0,0,0"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        HorizontalAlignment="Center"
+                                        Command="{Binding ToggleSidebarCommand}">
+                                    <Grid Width="209" Height="28">
+                                        <Viewbox Width="14"
+                                                 Height="14"
+                                                 HorizontalAlignment="Center"
+                                                 VerticalAlignment="Center">
+                                            <Canvas Width="14" Height="14">
+                                                <Path Fill="Transparent"
+                                                      Stroke="#333333"
+                                                      Opacity="0.7"
+                                                      StrokeThickness="1.16667"
+                                                      StrokeStartLineCap="Round"
+                                                      StrokeEndLineCap="Round"
+                                                      StrokeLineJoin="Round"
+                                                      Data="M5.25 10.5L8.75 7L5.25 3.5" />
+                                            </Canvas>
+                                        </Viewbox>
+                                    </Grid>
+                                </Button>
+                            </StackPanel>
+
+                            <Grid Margin="7,8,7,0"
+                                  Visibility="{Binding IsSidebarExpanded, Converter={StaticResource InverseVisibilityBoolConverter}}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="31.5" />
+                                    <RowDefinition Height="7" />
+                                    <RowDefinition Height="31.5" />
+                                    <RowDefinition Height="7" />
+                                    <RowDefinition Height="71" />
+                                    <RowDefinition Height="7" />
+                                    <RowDefinition Height="28" />
+                                </Grid.RowDefinitions>
+
+                                <Button Grid.Row="0"
+                                        Style="{StaticResource SidebarNavIconButtonStyle}"
+                                        Width="41"
+                                        Height="31.5"
+                                        Background="Transparent"
+                                        BorderThickness="0">
+                                    <Viewbox Width="14" Height="14">
+                                        <Canvas Width="14" Height="14">
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.91667 4.66667L6.41667 8.16667" />
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.33333 8.16667L5.83333 4.66667L7 2.91667" />
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M1.16667 2.91667H8.16667" />
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M4.08333 1.16667H4.66667" />
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M12.8333 12.8333L9.91667 7L7 12.8333" />
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M8.16667 10.5H11.6667" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
+
+                                <Button Grid.Row="2"
+                                        Style="{StaticResource SidebarNavIconButtonStyle}"
+                                        Width="41"
+                                        Height="31.5"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding SingleScreenCommand}">
+                                    <Viewbox Width="14" Height="14">
+                                        <Canvas Width="14" Height="14">
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M11.6667 7.58333C11.6667 10.5 9.625 11.9583 7.19833 12.8042C7.07126 12.8472 6.93323 12.8452 6.8075 12.7983C4.375 11.9583 2.33333 10.5 2.33333 7.58333V3.5C2.33333 3.34529 2.39479 3.19692 2.50419 3.08752C2.61358 2.97813 2.76196 2.91667 2.91667 2.91667C4.08333 2.91667 5.54167 2.21667 6.55667 1.33C6.68025 1.22442 6.83746 1.1664 7 1.1664C7.16254 1.1664 7.31975 1.22442 7.44333 1.33C8.46417 2.2225 9.91667 2.91667 11.0833 2.91667C11.238 2.91667 11.3864 2.97813 11.4958 3.08752C11.6052 3.19692 11.6667 3.34529 11.6667 3.5V7.58333Z" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
+
+                                <Border Grid.Row="4"
+                                        BorderBrush="#E0E0E0"
+                                        BorderThickness="0,1,0,0">
+                                    <Grid Margin="0,8,0,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="28" />
+                                            <RowDefinition Height="7" />
+                                            <RowDefinition Height="28" />
+                                        </Grid.RowDefinitions>
+
+                                        <Button Grid.Row="0"
+                                                Style="{StaticResource SidebarNavIconButtonStyle}"
+                                        Width="41"
+                                        Height="28"
+                                        Background="Transparent"
+                                        BorderThickness="0">
+                                    <Viewbox Width="14" Height="14">
+                                        <Canvas Width="14" Height="14">
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M7 12.8333C10.2217 12.8333 12.8333 10.2217 12.8333 7C12.8333 3.77834 10.2217 1.16667 7 1.16667C3.77834 1.16667 1.16667 3.77834 1.16667 7C1.16667 10.2217 3.77834 12.8333 7 12.8333Z" />
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M7 9.33333V7" />
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M7 4.66667H7.00583" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
+
+                                        <Button Grid.Row="2"
+                                                Style="{StaticResource SidebarNavIconButtonStyle}"
+                                                Width="41"
+                                                Height="28"
+                                                Background="Transparent"
+                                                BorderThickness="0">
+                                            <Viewbox Width="14" Height="14">
+                                                <Canvas Width="14" Height="14">
+                                                    <Path Fill="Transparent"
+                                                          Stroke="#333333"
+                                                          Opacity="0.7"
+                                                          StrokeThickness="1.16667"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round"
+                                                          StrokeLineJoin="Round"
+                                                          Data="M5.83333 7.58333C6.08385 7.91824 6.40346 8.19536 6.77049 8.39588C7.13752 8.59641 7.54338 8.71565 7.96055 8.74553C8.37771 8.7754 8.79643 8.71521 9.18828 8.56904C9.58014 8.42286 9.93598 8.19412 10.2317 7.89833L11.9817 6.14833C12.513 5.59824 12.8069 4.86149 12.8003 4.09675C12.7937 3.33201 12.4869 2.60047 11.9461 2.0597C11.4054 1.51892 10.6738 1.21218 9.90909 1.20553C9.14435 1.19889 8.40759 1.49287 7.8575 2.02417L6.85417 3.02167" />
+                                                    <Path Fill="Transparent"
+                                                          Stroke="#333333"
+                                                          Opacity="0.7"
+                                                          StrokeThickness="1.16667"
+                                                          StrokeStartLineCap="Round"
+                                                          StrokeEndLineCap="Round"
+                                                          StrokeLineJoin="Round"
+                                                          Data="M8.16667 6.41667C7.91615 6.08176 7.59654 5.80464 7.22951 5.60412C6.86248 5.40359 6.45662 5.28435 6.03945 5.25447C5.62229 5.2246 5.20357 5.28479 4.81172 5.43096C4.41986 5.57714 4.06402 5.80588 3.76833 6.10167L2.01833 7.85167C1.48704 8.40176 1.19306 9.13851 1.1997 9.90325C1.20635 10.668 1.51309 11.3995 2.05386 11.9403C2.59464 12.4811 3.32617 12.7878 4.09091 12.7945C4.85565 12.8011 5.59241 12.5071 6.1425 11.9758L7.14 10.9783" />
+                                                </Canvas>
+                                            </Viewbox>
+                                        </Button>
+                                    </Grid>
+                                </Border>
+
+                                <Button Grid.Row="6"
+                                        Style="{StaticResource SidebarNavIconButtonStyle}"
+                                        Width="41"
+                                        Height="28"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding ToggleSidebarCommand}">
+                                    <Viewbox Width="14" Height="14">
+                                        <Canvas Width="14" Height="14">
+                                            <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M5.25 10.5L8.75 7L5.25 3.5" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
             <Grid Grid.Column="1"
                   Background="{StaticResource PageBackgroundBrush}">
             <Grid.RowDefinitions>
@@ -1215,7 +1099,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="搴忓彿" Width="96.313">
+                                <DataGridTemplateColumn Header="序号" Width="96.313">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding DisplayIndex, StringFormat={}{0:00}}"
@@ -1226,7 +1110,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="ADB 搴忓彿" Width="259.313">
+                                <DataGridTemplateColumn Header="ADB 序号" Width="259.313">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Serial}"
@@ -1238,10 +1122,10 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="鍝佺墝"
+                                <DataGridTextColumn Header="品牌"
                                                     Width="159.391"
                                                     Binding="{Binding Brand}" />
-                                <DataGridTextColumn Header="鍨嬪彿"
+                                <DataGridTextColumn Header="型号"
                                                     Width="237.375"
                                                     Binding="{Binding ModelName}" />
                                 <DataGridTextColumn Header="安卓版本"
