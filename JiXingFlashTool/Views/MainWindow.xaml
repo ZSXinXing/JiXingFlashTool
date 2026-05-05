@@ -912,7 +912,7 @@
                                 Panel.ZIndex="0" />
 
                         <StackPanel Grid.Row="0"
-                                    Margin="14,0,14,0"
+                                    Margin="0,0,14,0"
                                     Panel.ZIndex="1"
                                     Orientation="Horizontal">
                             <control:IconButton
@@ -983,7 +983,7 @@
                                                 ButtonCommandParameter="CheckSystemUpdate" />
                         </StackPanel>
                         <StackPanel Grid.Row="2"
-                                    Margin="0,0,14,0"
+                                    Margin="0,0,0,0"
                                     Panel.ZIndex="1"
                                     Orientation="Horizontal">
                             <TextBlock Text="TWRP 专业指令" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" />
@@ -993,7 +993,7 @@
                         </StackPanel>
 
                         <StackPanel Grid.Row="4"
-                                    Margin="0,0,14,0"
+                                    Margin="0,0,0,0"
                                     Panel.ZIndex="1"
                                     Orientation="Horizontal">
                             <control:IconButton
@@ -1341,22 +1341,6 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Background="White"
-                                Visibility="{Binding ShowEmptyState, Converter={StaticResource VisibilityBoolConverter}}">
-                            <StackPanel HorizontalAlignment="Center"
-                                        VerticalAlignment="Center">
-                                <TextBlock Text="暂无检测到设备"
-                                           FontSize="16"
-                                           FontWeight="SemiBold"
-                                           Foreground="{StaticResource TextBrush}"
-                                           HorizontalAlignment="Center" />
-                                <TextBlock Margin="0,8,0,0"
-                                           Text="请连接设备并确认 ADB 已启动，随后点击右上角“刷新设备”。"
-                                           FontSize="12.25"
-                                           Foreground="{StaticResource MutedTextBrush}"
-                                           HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Border>
                     </Grid>
                 </Border>
             </Grid>
