@@ -47,6 +47,34 @@ namespace JiXingFlashTool.Views
             viewModel.ViewLoad();
         }
 
+        private void ProfessionalDropDownPopup_Closed(object sender, EventArgs e)
+        {
+            if (sender is System.Windows.Controls.Primitives.Popup popup &&
+                popup.PlacementTarget is System.Windows.Controls.Primitives.ToggleButton toggleButton)
+            {
+                toggleButton.IsChecked = false;
+            }
+        }
+
+        private void ProfessionalDropDownButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender == ProfessionalRebootDropDownButton)
+            {
+                ProfessionalClearDropDownButton.IsChecked = false;
+                ProfessionalUpdateDropDownButton.IsChecked = false;
+            }
+            else if (sender == ProfessionalClearDropDownButton)
+            {
+                ProfessionalRebootDropDownButton.IsChecked = false;
+                ProfessionalUpdateDropDownButton.IsChecked = false;
+            }
+            else if (sender == ProfessionalUpdateDropDownButton)
+            {
+                ProfessionalRebootDropDownButton.IsChecked = false;
+                ProfessionalClearDropDownButton.IsChecked = false;
+            }
+        }
+
         /// <summary>
         /// 窗口源初始化后清空标题栏图标并固定标题栏颜色。
         /// </summary>

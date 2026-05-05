@@ -102,6 +102,7 @@ namespace JiXingFlashTool.Utils
         /// TWRP 专业指令“跳过向导”图标。
         /// </summary>
         public static readonly ImageSource TwrpProSkipGuideIcon = Load("Resource/Image/TwrpPro/professional_skip_guide.png");
+        public static readonly ImageSource TwrpDropDownArrowIcon = Load("Resource/Image/TwrpPro/professional_dropdown_arrow.png");
 
         /// <summary>
         /// 加载图标资源，兼容 PNG 和 SVG 文本文件。

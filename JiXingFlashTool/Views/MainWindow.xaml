@@ -40,6 +40,114 @@
         <SolidColorBrush x:Key="BorderBrush" Color="#E0E0E0" />
         <SolidColorBrush x:Key="LightInputBrush" Color="#FAFAFA" />
 
+        <Style x:Key="TwrpDropDownMenuItemStyle" TargetType="Button">
+            <Setter Property="Height" Value="24.5" />
+            <Setter Property="Padding" Value="9,0,10,0" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RootBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="#EEF4FF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="#E4EDFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TwrpDropDownPopupBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#E6E8EF" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="16"
+                                      Color="#22000000"
+                                      Direction="270"
+                                      Opacity="0.18"
+                                      ShadowDepth="2" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="TwrpDropDownToggleButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Width" Value="75.25" />
+            <Setter Property="Height" Value="24.5" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="RootBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3.5"
+                                SnapsToDevicePixels="True">
+                            <Grid ClipToBounds="True" UseLayoutRounding="True">
+                                <Image Width="12.25"
+                                       Height="12.25"
+                                       Source="{TemplateBinding Tag}"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Top"
+                                       Margin="10.5,6.13,0,0" />
+                                <TextBlock Text="{TemplateBinding Content}"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Top"
+                                           TextAlignment="Center"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           FontSize="{TemplateBinding FontSize}"
+                                           FontWeight="{TemplateBinding FontWeight}"
+                                           Margin="28.5,4.25,0,0" />
+                                <Border Width="10.5"
+                                        Height="10.5"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Top"
+                                        Margin="54.25,7,0,0">
+                                    <Image Source="{x:Static local:IconResources.TwrpDropDownArrowIcon}"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           Stretch="Uniform" />
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="RootBorder" Property="Opacity" Value="0.98" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="SidebarButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="38.5" />
             <Setter Property="Background" Value="Transparent" />
@@ -977,69 +1085,224 @@
                                     Margin="0,0,0,0"
                                     Panel.ZIndex="1"
                                     Orientation="Horizontal">
-                            <TextBlock Text="TWRP 专业指令" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" />
-                            <Border Margin="7,0,0,0" Background="#1AF44336" CornerRadius="3.5">
-                                <TextBlock Text="专业模式" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" Margin="7,0,7,0" VerticalAlignment="Center" />
-                            </Border>
-                        </StackPanel>
+                                <TextBlock Text="TWRP 专业指令" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" />
+                            </StackPanel>
 
                         <StackPanel Grid.Row="4"
                                     Margin="0,0,0,0"
                                     Panel.ZIndex="1"
                                     Orientation="Horizontal">
-                            <control:IconButton
-                                                Height="24.5"
-                                                ButtonBackground="#FF9800"
-                                                ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProRebootSystemIcon}"
-                                                ButtonText="重启到系统"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="RebootSystem" />
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#7B9EFF"
-                                                ButtonBorderBrush="#7B9EFF"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProRebootSystemIcon}"
-                                                ButtonText="启动到 TWRP"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="RebootTwrp" />
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#9C27B0"
-                                                ButtonBorderBrush="#9C27B0"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProRebootSystemIcon}"
-                                                ButtonText="重启到 Download"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="RebootDownload" />
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#FF9800"
-                                                ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProWipeIcon}"
-                                                ButtonText="双清"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="Wipe" />
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#F44336"
-                                                ButtonBorderBrush="#F44336"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProClearSystemIcon}"
-                                                ButtonText="清除系统"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="ClearSystem" />
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#F44336"
-                                                ButtonBorderBrush="#F44336"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProFormatDataIcon}"
-                                                ButtonText="格式化 Data"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="FormatData" />
+                            <ToggleButton x:Name="ProfessionalRebootDropDownButton"
+                                          Style="{StaticResource TwrpDropDownToggleButtonStyle}"
+                                          ClickMode="Press"
+                                          Background="#5C82FD"
+                                          BorderBrush="#5C82FD"
+                                          Content="重启"
+                                          Tag="{x:Static local:IconResources.TwrpProRebootSystemIcon}"
+                                          Checked="ProfessionalDropDownButton_Checked"
+                                          />
+                            <Popup PlacementTarget="{Binding ElementName=ProfessionalRebootDropDownButton}"
+                                   Placement="Bottom"
+                                   AllowsTransparency="True"
+                                   PopupAnimation="Slide"
+                                   StaysOpen="False"
+                                   Closed="ProfessionalDropDownPopup_Closed"
+                                   IsOpen="{Binding IsChecked, ElementName=ProfessionalRebootDropDownButton}">
+                                <Border Margin="0,4,0,0"
+                                        Style="{StaticResource TwrpDropDownPopupBorderStyle}">
+                                    <StackPanel Width="124">
+                                        <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Margin="0,0,0,4"
+                                                Command="{Binding ProfessionalInstructionCommand}"
+                                                CommandParameter="RebootSystem">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="16" />
+                                                    <ColumnDefinition Width="7" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" Width="12" Height="12" Fill="#5C82FD" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Rectangle.OpacityMask>
+                                                        <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProRebootSystemIcon}" Stretch="Uniform" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="系统" Foreground="#333333" />
+                                            </Grid>
+                                        </Button>
+                                        <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Margin="0,0,0,4"
+                                                Command="{Binding ProfessionalInstructionCommand}"
+                                                CommandParameter="RebootTwrp">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="16" />
+                                                    <ColumnDefinition Width="7" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" Width="12" Height="12" Fill="#7B9EFF" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Rectangle.OpacityMask>
+                                                        <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProUpdateTwrpIcon}" Stretch="Uniform" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="TWRP" Foreground="#333333" />
+                                            </Grid>
+                                        </Button>
+                                        <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Command="{Binding ProfessionalInstructionCommand}"
+                                                CommandParameter="RebootDownload">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="16" />
+                                                    <ColumnDefinition Width="7" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" Width="12" Height="12" Fill="#9C27B0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Rectangle.OpacityMask>
+                                                        <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProFlashFileIcon}" Stretch="Uniform" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="Download" Foreground="#333333" />
+                                            </Grid>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+
+                            <ToggleButton x:Name="ProfessionalClearDropDownButton"
+                                          Style="{StaticResource TwrpDropDownToggleButtonStyle}"
+                                          Margin="7,0,0,0"
+                                          ClickMode="Press"
+                                          Background="#F44336"
+                                          BorderBrush="#F44336"
+                                          Content="清除"
+                                          Tag="{x:Static local:IconResources.TwrpProClearSystemIcon}"
+                                          Checked="ProfessionalDropDownButton_Checked"
+                                          />
+                            <Popup PlacementTarget="{Binding ElementName=ProfessionalClearDropDownButton}"
+                                   Placement="Bottom"
+                                   AllowsTransparency="True"
+                                   PopupAnimation="Slide"
+                                   StaysOpen="False"
+                                   Closed="ProfessionalDropDownPopup_Closed"
+                                   IsOpen="{Binding IsChecked, ElementName=ProfessionalClearDropDownButton}">
+                                <Border Margin="0,4,0,0"
+                                        Style="{StaticResource TwrpDropDownPopupBorderStyle}">
+                                    <StackPanel Width="124">
+                                        <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Margin="0,0,0,4"
+                                                Command="{Binding ProfessionalInstructionCommand}"
+                                                CommandParameter="Wipe">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="16" />
+                                                    <ColumnDefinition Width="7" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" Width="12" Height="12" Fill="#FF9800" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Rectangle.OpacityMask>
+                                                        <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProWipeIcon}" Stretch="Uniform" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="双清" Foreground="#333333" />
+                                            </Grid>
+                                        </Button>
+                                        <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Margin="0,0,0,4"
+                                                Command="{Binding ProfessionalInstructionCommand}"
+                                                CommandParameter="ClearSystem">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="16" />
+                                                    <ColumnDefinition Width="7" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" Width="12" Height="12" Fill="#F44336" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Rectangle.OpacityMask>
+                                                        <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProClearSystemIcon}" Stretch="Uniform" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="清除系统" Foreground="#333333" />
+                                            </Grid>
+                                        </Button>
+                                        <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Command="{Binding ProfessionalInstructionCommand}"
+                                                CommandParameter="FormatData">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="16" />
+                                                    <ColumnDefinition Width="7" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" Width="12" Height="12" Fill="#F44336" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Rectangle.OpacityMask>
+                                                        <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProFormatDataIcon}" Stretch="Uniform" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="格式化 Data" Foreground="#333333" />
+                                            </Grid>
+                                        </Button>
+                                        </StackPanel>
+                                </Border>
+                            </Popup>
+
+                            <ToggleButton x:Name="ProfessionalUpdateDropDownButton"
+                                          Style="{StaticResource TwrpDropDownToggleButtonStyle}"
+                                          Margin="7,0,0,0"
+                                          ClickMode="Press"
+                                          Background="#5C82FD"
+                                          BorderBrush="#5C82FD"
+                                          Content="更新"
+                                          Tag="{x:Static local:IconResources.TwrpProUpdateTwrpIcon}"
+                                          Checked="ProfessionalDropDownButton_Checked"
+                                          />
+                            <Popup PlacementTarget="{Binding ElementName=ProfessionalUpdateDropDownButton}"
+                                   Placement="Bottom"
+                                   AllowsTransparency="True"
+                                   PopupAnimation="Slide"
+                                   StaysOpen="False"
+                                   Closed="ProfessionalDropDownPopup_Closed"
+                                   IsOpen="{Binding IsChecked, ElementName=ProfessionalUpdateDropDownButton}">
+                                <Border Margin="0,4,0,0"
+                                        Style="{StaticResource TwrpDropDownPopupBorderStyle}">
+                                    <StackPanel Width="124">
+                                        <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Command="{Binding ProfessionalInstructionCommand}"
+                                                CommandParameter="FlashKernel">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="16" />
+                                                    <ColumnDefinition Width="7" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" Width="12" Height="12" Fill="#5C82FD" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Rectangle.OpacityMask>
+                                                        <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProUpdateKernelIcon}" Stretch="Uniform" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="更新内核" Foreground="#333333" />
+                                            </Grid>
+                                        </Button>
+                                        <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Command="{Binding ProfessionalInstructionCommand}"
+                                                CommandParameter="UpdateTwrp">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="16" />
+                                                    <ColumnDefinition Width="7" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Rectangle Grid.Column="0" Width="12" Height="12" Fill="#7B9EFF" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Rectangle.OpacityMask>
+                                                        <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProUpdateTwrpIcon}" Stretch="Uniform" />
+                                                    </Rectangle.OpacityMask>
+                                                </Rectangle>
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="更新 TWRP" Foreground="#333333" />
+                                            </Grid>
+                                        </Button>
+                                    </StackPanel>
+                                </Border>
+                            </Popup>
+
                             <control:IconButton
                                                 Height="24.5"
                                                 Margin="7,0,0,0"
@@ -1058,24 +1321,6 @@
                                                 ButtonText="刷入文件"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="FlashFile" />
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#5C82FD"
-                                                ButtonBorderBrush="#5C82FD"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProUpdateKernelIcon}"
-                                                ButtonText="更新内核"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="FlashKernel" />
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#7B9EFF"
-                                                ButtonBorderBrush="#7B9EFF"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProUpdateTwrpIcon}"
-                                                ButtonText="更新 TWRP"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="UpdateTwrp" />
                             <control:IconButton
                                                 Height="24.5"
                                                 Margin="7,0,0,0"
@@ -1351,6 +1596,8 @@
     </Grid>
     </Border>
 </Window>
+
+
 
 
 
