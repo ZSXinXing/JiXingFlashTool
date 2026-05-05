@@ -122,9 +122,9 @@
     <Compile Include="Model\FileModel.cs" />
     <Compile Include="Model\SocketPackageModel.cs" />
     <Compile Include="Model\YuvModel.cs" />
-    <Compile Include="ObservableModel\DeviceObservableModel.cs" />
-    <Compile Include="ObservableModel\ObservableCastScreenModel.cs" />
-    <Compile Include="ObservableModel\ObservableDeviceInstallModel.cs" />
+    <Compile Include="ItemViewModel\DeviceItemViewModel.cs" />
+    <Compile Include="ItemViewModel\CastScreenItemViewModel.cs" />
+    <Compile Include="ItemViewModel\DeviceInstallItemViewModel.cs" />
     <Compile Include="Services\AdbService.cs" />
     <Compile Include="Services\AppService.cs" />
     <Compile Include="Services\CastScreenManageService.cs" />
@@ -469,3 +469,4 @@
     <PostBuildEvent>REM Eazfuscator.NET is integrated with this project at MSBuild level: https://help.gapotchenko.com/eazfuscator.net/kb/100036</PostBuildEvent>
   </PropertyGroup>
 </Project>
+

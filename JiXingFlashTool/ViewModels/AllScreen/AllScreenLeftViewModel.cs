@@ -17,7 +17,7 @@ using System.Windows.Threading;
 using JiXingFlashTool.EventArg;
 using JiXingFlashTool.Extensions;
 using JiXingFlashTool.Models;
-using JiXingFlashTool.ObservableModel;
+using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Services;
 using JiXingFlashTool.Model;
 
@@ -29,18 +29,18 @@ namespace JiXingFlashTool.ViewModels.AllScreen
 
         private int sidebarWidth = 200;
         public int SidebarWidth { get => sidebarWidth; set => SetProperty(ref sidebarWidth, value); }
-        private ObservableCollection<DeviceObservableModel> deviceCollection = new ObservableCollection<DeviceObservableModel>();
-        public ObservableCollection<DeviceObservableModel> DeviceCollection { get => deviceCollection; set => SetProperty(ref deviceCollection, value); }
-        private List<DeviceObservableModel> DeviceList = new List<DeviceObservableModel>();
+        private ObservableCollection<DeviceItemViewModel> deviceCollection = new ObservableCollection<DeviceItemViewModel>();
+        public ObservableCollection<DeviceItemViewModel> DeviceCollection { get => deviceCollection; set => SetProperty(ref deviceCollection, value); }
+        private List<DeviceItemViewModel> DeviceList = new List<DeviceItemViewModel>();
 
-        public RelayCommand<DeviceObservableModel> ItemDoubleClickCommand => new Lazy<RelayCommand<DeviceObservableModel>>(() => new RelayCommand<DeviceObservableModel>(ItemDoubleClick)).Value;
-        public RelayCommand<DeviceObservableModel> ItemClickCommand => new Lazy<RelayCommand<DeviceObservableModel>>(() => new RelayCommand<DeviceObservableModel>(ItemClick)).Value;
+        public RelayCommand<DeviceItemViewModel> ItemDoubleClickCommand => new Lazy<RelayCommand<DeviceItemViewModel>>(() => new RelayCommand<DeviceItemViewModel>(ItemDoubleClick)).Value;
+        public RelayCommand<DeviceItemViewModel> ItemClickCommand => new Lazy<RelayCommand<DeviceItemViewModel>>(() => new RelayCommand<DeviceItemViewModel>(ItemClick)).Value;
         public AllScreenLeftViewModel()
         {
 
             WeakReferenceMessenger.Default.Register<ValueChangedMessage<bool>, string>(this, AllScreenTopViewModel.ASTShowOrHiddenSideBarMessageKey, ShowOrHiddenSideBar);
-            WeakReferenceMessenger.Default.Register<ValueChangedMessage<ObservableCastScreenModel>, string>(this, DeviceScreenListViewModel.DSCastScreenConnectMessageKey, CastScreenConnect);
-            WeakReferenceMessenger.Default.Register<ValueChangedMessage<ObservableCastScreenModel>, string>
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<CastScreenItemViewModel>, string>(this, DeviceScreenListViewModel.DSCastScreenConnectMessageKey, CastScreenConnect);
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<CastScreenItemViewModel>, string>
                 (this, DeviceScreenListViewModel.DSCastScreenDisconnectMessageKey, CastScreenDisconnect);
             WeakReferenceMessenger.Default.Register<ValueChangedMessage<bool>, string>
                 (this, DeviceScreenListViewModel.DSCastScreenSelectMessageKey, SelectAll);
@@ -59,7 +59,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             {
                 try
                 {
-                    DeviceObservableModel ob = DeviceList.Find(it =>
+                    DeviceItemViewModel ob = DeviceList.Find(it =>
                     {
                         if (it == null) return false;
                         return it.Device.RoSerialNo.Equals(device.RoSerialNo);
@@ -75,7 +75,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             else SidebarWidth = 0;
         }
 
-        private void CastScreenConnect(object recipient, ValueChangedMessage<ObservableCastScreenModel> e)
+        private void CastScreenConnect(object recipient, ValueChangedMessage<CastScreenItemViewModel> e)
         {
             try
             {
@@ -95,7 +95,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             catch { }
         }
 
-        private void CastScreenDisconnect(object recipient, ValueChangedMessage<ObservableCastScreenModel> e)
+        private void CastScreenDisconnect(object recipient, ValueChangedMessage<CastScreenItemViewModel> e)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             catch { }
         }
 
-        private void ItemDoubleClick(DeviceObservableModel ob)
+        private void ItemDoubleClick(DeviceItemViewModel ob)
         {
             SynchronizationContext.Current.Post(pl =>
             {
@@ -127,12 +127,12 @@ namespace JiXingFlashTool.ViewModels.AllScreen
                 ob.RefreshItemBackgroundColor();
                 ob.RefreshItemForegroundColor();
                 ob.RefreshItemBorderThickness();
-                WeakReferenceMessenger.Default.Send<ValueChangedMessage<DeviceObservableModel>, string>
-                (new ValueChangedMessage<DeviceObservableModel>(ob), ASLShowCastScreenMessageKey);
+                WeakReferenceMessenger.Default.Send<ValueChangedMessage<DeviceItemViewModel>, string>
+                (new ValueChangedMessage<DeviceItemViewModel>(ob), ASLShowCastScreenMessageKey);
             }, null);
         }
 
-        private void ItemClick(DeviceObservableModel ob)
+        private void ItemClick(DeviceItemViewModel ob)
         {
             SynchronizationContext.Current.Post(pl =>
             {
@@ -146,3 +146,4 @@ namespace JiXingFlashTool.ViewModels.AllScreen
 
     }
 }
+

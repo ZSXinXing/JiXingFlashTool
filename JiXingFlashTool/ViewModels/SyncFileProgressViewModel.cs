@@ -15,7 +15,7 @@ using System.Windows.Forms;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using JiXingFlashTool.Models;
-using JiXingFlashTool.ObservableModel;
+using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Services;
 using JiXingFlashTool.Utils;
 using JiXingFlashTool.Properties;
@@ -29,8 +29,8 @@ namespace JiXingFlashTool.ViewModels
         public bool FinishSync { get => finishSync; set => SetProperty(ref finishSync, value); }
         private int FinishCount = 0;
 
-        private ObservableCollection<ObservableDeviceInstallModel> deviceCollection = new ObservableCollection<ObservableDeviceInstallModel>();
-        public ObservableCollection<ObservableDeviceInstallModel> DeviceCollection { get => deviceCollection; set => SetProperty(ref deviceCollection, value); }
+        private ObservableCollection<DeviceInstallItemViewModel> deviceCollection = new ObservableCollection<DeviceInstallItemViewModel>();
+        public ObservableCollection<DeviceInstallItemViewModel> DeviceCollection { get => deviceCollection; set => SetProperty(ref deviceCollection, value); }
 
         public RelayCommand CloseCommand => new Lazy<RelayCommand>(() => new RelayCommand(Close)).Value;
         public RelayCommand FinishCommand => new Lazy<RelayCommand>(() => new RelayCommand(Finish)).Value;
@@ -40,20 +40,18 @@ namespace JiXingFlashTool.ViewModels
         public List<DeviceModel> DeviceList { get; set; }
         public List<FileModel> FileList { get; set; }
 
-        private List<ObservableDeviceInstallModel> deviceInstallModels = new List<ObservableDeviceInstallModel>();
+        private List<DeviceInstallItemViewModel> deviceInstallModels = new List<DeviceInstallItemViewModel>();
 
         private Thread syncFileThread;
         private List<Thread> AllSyncFileThread = new List<Thread>();
         private List<Thread> AllInstallThread = new List<Thread>();
-        private int MaxInstallThreadCount = 20;
-        private int CurrentThreadCount = 0;
         public void Start() {
 
             //组装数组
             for (int i = 0; i < DeviceList.Count; i++)
             {
                 DeviceInstallModel deviceInstall = new DeviceInstallModel() { Device = DeviceList[i], FileList = FileList, SumCount = FileList.Count };
-                ObservableDeviceInstallModel ob = new ObservableDeviceInstallModel(deviceInstall);
+                DeviceInstallItemViewModel ob = new DeviceInstallItemViewModel(deviceInstall);
 
                 DeviceCollection.Add(ob);
                 deviceInstallModels.Add(ob);
@@ -63,7 +61,7 @@ namespace JiXingFlashTool.ViewModels
             {
                 for (int i = 0; i < deviceInstallModels.Count; i++)
                 {
-                    ObservableDeviceInstallModel ob = deviceInstallModels[i];
+                    DeviceInstallItemViewModel ob = deviceInstallModels[i];
                     for (int j = 0; j < ob.DeviceInstall.FileList.Count; j++)
                     {
                         FileModel fileModel = ob.DeviceInstall.FileList[j];
@@ -82,7 +80,7 @@ namespace JiXingFlashTool.ViewModels
             syncFileThread.Start();
         }
 
-        private void InstallTask(ObservableDeviceInstallModel ob,FileModel fileInfo) {
+        private void InstallTask(DeviceInstallItemViewModel ob,FileModel fileInfo) {
             Thread thread = new Thread(() =>
             {
                 using (Stream apkStream = File.OpenRead(fileInfo.Path))
@@ -119,6 +117,7 @@ namespace JiXingFlashTool.ViewModels
                     }
                     catch (Exception ex)
                     {
+                        Debug.WriteLine(ex);
                         ob.FailureCount = ob.FailureCount + 1;
                     }
                     ob.Progress = ob.Progress + 1;
@@ -131,7 +130,7 @@ namespace JiXingFlashTool.ViewModels
         }
 
 
-        private void PushTask(ObservableDeviceInstallModel ob, string path)
+        private void PushTask(DeviceInstallItemViewModel ob, string path)
         {
             Thread thread = new Thread(() =>
             {
@@ -148,6 +147,7 @@ namespace JiXingFlashTool.ViewModels
                 }
                 catch (Exception ex)
                 {
+                    Debug.WriteLine(ex);
                     ob.FailureCount = ob.FailureCount + 1;
                 }
                 ob.Progress = ob.Progress + 1;
@@ -180,3 +180,4 @@ namespace JiXingFlashTool.ViewModels
         }
     }
 }
+

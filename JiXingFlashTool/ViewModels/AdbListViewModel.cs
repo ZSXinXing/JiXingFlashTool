@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using JiXingFlashTool.ObservableModel;
+using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Services;
 using JiXingFlashTool.Models;
 using JiXingFlashTool.Enums;
@@ -19,7 +19,7 @@ namespace JiXingFlashTool.ViewModels
 {
     public class AdbListViewModel : ObservableObject
     {
-        public List<DeviceObservableModel> SelectDeviceList { get; set; } = new List<DeviceObservableModel>();
+        public List<DeviceItemViewModel> SelectDeviceList { get; set; } = new List<DeviceItemViewModel>();
 
         protected ObservableCollection<AdbCommandModel> commandCollection = new ObservableCollection<AdbCommandModel>();
         public ObservableCollection<AdbCommandModel> CommandCollection { get => commandCollection; set => SetProperty(ref commandCollection, value); }
@@ -58,3 +58,4 @@ namespace JiXingFlashTool.ViewModels
 
     }
 }
+

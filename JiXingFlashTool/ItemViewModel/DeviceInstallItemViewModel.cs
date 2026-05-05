@@ -10,12 +10,12 @@ using System.Windows.Documents;
 using System.Windows.Threading;
 using static System.Windows.Forms.LinkLabel;
 
-namespace JiXingFlashTool.ObservableModel
+namespace JiXingFlashTool.ItemViewModel
 {
-    public class ObservableDeviceInstallModel : ObservableObject
+    public class DeviceInstallItemViewModel : ObservableObject
     {
         private DeviceInstallModel deviceInstall { get; set; }
-        public ObservableDeviceInstallModel(DeviceInstallModel deviceInstallModel)
+        public DeviceInstallItemViewModel(DeviceInstallModel deviceInstallModel)
         {
             this.deviceInstall = deviceInstallModel;
         }
@@ -86,3 +86,4 @@ namespace JiXingFlashTool.ObservableModel
         }
     }
 }
+

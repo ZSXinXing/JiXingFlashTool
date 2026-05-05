@@ -9,12 +9,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace JiXingFlashTool.ObservableModel
+namespace JiXingFlashTool.ItemViewModel
 {
     /// <summary>
     /// 设备列表中的单个设备展示模型，负责承载主页面表格展示所需的状态与样式数据。
     /// </summary>
-    public class DeviceObservableModel : ObservableObject
+    public class DeviceItemViewModel : ObservableObject
     {
         private static readonly SolidColorBrush UsbTagBackgroundBrush = CreateBrush("#E3F2FD");
         private static readonly SolidColorBrush UsbTagForegroundBrush = CreateBrush("#2196F3");
@@ -85,11 +85,11 @@ namespace JiXingFlashTool.ObservableModel
         }
 
         /// <summary>
-        /// 设备品牌，优先展示 Product 字段。
+        /// 设备品牌，对应 ro.product.brand。
         /// </summary>
         public string Brand
         {
-            get => string.IsNullOrWhiteSpace(Device.Product) ? Device.Name : Device.Product;
+            get => Device.Brand;
         }
 
         /// <summary>
@@ -282,7 +282,7 @@ namespace JiXingFlashTool.ObservableModel
         /// <summary>
         /// 使用设备模型初始化展示模型。
         /// </summary>
-        public DeviceObservableModel(DeviceModel device) => this.device = device;
+        public DeviceItemViewModel(DeviceModel device) => this.device = device;
 
         #region 调用任务的方法
         /// <summary>
@@ -388,3 +388,4 @@ namespace JiXingFlashTool.ObservableModel
         }
     }
 }
+

@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Threading;
 using JiXingFlashTool.Models;
-using JiXingFlashTool.ObservableModel;
+using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Utils;
 using JiXingFlashTool.Views;
 using JiXingFlashTool.Properties;
@@ -119,3 +119,4 @@ namespace JiXingFlashTool.ViewModels
 
     }
 }
+

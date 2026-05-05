@@ -13,7 +13,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using JiXingFlashTool.EventArg;
-using JiXingFlashTool.ObservableModel;
+using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Services;
 using static System.Windows.Forms.LinkLabel;
 
@@ -154,3 +154,4 @@ namespace JiXingFlashTool.ViewModels.AllScreen
         }
     }
 }
+

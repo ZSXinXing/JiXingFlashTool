@@ -21,7 +21,7 @@ using JiXingFlashTool.Enums;
 using JiXingFlashTool.EventArg;
 using JiXingFlashTool.Extensions;
 using JiXingFlashTool.Models;
-using JiXingFlashTool.ObservableModel;
+using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Services;
 using JiXingFlashTool.Utils;
 using static System.Windows.Forms.LinkLabel;
@@ -44,10 +44,10 @@ namespace JiXingFlashTool.ViewModels.AllScreen
         private double controlCastScreenHeight = 0;
         public double ControlCastScreenHeight { get => controlCastScreenHeight; set => SetProperty(ref controlCastScreenHeight, value); }
 
-        private ObservableCastScreenModel controlCastScreen;
-        public ObservableCastScreenModel ControlCastScreen { get => controlCastScreen; set => SetProperty(ref controlCastScreen, value); }
+        private CastScreenItemViewModel controlCastScreen;
+        public CastScreenItemViewModel ControlCastScreen { get => controlCastScreen; set => SetProperty(ref controlCastScreen, value); }
 
-        private ObservableCastScreenModel oldControlCastScreen;
+        private CastScreenItemViewModel oldControlCastScreen;
 
         private bool CtrlKeyDown = false;
         private bool isSyncMouse = true;
@@ -56,9 +56,9 @@ namespace JiXingFlashTool.ViewModels.AllScreen
 
         public System.Windows.Controls.ListBox DeviceListBox { get; set; }
         public RelayCommand<int> ListBoxDoubleCommand => new Lazy<RelayCommand<int>>(() => new RelayCommand<int>(ShowControlCastScreen)).Value;
-        private ObservableCollection<ObservableCastScreenModel> deviceCollection = new ObservableCollection<ObservableCastScreenModel>();
-        public ObservableCollection<ObservableCastScreenModel> DeviceCollection { get => deviceCollection; set => SetProperty(ref deviceCollection, value); }
-        private List<ObservableCastScreenModel> DeviceList = new List<ObservableCastScreenModel>();
+        private ObservableCollection<CastScreenItemViewModel> deviceCollection = new ObservableCollection<CastScreenItemViewModel>();
+        public ObservableCollection<CastScreenItemViewModel> DeviceCollection { get => deviceCollection; set => SetProperty(ref deviceCollection, value); }
+        private List<CastScreenItemViewModel> DeviceList = new List<CastScreenItemViewModel>();
 
         public RelayCommand BackCommand => new Lazy<RelayCommand>(() => new RelayCommand(Back)).Value;
         public RelayCommand HomeCommand => new Lazy<RelayCommand>(() => new RelayCommand(Home)).Value;
@@ -82,7 +82,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             WeakReferenceMessenger.Default.Register<ValueChangedMessage<bool>, string>(this, AllScreenTopViewModel.ASTSelectAllMessageKey, SelectAll);
 
             WeakReferenceMessenger.Default.Register<ValueChangedMessage<bool>, string>(this, DeviceScreenWindowModel.DSCloseSceenWindowMessageKey, CloseWindow);
-            WeakReferenceMessenger.Default.Register<ValueChangedMessage<DeviceObservableModel>, string>(this, AllScreenLeftViewModel.ASLShowCastScreenMessageKey, ShowControlCastScreen);
+            WeakReferenceMessenger.Default.Register<ValueChangedMessage<DeviceItemViewModel>, string>(this, AllScreenLeftViewModel.ASLShowCastScreenMessageKey, ShowControlCastScreen);
 
         }
 
@@ -105,7 +105,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
         private void OnDeviceDisconnected(object sender, EventArg.DeviceEventArgs e)
         {
             if (e.DeviceModel == null) return;
-            ObservableCastScreenModel ob = DeviceList.Find(it =>
+            CastScreenItemViewModel ob = DeviceList.Find(it =>
             {
                 if (it == null) return false;
                 return it.Device.Serial.Equals(e.DeviceModel.Serial);
@@ -120,7 +120,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             if (e.DeviceModel == null) return;
             if (e.DeviceModel.State == JXAdbCore.Enums.DeviceState.Offline)
             {
-                ObservableCastScreenModel ob = DeviceList.Find(it =>
+                CastScreenItemViewModel ob = DeviceList.Find(it =>
                 {
                     if (it == null) return false;
                     return it.Equals(e.DeviceModel.Serial);
@@ -135,7 +135,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
         {
             CastScreenManageService.Instance.AddCastScreen(device);
         }
-        private void RemoveDevice(ObservableCastScreenModel ob)
+        private void RemoveDevice(CastScreenItemViewModel ob)
         {
 
             ThreadPool.QueueUserWorkItem(delegate
@@ -150,8 +150,8 @@ namespace JiXingFlashTool.ViewModels.AllScreen
                         ob.CastScreenService.StopReceiveStream();
                         DeviceList.Remove(ob);
                         deviceCollection.Remove(ob);
-                        WeakReferenceMessenger.Default.Send<ValueChangedMessage<ObservableCastScreenModel>, string>
-                        (new ValueChangedMessage<ObservableCastScreenModel>(ob), DSCastScreenDisconnectMessageKey);
+                        WeakReferenceMessenger.Default.Send<ValueChangedMessage<CastScreenItemViewModel>, string>
+                        (new ValueChangedMessage<CastScreenItemViewModel>(ob), DSCastScreenDisconnectMessageKey);
                         WeakReferenceMessenger.Default.Send<ValueChangedMessage<int>, string>
                         (new ValueChangedMessage<int>(DeviceList.Count), DSCastScreenCountChangeMessageKey);
                         if (ob == ControlCastScreen)
@@ -170,7 +170,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
         private void SelectAll(object recipient, ValueChangedMessage<bool> e)
         {
             isSelectAll = e.Value;
-            foreach (ObservableCastScreenModel ob in DeviceList)
+            foreach (CastScreenItemViewModel ob in DeviceList)
             {
                 ob.IsSelect = isSelectAll;
                 ob.RefreshItemBorderThickness();
@@ -189,7 +189,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
 
             try
             {
-                foreach (ObservableCastScreenModel ob in DeviceList)
+                foreach (CastScreenItemViewModel ob in DeviceList)
                 {
                     ob.CastScreenService.StopReceiveStream();
                 }
@@ -210,7 +210,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
                     {
                         try
                         {
-                            ObservableCastScreenModel ob = new ObservableCastScreenModel(e.Device, e.CastScreenService);
+                            CastScreenItemViewModel ob = new CastScreenItemViewModel(e.Device, e.CastScreenService);
                             ob.ScreenWidth = AppService.Instance.AppConfig.ScreenCurrentWidth;
                             ob.ScreenHeight = (((ob.CastScreenService.VideoHeight * 1.0) / (ob.CastScreenService.VideoWidth * 1.0)) * ob.ScreenWidth);
 
@@ -238,7 +238,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
 
                             Debug.WriteLine($"IP:{e.Device.Serial} 投屏成功DeviceScreenListViewModel");
                             ob.IsSelect = isSelectAll;
-                            WeakReferenceMessenger.Default.Send<ValueChangedMessage<ObservableCastScreenModel>, string>(new ValueChangedMessage<ObservableCastScreenModel>(ob), DSCastScreenConnectMessageKey);
+                            WeakReferenceMessenger.Default.Send<ValueChangedMessage<CastScreenItemViewModel>, string>(new ValueChangedMessage<CastScreenItemViewModel>(ob), DSCastScreenConnectMessageKey);
                             WeakReferenceMessenger.Default.Send<ValueChangedMessage<int>, string>(new ValueChangedMessage<int>(DeviceList.Count), DSCastScreenCountChangeMessageKey);
                         }
                         catch
@@ -254,7 +254,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
 
             for (int i = 0; i < DeviceList.Count; i++)
             {
-                ObservableCastScreenModel ob = DeviceList[i];
+                CastScreenItemViewModel ob = DeviceList[i];
                 ob.ScreenWidth = e.Value;
                 ob.ScreenHeight = (((ob.CastScreenService.VideoHeight * 1.0) / (ob.CastScreenService.VideoWidth * 1.0)) * ob.ScreenWidth);
             }
@@ -264,13 +264,13 @@ namespace JiXingFlashTool.ViewModels.AllScreen
 
             for (int i = 0; i < DeviceList.Count; i++)
             {
-                ObservableCastScreenModel ob = DeviceList[i];
+                CastScreenItemViewModel ob = DeviceList[i];
                 if (ControlCastScreen != null && ob.Device.Serial.Equals(ControlCastScreen.Device.Serial)) continue;
                 ob.CastScreenService.ResetParamter(AppService.Instance.AppConfig.MiniCastScreenResolution, 1, AppService.Instance.AppConfig.MiniCastScreenRate);
             }
         }
 
-        private void ShowControlCastScreen(object recipient, ValueChangedMessage<DeviceObservableModel> e)
+        private void ShowControlCastScreen(object recipient, ValueChangedMessage<DeviceItemViewModel> e)
         {
             int index = -1;
             index = DeviceList.FindIndex(it =>
@@ -294,7 +294,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
                 int controlResolution = AppService.Instance.AppConfig.ControlCastScreenResolution;
                 int controlRate = AppService.Instance.AppConfig.ControlCastScreenRate;
 
-                ObservableCastScreenModel ob = DeviceList[index];
+                CastScreenItemViewModel ob = DeviceList[index];
                 DeviceModel device = ob.Device;
                 double width = (int)DeviceListBox.ActualWidth;
                 ControlCastScreenWidth = 450;
@@ -321,9 +321,9 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             SendMessageToDevice(GetNeedSyncDeviceList(SyncType.Mouse), new KeycodeControlMessage { KeyCode = AndroidKeycode.AKEYCODE_APP_SWITCH, Action = AndroidKeyEventAction.AKEY_EVENT_ACTION_DOWN });
             SendMessageToDevice(GetNeedSyncDeviceList(SyncType.Mouse), new KeycodeControlMessage { KeyCode = AndroidKeycode.AKEYCODE_APP_SWITCH, Action = AndroidKeyEventAction.AKEY_EVENT_ACTION_UP });
         }
-        private List<ObservableCastScreenModel> GetNeedSyncDeviceList(SyncType type)
+        private List<CastScreenItemViewModel> GetNeedSyncDeviceList(SyncType type)
         {
-            List<ObservableCastScreenModel> list = DeviceList.FindAll(it =>
+            List<CastScreenItemViewModel> list = DeviceList.FindAll(it =>
             {
                 return ((it.IsSelect == true && (type == SyncType.Mouse ? isSyncMouse : (type == SyncType.Keyboard ? isSyncKeyboard : false))) ||
                 (it.Device.Serial.Equals(ControlCastScreen.Device.Serial)));
@@ -381,8 +381,8 @@ namespace JiXingFlashTool.ViewModels.AllScreen
                     try
                     {
                         string text = System.Windows.Clipboard.GetText();
-                        List<ObservableCastScreenModel> list = GetNeedSyncDeviceList(SyncType.Keyboard);
-                        foreach (ObservableCastScreenModel ob in list)
+                        List<CastScreenItemViewModel> list = GetNeedSyncDeviceList(SyncType.Keyboard);
+                        foreach (CastScreenItemViewModel ob in list)
                         {
                             AdbService.Instance.SendText(ob.Device, text);
                         }
@@ -408,7 +408,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
         }
 
 
-        private void SendMessageToDevice(List<ObservableCastScreenModel> obList, List<IControlMessage> iControlMessageList)
+        private void SendMessageToDevice(List<CastScreenItemViewModel> obList, List<IControlMessage> iControlMessageList)
         {
 
             new Thread(() =>
@@ -417,7 +417,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
                 {
                     try
                     {
-                        ObservableCastScreenModel ob = obList[i];
+                        CastScreenItemViewModel ob = obList[i];
                         IControlMessage cmd = iControlMessageList[i]; ;
                         ob.CastScreenService.SendMessage(cmd.bytes(), 0, cmd.size);
                     }
@@ -429,12 +429,12 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             }).Start();
         }
 
-        private void SendMessageToDevice(List<ObservableCastScreenModel> obList, IControlMessage iControlMessage)
+        private void SendMessageToDevice(List<CastScreenItemViewModel> obList, IControlMessage iControlMessage)
         {
 
             for (int i = 0; i < obList.Count; i++)
             {
-                ObservableCastScreenModel ob = obList[i];
+                CastScreenItemViewModel ob = obList[i];
                 try
                 {
                     ob.CastScreenService.SendMessage(iControlMessage.bytes(), 0, iControlMessage.size);
@@ -448,11 +448,11 @@ namespace JiXingFlashTool.ViewModels.AllScreen
         private List<IControlMessage> GetNeedAsyncIControlMessage(Image sender, InputEventArgs e, SyncType type = SyncType.Mouse, AndroidMotionEventAction action = AndroidMotionEventAction.AMOTION_EVENT_ACTION_UP, AndroidKeyEventAction keyAction = AndroidKeyEventAction.AKEY_EVENT_ACTION_UP)
         {
 
-            List<ObservableCastScreenModel> obList = GetNeedSyncDeviceList(type);
+            List<CastScreenItemViewModel> obList = GetNeedSyncDeviceList(type);
             List<IControlMessage> iControlMessageList = new List<IControlMessage>();
 
 
-            foreach (ObservableCastScreenModel ob in obList)
+            foreach (CastScreenItemViewModel ob in obList)
             {
 
 
@@ -500,7 +500,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             return iControlMessageList;
         }
 
-        private Position GetMousePosition(Image sender, System.Windows.Input.MouseEventArgs e, ObservableCastScreenModel ob)
+        private Position GetMousePosition(Image sender, System.Windows.Input.MouseEventArgs e, CastScreenItemViewModel ob)
         {
 
             try
@@ -535,3 +535,4 @@ namespace JiXingFlashTool.ViewModels.AllScreen
         #endregion
     }
 }
+

@@ -9,9 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace JiXingFlashTool.ObservableModel
+namespace JiXingFlashTool.ItemViewModel
 {
-    public class ObservableCastScreenModel : DeviceObservableModel
+    public class CastScreenItemViewModel : DeviceItemViewModel
     {
         private CastScreenService castScreenService;
         public CastScreenService CastScreenService { get { return castScreenService; } }
@@ -60,7 +60,7 @@ namespace JiXingFlashTool.ObservableModel
             set => SetProperty(ref screenHeight, value);
         }
 
-        public ObservableCastScreenModel(DeviceModel device, CastScreenService castScreenService) : base(device)
+        public CastScreenItemViewModel(DeviceModel device, CastScreenService castScreenService) : base(device)
         {
             this.device = device;
             this.castScreenService = castScreenService;
@@ -68,3 +68,4 @@ namespace JiXingFlashTool.ObservableModel
         }
     }
 }
+

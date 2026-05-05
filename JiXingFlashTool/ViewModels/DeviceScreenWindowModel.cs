@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows;
-using JiXingFlashTool.ObservableModel;
+using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Enums;
 using JiXingFlashTool.EventArg;
 using JiXingFlashTool.Utils;
@@ -38,8 +38,8 @@ namespace JiXingFlashTool.ViewModels
         private string title;
         public string Title { get => title; set => SetProperty(ref title, value); }
 
-        private ObservableCastScreenModel ob;
-        public ObservableCastScreenModel OB { get => ob; set => SetProperty(ref ob, value); }
+        private CastScreenItemViewModel ob;
+        public CastScreenItemViewModel OB { get => ob; set => SetProperty(ref ob, value); }
 
         public RelayCommand CloseCommand => new Lazy<RelayCommand>(() => new RelayCommand(CloseWindow)).Value;
         public RelayCommand MiniCommand => new Lazy<RelayCommand>(() => new RelayCommand(MiniWindow)).Value;
@@ -293,7 +293,7 @@ namespace JiXingFlashTool.ViewModels
             CastScreenService screenService = (CastScreenService)sender;
             if (e.Result)
             {
-                ObservableCastScreenModel ob = new ObservableCastScreenModel(e.Device, screenService);
+                CastScreenItemViewModel ob = new CastScreenItemViewModel(e.Device, screenService);
                 this.OB = ob;
 
                 Debug.WriteLine("投屏成功");
@@ -308,3 +308,4 @@ namespace JiXingFlashTool.ViewModels
         }
     }
 }
+

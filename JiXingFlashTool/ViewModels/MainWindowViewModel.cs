@@ -4,10 +4,11 @@ using HandyControl.Controls;
 using JiXingFlashTool.EventArg;
 using JiXingFlashTool.Model;
 using JiXingFlashTool.Models;
-using JiXingFlashTool.ObservableModel;
+using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Services;
 using JiXingFlashTool.ViewModels.AllScreen;
 using JiXingFlashTool.Views;
+using JiXingFlashTool.Enums;
 using JXAdbCore.Enums;
 using System;
 using System.Collections.Generic;
@@ -39,11 +40,13 @@ namespace JiXingFlashTool.ViewModels
         private bool _isSelectAll;
         private bool _isSidebarExpanded = true;
         private int _listCount;
+        private const double SidebarWidthScale = 0.8D;
+        private const double SidebarCollapsedWidth = 60D;
 
         /// <summary>
         /// 设备列表源集合。
         /// </summary>
-        public ObservableCollection<DeviceObservableModel> DeviceCollection { get; } = new ObservableCollection<DeviceObservableModel>();
+        public ObservableCollection<DeviceItemViewModel> DeviceCollection { get; } = new ObservableCollection<DeviceItemViewModel>();
 
         /// <summary>
         /// 设备列表视图，用于承载筛选逻辑。
@@ -217,7 +220,7 @@ namespace JiXingFlashTool.ViewModels
         /// <summary>
         /// 侧边栏当前宽度。
         /// </summary>
-        public double SidebarPanelWidth => IsSidebarExpanded ? 223D : 55D;
+        public double SidebarPanelWidth => IsSidebarExpanded ? 223D * SidebarWidthScale : SidebarCollapsedWidth;
 
         /// <summary>
         /// 侧边栏顶部容器当前高度。
@@ -259,9 +262,9 @@ namespace JiXingFlashTool.ViewModels
             {
                 if (SetProperty(ref _isSelectAll, value))
                 {
-                    foreach (var deviceObservableModel in DeviceCollection)
+                    foreach (var deviceItemViewModel in DeviceCollection)
                     {
-                        deviceObservableModel.IsSelect = _isSelectAll;
+                        deviceItemViewModel.IsSelect = _isSelectAll;
                     }
                 }
             }
@@ -287,7 +290,7 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         public bool ShowDeviceTable => !IsLoading && !HasLoadError && HasDevices;
 
-        private readonly List<DeviceObservableModel> _deviceList = new List<DeviceObservableModel>();
+        private readonly List<DeviceItemViewModel> _deviceList = new List<DeviceItemViewModel>();
 
         /// <summary>
         /// 全选命令。
@@ -300,14 +303,19 @@ namespace JiXingFlashTool.ViewModels
         public RelayCommand SystemShowViewCommand => new Lazy<RelayCommand>(() => new RelayCommand(ShowAdbCommandView)).Value;
 
         /// <summary>
-        /// 打开 TWRP 命令窗口。
-        /// </summary>
-        public RelayCommand TWRPShowViewCommand => new Lazy<RelayCommand>(() => new RelayCommand(TWRPCommand)).Value;
-
-        /// <summary>
         /// 打开系统更新窗口。
         /// </summary>
         public RelayCommand UpdateSystemCommand => new Lazy<RelayCommand>(() => new RelayCommand(UpdateSystem)).Value;
+
+        /// <summary>
+        /// 执行专业指令按钮组中的快捷操作。
+        /// </summary>
+        public RelayCommand<string> ProfessionalInstructionCommand => new Lazy<RelayCommand<string>>(() => new RelayCommand<string>(ExecuteProfessionalInstructionCommand)).Value;
+
+        /// <summary>
+        /// 执行维护指令按钮组中的快捷操作。
+        /// </summary>
+        public RelayCommand<string> MaintenanceInstructionCommand => new Lazy<RelayCommand<string>>(() => new RelayCommand<string>(ExecuteMaintenanceInstructionCommand)).Value;
 
         /// <summary>
         /// 单控投屏命令。
@@ -424,9 +432,9 @@ namespace JiXingFlashTool.ViewModels
                     return;
                 }
 
-                foreach (var deviceObservableModel in selectList)
+                foreach (var deviceItemViewModel in selectList)
                 {
-                    deviceObservableModel.StartAdbCommand((AdbCommandModel)value);
+                    deviceItemViewModel.StartAdbCommand((AdbCommandModel)value);
                 }
             };
         }
@@ -437,30 +445,6 @@ namespace JiXingFlashTool.ViewModels
         private void SelectAll()
         {
             IsSelectAll = !IsSelectAll;
-        }
-
-        /// <summary>
-        /// 执行 TWRP 命令。
-        /// </summary>
-        private void TWRPCommand()
-        {
-            var selectList = GetSelectedDevices();
-            if (selectList.Count == 0)
-            {
-                Growl.Warning("请先选择手机");
-                return;
-            }
-
-            CommandListViewModel.Show(_deviceList, value =>
-            {
-                Task.Run(() =>
-                {
-                    foreach (var deviceObservableModel in selectList)
-                    {
-                        deviceObservableModel.ExecuteTWRPCommand((CommandModel)value);
-                    }
-                });
-            });
         }
 
         /// <summary>
@@ -481,11 +465,165 @@ namespace JiXingFlashTool.ViewModels
                 openFileDialog.Multiselect = false;
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    foreach (var deviceObservableModel in selectList)
+                    foreach (var deviceItemViewModel in selectList)
                     {
-                        deviceObservableModel.UpdateSystem(openFileDialog.FileName);
+                        deviceItemViewModel.UpdateSystem(openFileDialog.FileName);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 执行专业模式快捷指令。
+        /// </summary>
+        /// <param name="commandKey">指令标识。</param>
+        private void ExecuteProfessionalInstructionCommand(string commandKey)
+        {
+            var selectList = GetSelectedDevices().Where(item => item?.Device != null).ToList();
+            if (selectList.Count == 0)
+            {
+                Growl.Warning("请先选择手机");
+                return;
+            }
+
+            switch (commandKey)
+            {
+                case "RebootSystem":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            deviceItemViewModel.Service.RebootToSystem();
+                        }
+                    });
+                    break;
+                case "RebootTwrp":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            deviceItemViewModel.Service.RebootToTWRP();
+                        }
+                    });
+                    break;
+                case "RebootDownload":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            AdbService.Instance.ExecuteShellCommand(deviceItemViewModel.Device, "reboot download", null);
+                        }
+                    });
+                    break;
+                case "Wipe":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            deviceItemViewModel.Service.Wipe();
+                        }
+                    });
+                    break;
+                case "ClearSystem":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            deviceItemViewModel.Service.DeleteSystem();
+                        }
+                    });
+                    break;
+                case "FormatData":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            deviceItemViewModel.Service.FormatPhone();
+                        }
+                    });
+                    break;
+                case "Sideload":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            deviceItemViewModel.Service.Sideload();
+                        }
+                    });
+                    break;
+                case "FlashFile":
+                    ExecuteProfessionalFileCommand(selectList, "ZIP 文件 (*.zip)|*.zip", (deviceItemViewModel, filePath) => deviceItemViewModel.Service.FlashFile(filePath));
+                    break;
+                case "FlashKernel":
+                    ExecuteProfessionalFileCommand(selectList, "IMG 文件 (*.img)|*.img", (deviceItemViewModel, filePath) => deviceItemViewModel.Service.FlashKernel(filePath));
+                    break;
+                case "UpdateTwrp":
+                    ExecuteProfessionalFileCommand(selectList, "IMG 文件 (*.img)|*.img", (deviceItemViewModel, filePath) => deviceItemViewModel.Service.UpdateTwrp(filePath));
+                    break;
+                case "Decrypt":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            deviceItemViewModel.Service.Decrypt();
+                        }
+                    });
+                    break;
+                case "DisableDeveloper":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            AdbService.Instance.ExecuteShellCommand(deviceItemViewModel.Device, "settings put global development_settings_enabled 0", null);
+                        }
+                    });
+                    break;
+                case "SkipGuide":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            AdbService.Instance.ExecuteShellCommand(deviceItemViewModel.Device, "settings put secure user_setup_complete 1 && settings put global device_provisioned 1", null);
+                        }
+                    });
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 维护指令按钮的占位处理，仅保留 UI 绑定，不执行业务逻辑。
+        /// </summary>
+        /// <param name="commandKey">指令标识。</param>
+        private void ExecuteMaintenanceInstructionCommand(string commandKey)
+        {
+            _ = commandKey;
+        }
+
+        /// <summary>
+        /// 为需要文件的专业指令选择文件后再执行。
+        /// </summary>
+        /// <param name="selectList">当前选中的设备列表。</param>
+        /// <param name="fileFilter">文件筛选器。</param>
+        /// <param name="action">文件执行逻辑。</param>
+        private static void ExecuteProfessionalFileCommand(List<DeviceItemViewModel> selectList, string fileFilter, Action<DeviceItemViewModel, string> action)
+        {
+            using (var openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = string.IsNullOrWhiteSpace(fileFilter) ? "文件|*.*" : fileFilter;
+                openFileDialog.Multiselect = false;
+                if (openFileDialog.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+
+                var filePath = openFileDialog.FileName;
+                Task.Run(() =>
+                {
+                    foreach (var deviceItemViewModel in selectList)
+                    {
+                        action(deviceItemViewModel, filePath);
+                    }
+                });
             }
         }
 
@@ -503,15 +641,15 @@ namespace JiXingFlashTool.ViewModels
                     return;
                 }
 
-                foreach (var deviceObservableModel in selectList)
+                foreach (var deviceItemViewModel in selectList)
                 {
-                    if (deviceObservableModel?.Device == null)
+                    if (deviceItemViewModel?.Device == null)
                     {
                         continue;
                     }
 
                     DeviceScreenViewModel
-                        .Show(deviceObservableModel.Device)
+                        .Show(deviceItemViewModel.Device)
                         .StartScreen(AppService.Instance.AppConfig.ControlCastScreenResolution, AppService.Instance.AppConfig.ControlCastScreenRate);
                 }
             }
@@ -534,14 +672,14 @@ namespace JiXingFlashTool.ViewModels
                     return;
                 }
 
-                foreach (var deviceObservableModel in selectList)
+                foreach (var deviceItemViewModel in selectList)
                 {
-                    if (deviceObservableModel?.Device == null)
+                    if (deviceItemViewModel?.Device == null)
                     {
                         continue;
                     }
 
-                    deviceObservableModel.RestoreFactory();
+                    deviceItemViewModel.RestoreFactory();
                 }
             }
             catch
@@ -554,7 +692,7 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         private bool FilterDevice(object obj)
         {
-            if (!(obj is DeviceObservableModel deviceObservableModel))
+            if (!(obj is DeviceItemViewModel deviceItemViewModel))
             {
                 return false;
             }
@@ -563,14 +701,14 @@ namespace JiXingFlashTool.ViewModels
             {
                 var keyword = SearchKeyword.Trim();
                 var isKeywordMatched =
-                    ContainsKeyword(deviceObservableModel.Serial, keyword) ||
-                    ContainsKeyword(deviceObservableModel.Brand, keyword) ||
-                    ContainsKeyword(deviceObservableModel.ModelName, keyword) ||
-                    ContainsKeyword(deviceObservableModel.Model, keyword) ||
-                    ContainsKeyword(deviceObservableModel.AndroidVersion, keyword) ||
-                    ContainsKeyword(deviceObservableModel.SystemVersion, keyword) ||
-                    ContainsKeyword(deviceObservableModel.DeviceState, keyword) ||
-                    ContainsKeyword(deviceObservableModel.TaskDetailDisplayMessage, keyword);
+                    ContainsKeyword(deviceItemViewModel.Serial, keyword) ||
+                    ContainsKeyword(deviceItemViewModel.Brand, keyword) ||
+                    ContainsKeyword(deviceItemViewModel.ModelName, keyword) ||
+                    ContainsKeyword(deviceItemViewModel.Model, keyword) ||
+                    ContainsKeyword(deviceItemViewModel.AndroidVersion, keyword) ||
+                    ContainsKeyword(deviceItemViewModel.SystemVersion, keyword) ||
+                    ContainsKeyword(deviceItemViewModel.DeviceState, keyword) ||
+                    ContainsKeyword(deviceItemViewModel.TaskDetailDisplayMessage, keyword);
 
                 if (!isKeywordMatched)
                 {
@@ -580,22 +718,22 @@ namespace JiXingFlashTool.ViewModels
 
             if (!string.IsNullOrWhiteSpace(ConnectionTypeFilter) &&
                 !ConnectionTypeFilter.Equals("全部连接", StringComparison.Ordinal) &&
-                !deviceObservableModel.ConnectionType.Equals(ConnectionTypeFilter, StringComparison.Ordinal))
+                !deviceItemViewModel.ConnectionType.Equals(ConnectionTypeFilter, StringComparison.Ordinal))
             {
                 return false;
             }
 
             if (!string.IsNullOrWhiteSpace(ModelFilter) &&
                 !ModelFilter.Equals("全部型号", StringComparison.Ordinal) &&
-                !deviceObservableModel.ModelName.Equals(ModelFilter, StringComparison.OrdinalIgnoreCase) &&
-                !deviceObservableModel.Model.Equals(ModelFilter, StringComparison.OrdinalIgnoreCase))
+                !deviceItemViewModel.ModelName.Equals(ModelFilter, StringComparison.OrdinalIgnoreCase) &&
+                !deviceItemViewModel.Model.Equals(ModelFilter, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
 
             if (!string.IsNullOrWhiteSpace(DeviceStateFilter) &&
                 !DeviceStateFilter.Equals("全部状态", StringComparison.Ordinal) &&
-                !deviceObservableModel.DeviceState.Equals(DeviceStateFilter, StringComparison.Ordinal))
+                !deviceItemViewModel.DeviceState.Equals(DeviceStateFilter, StringComparison.Ordinal))
             {
                 return false;
             }
@@ -660,7 +798,7 @@ namespace JiXingFlashTool.ViewModels
         /// <summary>
         /// 获取当前选中的设备列表。
         /// </summary>
-        private List<DeviceObservableModel> GetSelectedDevices()
+        private List<DeviceItemViewModel> GetSelectedDevices()
         {
             return _deviceList.FindAll(item => item != null && item.IsSelect);
         }
@@ -877,23 +1015,23 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         protected virtual void AddDevice(DeviceModel device, int index)
         {
-            var deviceObservableModel = new DeviceObservableModel(device);
+            var deviceItemViewModel = new DeviceItemViewModel(device);
 
             RunOnUiThread(() =>
             {
                 try
                 {
                     var safeIndex = Math.Max(0, Math.Min(index, _deviceList.Count));
-                    _deviceList.Insert(safeIndex, deviceObservableModel);
-                    DeviceCollection.Insert(safeIndex, deviceObservableModel);
+                    _deviceList.Insert(safeIndex, deviceItemViewModel);
+                    DeviceCollection.Insert(safeIndex, deviceItemViewModel);
                 }
                 catch
                 {
-                    _deviceList.Add(deviceObservableModel);
-                    DeviceCollection.Add(deviceObservableModel);
+                    _deviceList.Add(deviceItemViewModel);
+                    DeviceCollection.Add(deviceItemViewModel);
                 }
 
-                deviceObservableModel.IsSelect = _isSelectAll;
+                deviceItemViewModel.IsSelect = _isSelectAll;
                 RefreshDevicePresentationState();
             });
         }
@@ -903,19 +1041,20 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         protected virtual void RemoveDevice(DeviceModel device)
         {
-            var deviceObservableModel = _deviceList.Find(item => item != null && item.Device.RoSerialNo.Equals(device.RoSerialNo));
-            if (deviceObservableModel == null)
+            var deviceItemViewModel = _deviceList.Find(item => item != null && item.Device.RoSerialNo.Equals(device.RoSerialNo));
+            if (deviceItemViewModel == null)
             {
                 return;
             }
 
             RunOnUiThread(() =>
             {
-                DeviceCollection.Remove(deviceObservableModel);
-                _deviceList.Remove(deviceObservableModel);
+                DeviceCollection.Remove(deviceItemViewModel);
+                _deviceList.Remove(deviceItemViewModel);
                 RefreshDevicePresentationState();
             });
         }
     }
 }
+
 
