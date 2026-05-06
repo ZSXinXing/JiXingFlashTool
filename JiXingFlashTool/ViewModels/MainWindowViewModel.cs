@@ -9,16 +9,21 @@ using JiXingFlashTool.Services;
 using JiXingFlashTool.ViewModels.AllScreen;
 using JiXingFlashTool.Views;
 using JiXingFlashTool.Enums;
+using JiXingFlashTool.Model.Payload;
+using JiXingFlashTool.Tasks;
 using JXAdbCore.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
 using System.Windows.Forms;
+using System.Windows.Threading;
+using TaskCore.Scheduling;
+using TaskCore.Sessions;
 
 namespace JiXingFlashTool.ViewModels
 {
@@ -49,9 +54,9 @@ namespace JiXingFlashTool.ViewModels
         public ObservableCollection<DeviceItemViewModel> DeviceCollection { get; } = new ObservableCollection<DeviceItemViewModel>();
 
         /// <summary>
-        /// 设备列表视图，用于承载筛选逻辑。
+        /// 设备列表可见集合，用于承载当前筛选后的展示行。
         /// </summary>
-        public ICollectionView DeviceView { get; }
+        public ObservableCollection<DeviceItemViewModel> DeviceView { get; } = new ObservableCollection<DeviceItemViewModel>();
 
         /// <summary>
         /// 当前已连接设备名称筛选集合，保留现有结构兼容。
@@ -131,7 +136,7 @@ namespace JiXingFlashTool.ViewModels
             {
                 if (SetProperty(ref _searchKeyword, value))
                 {
-                    DeviceView.Refresh();
+                    ScheduleRefreshDeviceView();
                 }
             }
         }
@@ -146,7 +151,7 @@ namespace JiXingFlashTool.ViewModels
             {
                 if (SetProperty(ref _modelFilter, value))
                 {
-                    DeviceView.Refresh();
+                    RefreshDeviceView();
                 }
             }
         }
@@ -161,7 +166,7 @@ namespace JiXingFlashTool.ViewModels
             {
                 if (SetProperty(ref _connectionTypeFilter, value))
                 {
-                    DeviceView.Refresh();
+                    RefreshDeviceView();
                 }
             }
         }
@@ -176,7 +181,7 @@ namespace JiXingFlashTool.ViewModels
             {
                 if (SetProperty(ref _deviceStateFilter, value))
                 {
-                    DeviceView.Refresh();
+                    RefreshDeviceView();
                 }
             }
         }
@@ -291,6 +296,8 @@ namespace JiXingFlashTool.ViewModels
         public bool ShowDeviceTable => !IsLoading && !HasLoadError && HasDevices;
 
         private readonly List<DeviceItemViewModel> _deviceList = new List<DeviceItemViewModel>();
+        private readonly DispatcherTimer _searchRefreshTimer;
+        private readonly IDeviceTaskScheduler _taskScheduler;
 
         /// <summary>
         /// 全选命令。
@@ -355,13 +362,20 @@ namespace JiXingFlashTool.ViewModels
             InitializeStaticFilters();
             InitializeTitle();
 
-            DeviceView = CollectionViewSource.GetDefaultView(DeviceCollection);
-            DeviceView.Filter = FilterDevice;
             DeviceCollection.CollectionChanged += OnDeviceCollectionChanged;
+            _searchRefreshTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(160)
+            };
+            _searchRefreshTimer.Tick += OnSearchRefreshTimerTick;
 
             DeviceService.Instance.DeviceDisconnected += PDeviceDisconnected;
             DeviceService.Instance.DeviceConnected += PDeviceConnected;
             DeviceService.Instance.DeviceChange += PDeviceChanage;
+
+            var sessionFactory = new TaskCoreBridge.AdbDeviceSessionFactory(GetDeviceBySerial);
+            var sessionProvider = new EphemeralDeviceSessionProvider(sessionFactory);
+            _taskScheduler = new DeviceTaskScheduler(sessionProvider);
 
             RefreshDeviceSummary();
             RefreshConnectDeviceNameList();
@@ -489,31 +503,13 @@ namespace JiXingFlashTool.ViewModels
             switch (commandKey)
             {
                 case "RebootSystem":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            deviceItemViewModel.Service.RebootToSystem();
-                        }
-                    });
+                    EnqueueSingleCommand(selectList, CommandType.RebootSystem);
                     break;
                 case "RebootTwrp":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            deviceItemViewModel.Service.RebootToTWRP();
-                        }
-                    });
+                    EnqueueSingleCommand(selectList, CommandType.RebootRecovery);
                     break;
                 case "RebootDownload":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            AdbService.Instance.ExecuteShellCommand(deviceItemViewModel.Device, "reboot download", null);
-                        }
-                    });
+                    EnqueueSingleCommand(selectList, CommandType.RebootDownload);
                     break;
                 case "Wipe":
                     Task.Run(() =>
@@ -587,7 +583,55 @@ namespace JiXingFlashTool.ViewModels
                         }
                     });
                     break;
+                case "0":
+                    EnqueueSingleCommand(selectList, CommandType.RebootSystem);
+                    break;
+                case "5":
+                    EnqueueSingleCommand(selectList, CommandType.RebootRecovery);
+                    break;
+                case "6":
+                    EnqueueSingleCommand(selectList, CommandType.RebootDownload);
+                    break;
             }
+        }
+
+        /// <summary>
+        /// 将选中的设备批量封装为 TaskCore 单条任务入队。
+        /// </summary>
+        /// <param name="selectList">选中的设备列表。</param>
+        /// <param name="commandType">需要执行的指令类型。</param>
+        private void EnqueueSingleCommand(List<DeviceItemViewModel> selectList, CommandType commandType)
+        {
+            Task.Run(async () =>
+            {
+                foreach (var deviceItemViewModel in selectList)
+                {
+                    if (deviceItemViewModel?.Device == null)
+                    {
+                        continue;
+                    }
+
+                    var payload = new SingleCommandPayload(deviceItemViewModel.Device, commandType);
+                    await _taskScheduler.EnqueueAsync(
+                        deviceItemViewModel.Device.Serial,
+                        new SingleCommandTask(),
+                        payload,
+                        detail: commandType.ToString());
+                }
+            });
+        }
+
+        /// <summary>
+        /// 根据序列号获取当前内存中的设备模型。
+        /// </summary>
+        /// <param name="serial">设备序列号。</param>
+        /// <returns>匹配到的设备模型。</returns>
+        private DeviceModel GetDeviceBySerial(string serial)
+        {
+            return _deviceList
+                .Where(item => item?.Device != null)
+                .Select(item => item.Device)
+                .FirstOrDefault(item => string.Equals(item.Serial, serial, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -596,7 +640,34 @@ namespace JiXingFlashTool.ViewModels
         /// <param name="commandKey">指令标识。</param>
         private void ExecuteMaintenanceInstructionCommand(string commandKey)
         {
-            _ = commandKey;
+            var selectList = GetSelectedDevices().Where(item => item?.Device != null).ToList();
+            if (selectList.Count == 0)
+            {
+                Growl.Warning("请先选择手机");
+                return;
+            }
+
+            switch (commandKey)
+            {
+                case "RebootDevice":
+                    EnqueueSingleCommand(selectList, CommandType.RebootSystem);
+                    break;
+                case "FlashOn":
+                    EnqueueSingleCommand(selectList, CommandType.OpenFlashlight);
+                    break;
+                case "FlashOff":
+                    EnqueueSingleCommand(selectList, CommandType.CloseFlashlight);
+                    break;
+                case "ShellCommand":
+                    ShowAdbCommandView();
+                    break;
+                case "RootDevice":
+                    Growl.Warning("当前版本暂未接入刷入 ROOT 的任务执行逻辑。");
+                    break;
+                case "CheckSystemUpdate":
+                    UpdateSystem();
+                    break;
+            }
         }
 
         /// <summary>
@@ -688,11 +759,75 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
-        /// 根据关键字和筛选项过滤设备列表。
+        /// 打开群控投屏窗口。
         /// </summary>
-        private bool FilterDevice(object obj)
+        private void AllScreen()
         {
-            if (!(obj is DeviceItemViewModel deviceItemViewModel))
+            DeviceScreenWindowModel.Show();
+        }
+
+        /// <summary>
+        /// 打开文件同步窗口。
+        /// </summary>
+        private void SyncFile()
+        {
+            var selectedDevices = GetSelectedDevices();
+            var devices = selectedDevices
+                .Where(item => item.Device != null)
+                .Select(item => item.Device)
+                .ToList();
+
+            if (devices.Count == 0)
+            {
+                Growl.Error("请先选择手机");
+                return;
+            }
+
+            var viewModel = new SyncFileViewModel
+            {
+                NeedInstallDeviceList = devices
+            };
+            var dialog = new SyncFileView
+            {
+                DataContext = viewModel
+            };
+            viewModel.Dialog = Dialog.Show(dialog);
+        }
+
+        /// <summary>
+        /// 刷新设备视图和汇总信息。
+        /// </summary>
+        private void RefreshDeviceView()
+        {
+            SyncDeviceView();
+            RefreshDeviceSummary();
+            RefreshConnectDeviceNameList();
+        }
+
+        /// <summary>
+        /// 延迟刷新搜索结果，避免每次输入都立刻重建列表。
+        /// </summary>
+        private void ScheduleRefreshDeviceView()
+        {
+            _searchRefreshTimer.Stop();
+            _searchRefreshTimer.Start();
+        }
+
+        /// <summary>
+        /// 搜索防抖定时器触发时刷新可见集合。
+        /// </summary>
+        private void OnSearchRefreshTimerTick(object sender, EventArgs e)
+        {
+            _searchRefreshTimer.Stop();
+            RefreshDeviceView();
+        }
+
+        /// <summary>
+        /// 判断设备是否满足当前筛选条件。
+        /// </summary>
+        private bool IsDeviceVisible(DeviceItemViewModel deviceItemViewModel)
+        {
+            if (deviceItemViewModel == null)
             {
                 return false;
             }
@@ -742,49 +877,82 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
-        /// 打开群控投屏窗口。
+        /// 同步当前可见设备集合，避免依赖 ICollectionView.Refresh。
         /// </summary>
-        private void AllScreen()
+        private void SyncDeviceView()
         {
-            DeviceScreenWindowModel.Show();
+            RunOnUiThread(() =>
+            {
+                var filteredDevices = _deviceList.Where(IsDeviceVisible).ToList();
+                DeviceView.Clear();
+
+                for (var index = 0; index < filteredDevices.Count; index++)
+                {
+                    filteredDevices[index].DisplayIndex = index + 1;
+                    DeviceView.Add(filteredDevices[index]);
+                }
+
+                RaisePageStateChanged();
+            });
         }
 
         /// <summary>
-        /// 打开文件同步窗口。
+        /// 将单个设备插入可见集合中，保持与源集合一致的顺序。
         /// </summary>
-        private void SyncFile()
+        /// <param name="deviceItemViewModel">待插入的设备项。</param>
+        /// <param name="sourceIndex">源集合中的位置。</param>
+        private void InsertDeviceViewItem(DeviceItemViewModel deviceItemViewModel, int sourceIndex)
         {
-            var selectedDevices = GetSelectedDevices();
-            var devices = selectedDevices
-                .Where(item => item.Device != null)
-                .Select(item => item.Device)
-                .ToList();
-
-            if (devices.Count == 0)
+            if (!IsDeviceVisible(deviceItemViewModel))
             {
-                Growl.Error("请先选择手机");
                 return;
             }
 
-            var viewModel = new SyncFileViewModel
+            var insertIndex = 0;
+            for (var index = 0; index < sourceIndex && index < _deviceList.Count; index++)
             {
-                NeedInstallDeviceList = devices
-            };
-            var dialog = new SyncFileView
+                if (IsDeviceVisible(_deviceList[index]))
+                {
+                    insertIndex++;
+                }
+            }
+
+            if (insertIndex < 0 || insertIndex > DeviceView.Count)
             {
-                DataContext = viewModel
-            };
-            viewModel.Dialog = Dialog.Show(dialog);
+                insertIndex = DeviceView.Count;
+            }
+
+            DeviceView.Insert(insertIndex, deviceItemViewModel);
+            RefreshVisibleDisplayIndex();
         }
 
         /// <summary>
-        /// 刷新设备视图和汇总信息。
+        /// 从可见集合移除单个设备项。
         /// </summary>
-        private void RefreshDeviceView()
+        /// <param name="deviceItemViewModel">待移除的设备项。</param>
+        private void RemoveDeviceViewItem(DeviceItemViewModel deviceItemViewModel)
         {
-            DeviceView.Refresh();
-            RefreshDeviceSummary();
-            RefreshConnectDeviceNameList();
+            if (deviceItemViewModel == null)
+            {
+                return;
+            }
+
+            if (DeviceView.Contains(deviceItemViewModel))
+            {
+                DeviceView.Remove(deviceItemViewModel);
+                RefreshVisibleDisplayIndex();
+            }
+        }
+
+        /// <summary>
+        /// 刷新当前可见设备的序号，避免表格序号错乱。
+        /// </summary>
+        private void RefreshVisibleDisplayIndex()
+        {
+            for (var index = 0; index < DeviceView.Count; index++)
+            {
+                DeviceView[index].DisplayIndex = index + 1;
+            }
         }
 
         /// <summary>
@@ -817,7 +985,7 @@ namespace JiXingFlashTool.ViewModels
             RefreshDeviceSummary();
             RefreshConnectDeviceNameList();
             RefreshModelFilterList();
-            DeviceView.Refresh();
+            RefreshVisibleDisplayIndex();
             RaisePageStateChanged();
         }
 
@@ -1024,11 +1192,13 @@ namespace JiXingFlashTool.ViewModels
                     var safeIndex = Math.Max(0, Math.Min(index, _deviceList.Count));
                     _deviceList.Insert(safeIndex, deviceItemViewModel);
                     DeviceCollection.Insert(safeIndex, deviceItemViewModel);
+                    InsertDeviceViewItem(deviceItemViewModel, safeIndex);
                 }
                 catch
                 {
                     _deviceList.Add(deviceItemViewModel);
                     DeviceCollection.Add(deviceItemViewModel);
+                    InsertDeviceViewItem(deviceItemViewModel, _deviceList.Count - 1);
                 }
 
                 deviceItemViewModel.IsSelect = _isSelectAll;
@@ -1051,6 +1221,7 @@ namespace JiXingFlashTool.ViewModels
             {
                 DeviceCollection.Remove(deviceItemViewModel);
                 _deviceList.Remove(deviceItemViewModel);
+                RemoveDeviceViewItem(deviceItemViewModel);
                 RefreshDevicePresentationState();
             });
         }

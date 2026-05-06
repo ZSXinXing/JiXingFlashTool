@@ -76,6 +76,16 @@ namespace JiXingFlashTool.Views
         }
 
         /// <summary>
+        /// 专业指令下拉菜单项点击后，主动收起对应弹框。
+        /// </summary>
+        private void ProfessionalDropDownMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            ProfessionalRebootDropDownButton.IsChecked = false;
+            ProfessionalClearDropDownButton.IsChecked = false;
+            ProfessionalUpdateDropDownButton.IsChecked = false;
+        }
+
+        /// <summary>
         /// 窗口源初始化后清空标题栏图标并固定标题栏颜色。
         /// </summary>
         private void Window_SourceInitialized(object sender, EventArgs e)

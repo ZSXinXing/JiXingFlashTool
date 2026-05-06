@@ -1113,8 +1113,9 @@
                                     <StackPanel Width="124">
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
                                                 Margin="0,0,0,4"
+                                                Click="ProfessionalDropDownMenuItem_Click"
                                                 Command="{Binding ProfessionalInstructionCommand}"
-                                                CommandParameter="RebootSystem">
+                                                CommandParameter="0">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="16" />
@@ -1131,8 +1132,9 @@
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
                                                 Margin="0,0,0,4"
+                                                Click="ProfessionalDropDownMenuItem_Click"
                                                 Command="{Binding ProfessionalInstructionCommand}"
-                                                CommandParameter="RebootTwrp">
+                                                CommandParameter="5">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="16" />
@@ -1148,8 +1150,9 @@
                                             </Grid>
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Click="ProfessionalDropDownMenuItem_Click"
                                                 Command="{Binding ProfessionalInstructionCommand}"
-                                                CommandParameter="RebootDownload">
+                                                CommandParameter="6">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="16" />
@@ -1190,6 +1193,7 @@
                                     <StackPanel Width="124">
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
                                                 Margin="0,0,0,4"
+                                                Click="ProfessionalDropDownMenuItem_Click"
                                                 Command="{Binding ProfessionalInstructionCommand}"
                                                 CommandParameter="Wipe">
                                             <Grid>
@@ -1208,6 +1212,7 @@
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
                                                 Margin="0,0,0,4"
+                                                Click="ProfessionalDropDownMenuItem_Click"
                                                 Command="{Binding ProfessionalInstructionCommand}"
                                                 CommandParameter="ClearSystem">
                                             <Grid>
@@ -1225,6 +1230,7 @@
                                             </Grid>
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Click="ProfessionalDropDownMenuItem_Click"
                                                 Command="{Binding ProfessionalInstructionCommand}"
                                                 CommandParameter="FormatData">
                                             <Grid>
@@ -1266,6 +1272,7 @@
                                         Style="{StaticResource TwrpDropDownPopupBorderStyle}">
                                     <StackPanel Width="124">
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Click="ProfessionalDropDownMenuItem_Click"
                                                 Command="{Binding ProfessionalInstructionCommand}"
                                                 CommandParameter="FlashKernel">
                                             <Grid>
@@ -1283,6 +1290,7 @@
                                             </Grid>
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
+                                                Click="ProfessionalDropDownMenuItem_Click"
                                                 Command="{Binding ProfessionalInstructionCommand}"
                                                 CommandParameter="UpdateTwrp">
                                             <Grid>
