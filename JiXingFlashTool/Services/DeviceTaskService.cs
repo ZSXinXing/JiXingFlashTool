@@ -1,8 +1,9 @@
 ﻿using JiXingFlashTool.Enums;
 using JiXingFlashTool.Extensions;
+using JiXingFlashTool.Interface;
 using JiXingFlashTool.Model;
 using JiXingFlashTool.Models;
-using JiXingFlashTool.ObservableModel;
+using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Utils;
 using JXAdbCore.Receivers;
 using SharpDX.Direct3D9;
@@ -18,12 +19,12 @@ namespace JiXingFlashTool.Services
 {
     public class DeviceTaskService
     {
-        private DeviceObservableModel ob;
-        public DeviceObservableModel OB { get { return ob; } }
+        private DeviceItemViewModel ob;
+        public DeviceItemViewModel OB { get { return ob; } }
 
         public DeviceModel Device { get { return OB.Device; } }
 
-        public DeviceTaskService(DeviceObservableModel ob) {
+        public DeviceTaskService(DeviceItemViewModel ob) {
             this.ob = ob;
         }
         public void StartAdbCommand(AdbCommandModel adbModel) {
@@ -54,10 +55,13 @@ namespace JiXingFlashTool.Services
                     case TWRPCommandType.FlashFile: FlashFile(commandModel.FilePath); break;
                     case TWRPCommandType.RebootTWRP: RebootToTWRP(); break;
                     case TWRPCommandType.Format: FormatPhone(); break;
-                    case TWRPCommandType.Decryption: Decryption(); break;
+                    case TWRPCommandType.Decryption: Decrypt(); break;
                     case TWRPCommandType.CheckDecryption: CheckDecryption(); break;
                     case TWRPCommandType.CheckCommandResult: CheckCommandResult(); break;
-                    case TWRPCommandType.UpdateTWRP:UpdateTWRP(commandModel.FilePath); break;
+                    case TWRPCommandType.UpdateTWRP: UpdateTwrp(commandModel.FilePath); break;
+                    case TWRPCommandType.RebootDownload: RebootToDownload(); break;
+                    case TWRPCommandType.DisableDeveloper: DisableDeveloper(); break;
+                    case TWRPCommandType.SkipGuide: SkipGuide(); break;
                 }
 
             }).Start();
@@ -190,6 +194,26 @@ namespace JiXingFlashTool.Services
 
             }).Start();
         }
+
+        /// <summary>
+        /// 重启到 Download 模式。
+        /// </summary>
+        public void RebootToDownload()
+        {
+            new Thread(() =>
+            {
+                try
+                {
+                    OB.TaskDetailMessage = "重启到 Download";
+                    AdbService.Instance.ExecuteShellCommand(ob.Device, "reboot download", null);
+                    OB.TaskDetailMessage = "执行完毕";
+                }
+                catch (Exception ex)
+                {
+                    ob.TaskDetailMessage = ex.Message;
+                }
+            }).Start();
+        }
         public void FlashFile(string filePath) {
             if (Device.State != JXAdbCore.Enums.DeviceState.Sideload)
             {
@@ -277,7 +301,10 @@ namespace JiXingFlashTool.Services
             }).Start();
         }
 
-        private void Decryption()
+        /// <summary>
+        /// 执行分区解密相关操作。
+        /// </summary>
+        public void Decrypt()
         {
             try
             {
@@ -359,9 +386,53 @@ namespace JiXingFlashTool.Services
         }
 
         /// <summary>
+        /// 关闭开发者选项。
+        /// </summary>
+        private void DisableDeveloper()
+        {
+            new Thread(() =>
+            {
+                try
+                {
+                    OB.TaskDetailMessage = "关闭开发者";
+                    AdbService.Instance.CMDExcute($"-s {Device.Serial} shell settings put global development_settings_enabled 0");
+                    OB.TaskDetailMessage = "执行完毕";
+                }
+                catch (Exception ex)
+                {
+                    OB.TaskDetailMessage = ex.Message;
+                }
+            }).Start();
+        }
+
+        /// <summary>
+        /// 跳过设置向导。
+        /// </summary>
+        private void SkipGuide()
+        {
+            new Thread(() =>
+            {
+                try
+                {
+                    OB.TaskDetailMessage = "跳过向导";
+                    AdbService.Instance.CMDExcute($"-s {Device.Serial} shell settings put secure user_setup_complete 1 && settings put global device_provisioned 1");
+                    OB.TaskDetailMessage = "执行完毕";
+                }
+                catch (Exception ex)
+                {
+                    OB.TaskDetailMessage = ex.Message;
+                }
+            }).Start();
+        }
+
+        /// <summary>
         /// 更新TWRP
         /// </summary>
-        private void UpdateTWRP(string filePath) {
+        /// <summary>
+        /// 刷新 TWRP 镜像。
+        /// </summary>
+        /// <param name="filePath">TWRP 镜像文件路径。</param>
+        public void UpdateTwrp(string filePath) {
             string recoveryPath = string.Empty;
             if (Device.Name == DeviceModelEnum.starqlte.ToString() || Device.Name == DeviceModelEnum.starqltechn.ToString())
             {
@@ -615,3 +686,4 @@ namespace JiXingFlashTool.Services
 
     }
 }
+

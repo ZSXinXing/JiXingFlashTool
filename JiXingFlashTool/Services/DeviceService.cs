@@ -229,6 +229,7 @@ namespace JiXingFlashTool.Services
                         {
                             device.RetailModel = device.Model.RetailModel();
                         }
+                        device.Brand = AdbService.Instance.GetProp(device, "ro.product.brand").ReplaceText("\r\n", "");
                         device.RoSerialNo = AdbService.Instance.GetRoSerialno(device).ReplaceText("\r\n", "");
                         device.ScreenSize = AdbService.Instance.GetScreenSize(device);
                         device.BuildDate = AdbService.Instance.GetBuildDate(device);

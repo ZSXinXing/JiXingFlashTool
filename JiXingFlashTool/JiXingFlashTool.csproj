@@ -3,7 +3,7 @@
   <Import Condition=" '$(EAZFUSCATOR_NET_HOME)' != '' and Exists('$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets') " Project="$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{528C87A2-2EE0-44CD-8E43-A41225E0E5D0}</ProjectGuid>
@@ -98,6 +98,7 @@
     <Compile Include="Delegate\CommonFinishDelegate.cs" />
     <Compile Include="Enums\AndroidInput.cs" />
     <Compile Include="Enums\AndroidKeyCodes.cs" />
+    <Compile Include="Enums\CommandType.cs" />
     <Compile Include="Enums\DeviceModelEnum.cs" />
     <Compile Include="Enums\ShowCommandType.cs" />
     <Compile Include="Enums\SyncType.cs" />
@@ -120,8 +121,11 @@
     <Compile Include="Model\DeviceModel.cs" />
     <Compile Include="Model\EthernetSNModel.cs" />
     <Compile Include="Model\FileModel.cs" />
+    <Compile Include="Model\Payload\SingleCommandPayload.cs" />
     <Compile Include="Model\SocketPackageModel.cs" />
     <Compile Include="Model\YuvModel.cs" />
+    <Compile Include="Capability\AdbCapability.cs" />
+    <Compile Include="Interface\IAdbCapability.cs" />
     <Compile Include="ItemViewModel\DeviceItemViewModel.cs" />
     <Compile Include="ItemViewModel\CastScreenItemViewModel.cs" />
     <Compile Include="ItemViewModel\DeviceInstallItemViewModel.cs" />
@@ -133,6 +137,9 @@
     <Compile Include="Services\DeviceTaskService.cs" />
     <Compile Include="Services\SQLService.cs" />
     <Compile Include="Services\TCSocketService.cs" />
+    <Compile Include="Tasks\SingleCommandTask.cs" />
+    <Compile Include="TaskCoreBridge\AdbDeviceSession.cs" />
+    <Compile Include="TaskCoreBridge\AdbDeviceSessionFactory.cs" />
     <Compile Include="Utils\CommonTool.cs" />
     <Compile Include="Utils\D3DImageSource.cs" />
     <Compile Include="Utils\FileUtil.cs" />
@@ -140,6 +147,7 @@
     <Compile Include="Utils\IconResources.cs" />
     <Compile Include="Utils\StaticConstant.cs" />
     <Compile Include="Utils\VideoStreamDecoder.cs" />
+    <Compile Include="Compatibility\IsExternalInit.cs" />
     <Compile Include="Control\IconButton.xaml.cs">
       <DependentUpon>IconButton.xaml</DependentUpon>
     </Compile>
@@ -270,7 +278,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="Resource\scrcpy-server">
+    <None Include="Resources\scrcpy-server">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -287,142 +295,142 @@
     <Content Include="Library\ADB\AdbWinUsbApi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resource\ffmpeg\avcodec-58.dll">
+    <Content Include="Resources\ffmpeg\avcodec-58.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resource\ffmpeg\avdevice-58.dll">
+    <Content Include="Resources\ffmpeg\avdevice-58.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resource\ffmpeg\avfilter-7.dll">
+    <Content Include="Resources\ffmpeg\avfilter-7.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resource\ffmpeg\avformat-58.dll">
+    <Content Include="Resources\ffmpeg\avformat-58.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resource\ffmpeg\avutil-56.dll">
+    <Content Include="Resources\ffmpeg\avutil-56.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resource\ffmpeg\postproc-55.dll">
+    <Content Include="Resources\ffmpeg\postproc-55.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resource\ffmpeg\swresample-3.dll">
+    <Content Include="Resources\ffmpeg\swresample-3.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resource\ffmpeg\swscale-5.dll">
+    <Content Include="Resources\ffmpeg\swscale-5.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Resource\Image\device_botom_more.png">
+    <Resource Include="Resources\Image\device_botom_more.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\device_bottom_back.png">
+    <Resource Include="Resources\Image\device_bottom_back.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\device_bottom_home.png">
+    <Resource Include="Resources\Image\device_bottom_home.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\FigmaSidebar\bottom_collapse.png">
+    <Resource Include="Resources\Image\FigmaSidebar\bottom_collapse.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\FigmaSidebar\bottom_lang.png">
+    <Resource Include="Resources\Image\FigmaSidebar\bottom_lang.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\FigmaSidebar\bottom_mode.png">
+    <Resource Include="Resources\Image\FigmaSidebar\bottom_mode.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\FigmaSidebar\collapsed_logo.png">
+    <Resource Include="Resources\Image\FigmaSidebar\collapsed_logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\FigmaSidebar\expanded_logo.png">
+    <Resource Include="Resources\Image\FigmaSidebar\expanded_logo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\FigmaSidebar\nav_device.png">
+    <Resource Include="Resources\Image\FigmaSidebar\nav_device.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\FigmaSidebar\nav_file.png">
+    <Resource Include="Resources\Image\FigmaSidebar\nav_file.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\FigmaSidebar\nav_screen.png">
+    <Resource Include="Resources\Image\FigmaSidebar\nav_screen.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\FigmaSidebar\sidebar_collapsed_preview.png">
+    <Resource Include="Resources\Image\FigmaSidebar\sidebar_collapsed_preview.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\restart.png">
+    <Resource Include="Resources\Image\Maintenance\restart.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\shutdown.png">
+    <Resource Include="Resources\Image\Maintenance\shutdown.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\flash_on.png">
+    <Resource Include="Resources\Image\Maintenance\flash_on.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\flash_off.png">
+    <Resource Include="Resources\Image\Maintenance\flash_off.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\shell.png">
+    <Resource Include="Resources\Image\Maintenance\shell.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\root.png">
+    <Resource Include="Resources\Image\Maintenance\root.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\update.png">
+    <Resource Include="Resources\Image\Maintenance\update.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\maintenance_buttons_18_377.png">
+    <Resource Include="Resources\Image\Maintenance\maintenance_buttons_18_377.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\tool_panel_21_1016.png">
+    <Resource Include="Resources\Image\Maintenance\tool_panel_21_1016.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\Maintenance\tool_panel_21_1016_exact.png">
+    <Resource Include="Resources\Image\Maintenance\tool_panel_21_1016_exact.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_reboot.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_reboot.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_wipe.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_wipe.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_clear_system.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_clear_system.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_format_data.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_format_data.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_sideload.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_sideload.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_flash_file.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_flash_file.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_update_kernel.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_update_kernel.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_update_twrp.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_update_twrp.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_decrypt.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_decrypt.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_disable_developer.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_disable_developer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_skip_guide.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_skip_guide.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\TwrpPro\professional_dropdown_arrow.png">
+    <Resource Include="Resources\Image\TwrpPro\professional_dropdown_arrow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\ic_close.png">
+    <Resource Include="Resources\Image\ic_close.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\inControl.png">
+    <Resource Include="Resources\Image\inControl.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\main_left_bg.png">
+    <Resource Include="Resources\Image\main_left_bg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resource\Image\window_mini.png">
+    <Resource Include="Resources\Image\window_mini.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
@@ -431,10 +439,17 @@
       <Project>{0e0fc54f-22e6-477b-9c6c-0f188a6fef80}</Project>
       <Name>JXAdbCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TaskCore\TaskCore.csproj">
+      <Project>{b4882eef-8a5d-4fe6-8935-fae77afbd8e0}</Project>
+      <Name>TaskCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm">
       <Version>8.2.2</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces">
+      <Version>10.0.0</Version>
     </PackageReference>
     <PackageReference Include="FFmpeg.AutoGen">
       <Version>4.4.0</Version>
@@ -451,9 +466,18 @@
     <PackageReference Include="SharpDX.Direct3D9">
       <Version>4.2.0</Version>
     </PackageReference>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
+      <Version>6.1.2</Version>
+    </PackageReference>
     <PackageReference Include="sqlite-net-pcl">
       <Version>1.8.116</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.6.3\lib\net462\System.Threading.Tasks.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7">
@@ -467,9 +491,9 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>REM Eazfuscator.NET is integrated with this project at MSBuild level: https://help.gapotchenko.com/eazfuscator.net/kb/100036</PostBuildEvent>
   </PropertyGroup>
 </Project>
-

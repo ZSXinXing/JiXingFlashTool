@@ -59,5 +59,17 @@ namespace JiXingFlashTool.Enums
         /// 检查指令是否执行成功
         /// </summary>
         CheckCommandResult,
+        /// <summary>
+        /// 重启到 Download
+        /// </summary>
+        RebootDownload,
+        /// <summary>
+        /// 关闭开发者选项
+        /// </summary>
+        DisableDeveloper,
+        /// <summary>
+        /// 跳过设置向导
+        /// </summary>
+        SkipGuide,
     }
 }

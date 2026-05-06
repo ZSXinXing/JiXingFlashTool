@@ -21,7 +21,7 @@
     
     <DockPanel>
         <DockPanel.Background>
-            <ImageBrush ImageSource="/./Resource/Image/main_left_bg.png"/>
+            <ImageBrush ImageSource="/./Resources/Image/main_left_bg.png"/>
         </DockPanel.Background>
         <!--<StackPanel DockPanel.Dock="Top" Orientation="Vertical"  Height="80" Margin="0 0 0 5">
             --><!--<DockPanel>
@@ -74,3 +74,4 @@
         </ListBox>
     </DockPanel>
 </UserControl>
+

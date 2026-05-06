@@ -27,7 +27,7 @@
                 <Button.Template>
                     <ControlTemplate>
                         <Grid >
-                            <Image  Source="/./Resource/Image/device_bottom_back.png" />
+                            <Image  Source="/./Resources/Image/device_bottom_back.png" />
                         </Grid>
                     </ControlTemplate>
                 </Button.Template>
@@ -36,7 +36,7 @@
                 <Button.Template>
                     <ControlTemplate>
                         <Grid >
-                            <Image  Source="/./Resource/Image/device_bottom_home.png" />
+                            <Image  Source="/./Resources/Image/device_bottom_home.png" />
                         </Grid>
                     </ControlTemplate>
                 </Button.Template>
@@ -45,7 +45,7 @@
                 <Button.Template>
                     <ControlTemplate>
                         <Grid >
-                            <Image  Source="/./Resource/Image/device_botom_more.png" />
+                            <Image  Source="/./Resources/Image/device_botom_more.png" />
                         </Grid>
                     </ControlTemplate>
                 </Button.Template>
@@ -63,7 +63,7 @@
                     <Button.Template>
                         <ControlTemplate>
                             <Grid >
-                                <Image  Source="/./Resource/Image/window_mini.png" />
+                                <Image  Source="/./Resources/Image/window_mini.png" />
                             </Grid>
                         </ControlTemplate>
                     </Button.Template>
@@ -72,7 +72,7 @@
                     <Button.Template>
                         <ControlTemplate>
                             <Grid >
-                                <Image  Source="/./Resource/Image/ic_close.png" />
+                                <Image  Source="/./Resources/Image/ic_close.png" />
                             </Grid>
                         </ControlTemplate>
                     </Button.Template>
@@ -92,3 +92,4 @@
                 />
     </DockPanel>
 </Window>
+

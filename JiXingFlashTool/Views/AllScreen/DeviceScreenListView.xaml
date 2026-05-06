@@ -33,7 +33,7 @@
                         <Button.Template>
                             <ControlTemplate>
                                 <Grid >
-                                    <Image  Source="/./Resource/Image/device_bottom_back.png" />
+                                    <Image  Source="/./Resources/Image/device_bottom_back.png" />
                                 </Grid>
                             </ControlTemplate>
                         </Button.Template>
@@ -42,7 +42,7 @@
                         <Button.Template>
                             <ControlTemplate>
                                 <Grid >
-                                    <Image  Source="/./Resource/Image/device_bottom_home.png" />
+                                    <Image  Source="/./Resources/Image/device_bottom_home.png" />
                                 </Grid>
                             </ControlTemplate>
                         </Button.Template>
@@ -51,7 +51,7 @@
                         <Button.Template>
                             <ControlTemplate>
                                 <Grid >
-                                    <Image  Source="/./Resource/Image/device_botom_more.png" />
+                                    <Image  Source="/./Resources/Image/device_botom_more.png" />
                                 </Grid>
                             </ControlTemplate>
                         </Button.Template>
@@ -67,7 +67,7 @@
                             <Button.Template>
                                 <ControlTemplate>
                                     <Grid >
-                                        <Image  Source="/./Resource/Image/ic_close.png" />
+                                        <Image  Source="/./Resources/Image/ic_close.png" />
                                     </Grid>
                                 </ControlTemplate>
                             </Button.Template>
@@ -120,7 +120,7 @@
                                         </DockPanel>
                                         <DockPanel Background="#2D77FC" Visibility="{Binding IsControl,Converter={StaticResource VisibilityBoolConverter}}">
                                             <Viewbox Stretch="Uniform">
-                                                <Image Width="{Binding  DataContext.InControlWidth,ElementName=DeviceListBox}" Source="/./Resource/Image/inControl.png" />
+                                                <Image Width="{Binding  DataContext.InControlWidth,ElementName=DeviceListBox}" Source="/./Resources/Image/inControl.png" />
                                             </Viewbox>
                                         </DockPanel>
                                         
@@ -134,3 +134,4 @@
         </ListBox>
     </DockPanel>
 </UserControl>
+

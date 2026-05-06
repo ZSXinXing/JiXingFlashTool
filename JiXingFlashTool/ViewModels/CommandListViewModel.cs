@@ -29,10 +29,16 @@ namespace JiXingFlashTool.ViewModels
         public List<DeviceItemViewModel> SelectDeviceList { get; set; } = new List<DeviceItemViewModel>();
 
         private readonly ObservableCollection<CommandModel> _commandCollection = new ObservableCollection<CommandModel>();
+        private readonly ObservableCollection<CommandModel> _rebootCommandCollection = new ObservableCollection<CommandModel>();
 
         /// <summary>
         /// 涓撲笟鎸囦护闆嗗悎銆?        /// </summary>
         public ObservableCollection<CommandModel> CommandCollection => _commandCollection;
+
+        /// <summary>
+        /// 重启下拉菜单集合。
+        /// </summary>
+        public ObservableCollection<CommandModel> RebootCommandCollection => _rebootCommandCollection;
 
         /// <summary>
         /// 鎵ц褰撳墠鎸夐挳瀵瑰簲鐨?TWRP 鎸囦护銆?        /// </summary>
@@ -58,9 +64,10 @@ namespace JiXingFlashTool.ViewModels
         private void InitCommand()
         {
             _commandCollection.Clear();
-            _commandCollection.Add(CreateCommand("重启到系统", TWRPCommandType.RebootSystem, 91, "#5C82FD", "professional_reboot.png", new Thickness(0, 4.25, 0, 0)));
-            _commandCollection.Add(CreateCommand("启动到TWRP", TWRPCommandType.RebootTWRP, 102.297, "#7B9EFF", "professional_reboot.png", new Thickness(0, 4.25, 0, 0)));
-            _commandCollection.Add(CreateCommand("重启到Download", TWRPCommandType.RebootDownload, 124.031, "#9C27B0", "professional_reboot.png", new Thickness(0, 4.25, 0, 0)));
+            _rebootCommandCollection.Clear();
+            _rebootCommandCollection.Add(CreateCommand("系统", TWRPCommandType.RebootSystem, 91, "#5C82FD", "professional_reboot.png", new Thickness(0, 4.25, 0, 0)));
+            _rebootCommandCollection.Add(CreateCommand("TWRP", TWRPCommandType.RebootTWRP, 102.297, "#7B9EFF", "professional_reboot.png", new Thickness(0, 4.25, 0, 0)));
+            _rebootCommandCollection.Add(CreateCommand("Download", TWRPCommandType.RebootDownload, 124.031, "#9C27B0", "professional_reboot.png", new Thickness(0, 4.25, 0, 0)));
             _commandCollection.Add(CreateCommand("鍙屾竻", TWRPCommandType.Wipe, 59.5, "#FF9800", "professional_wipe.png", new Thickness(0, 4.25, 0, 0)));
             _commandCollection.Add(CreateCommand("娓呴櫎绯荤粺", TWRPCommandType.ClearSystem, 80.5, "#F44336", "professional_clear_system.png", new Thickness(0, 4.25, 0, 0)));
             _commandCollection.Add(CreateCommand("格式化Data", TWRPCommandType.Format, 95.781, "#F44336", "professional_format_data.png", new Thickness(0, 4.25, 0, 0)));

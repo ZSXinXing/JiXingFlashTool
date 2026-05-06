@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Net;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ using System.Windows.Forms;
 using System.Windows.Threading;
 using TaskCore.Scheduling;
 using TaskCore.Sessions;
+using TaskCore.Tasks;
 
 namespace JiXingFlashTool.ViewModels
 {
@@ -376,6 +378,7 @@ namespace JiXingFlashTool.ViewModels
             var sessionFactory = new TaskCoreBridge.AdbDeviceSessionFactory(GetDeviceBySerial);
             var sessionProvider = new EphemeralDeviceSessionProvider(sessionFactory);
             _taskScheduler = new DeviceTaskScheduler(sessionProvider);
+            _taskScheduler.Log += OnTaskSchedulerLog;
 
             RefreshDeviceSummary();
             RefreshConnectDeviceNameList();
@@ -602,6 +605,19 @@ namespace JiXingFlashTool.ViewModels
         /// <param name="commandType">需要执行的指令类型。</param>
         private void EnqueueSingleCommand(List<DeviceItemViewModel> selectList, CommandType commandType)
         {
+            RunOnUiThread(() =>
+            {
+                foreach (var deviceItemViewModel in selectList)
+                {
+                    if (deviceItemViewModel == null)
+                    {
+                        continue;
+                    }
+
+                    deviceItemViewModel.TaskDetailMessage = string.Empty;
+                }
+            });
+
             Task.Run(async () =>
             {
                 foreach (var deviceItemViewModel in selectList)
@@ -618,6 +634,34 @@ namespace JiXingFlashTool.ViewModels
                         payload,
                         detail: commandType.ToString());
                 }
+            });
+        }
+
+        /// <summary>
+        /// 接收 TaskCore 的全局日志，并回写到对应设备行。
+        /// </summary>
+        /// <param name="deviceId">设备序列号。</param>
+        /// <param name="log">任务日志。</param>
+        private void OnTaskSchedulerLog(string deviceId, TaskLog log)
+        {
+            if (string.IsNullOrWhiteSpace(deviceId) || log == null)
+            {
+                return;
+            }
+
+            var targetMessage = log.Message ?? string.Empty;
+            var deviceItemViewModel = _deviceList.FirstOrDefault(item =>
+                item?.Device != null &&
+                string.Equals(item.Device.Serial, deviceId, StringComparison.OrdinalIgnoreCase));
+
+            if (deviceItemViewModel == null)
+            {
+                return;
+            }
+
+            RunOnUiThread(() =>
+            {
+                deviceItemViewModel.TaskDetailMessage = targetMessage;
             });
         }
 
@@ -883,7 +927,10 @@ namespace JiXingFlashTool.ViewModels
         {
             RunOnUiThread(() =>
             {
-                var filteredDevices = _deviceList.Where(IsDeviceVisible).ToList();
+                var filteredDevices = _deviceList
+                    .Where(IsDeviceVisible)
+                    .OrderBy(item => item, DeviceComparer)
+                    .ToList();
                 DeviceView.Clear();
 
                 for (var index = 0; index < filteredDevices.Count; index++)
@@ -909,11 +956,11 @@ namespace JiXingFlashTool.ViewModels
             }
 
             var insertIndex = 0;
-            for (var index = 0; index < sourceIndex && index < _deviceList.Count; index++)
+            for (; insertIndex < DeviceView.Count; insertIndex++)
             {
-                if (IsDeviceVisible(_deviceList[index]))
+                if (DeviceComparer.Compare(deviceItemViewModel, DeviceView[insertIndex]) < 0)
                 {
-                    insertIndex++;
+                    break;
                 }
             }
 
@@ -953,6 +1000,145 @@ namespace JiXingFlashTool.ViewModels
             {
                 DeviceView[index].DisplayIndex = index + 1;
             }
+        }
+
+        /// <summary>
+        /// 设备排序比较器，USB 按序列号排序，以太网按 IP 数值排序。
+        /// </summary>
+        private static readonly IComparer<DeviceItemViewModel> DeviceComparer = Comparer<DeviceItemViewModel>.Create(CompareDeviceItems);
+
+        /// <summary>
+        /// 比较两个设备项的排序位置。
+        /// </summary>
+        /// <param name="left">左侧设备项。</param>
+        /// <param name="right">右侧设备项。</param>
+        /// <returns>排序结果。</returns>
+        private static int CompareDeviceItems(DeviceItemViewModel left, DeviceItemViewModel right)
+        {
+            if (ReferenceEquals(left, right))
+            {
+                return 0;
+            }
+
+            if (left == null)
+            {
+                return 1;
+            }
+
+            if (right == null)
+            {
+                return -1;
+            }
+
+            var leftIsEthernet = IsEthernetDevice(left);
+            var rightIsEthernet = IsEthernetDevice(right);
+
+            if (leftIsEthernet != rightIsEthernet)
+            {
+                return leftIsEthernet ? 1 : -1;
+            }
+
+            if (leftIsEthernet)
+            {
+                var ipCompare = CompareEthernetSerial(left.Serial, right.Serial);
+                if (ipCompare != 0)
+                {
+                    return ipCompare;
+                }
+            }
+            else
+            {
+                var serialCompare = StringComparer.OrdinalIgnoreCase.Compare(left.Serial ?? string.Empty, right.Serial ?? string.Empty);
+                if (serialCompare != 0)
+                {
+                    return serialCompare;
+                }
+            }
+
+            return StringComparer.OrdinalIgnoreCase.Compare(left.Device?.Name ?? string.Empty, right.Device?.Name ?? string.Empty);
+        }
+
+        /// <summary>
+        /// 判断设备是否为以太网连接。
+        /// </summary>
+        /// <param name="deviceItemViewModel">设备项。</param>
+        /// <returns>是否为以太网设备。</returns>
+        private static bool IsEthernetDevice(DeviceItemViewModel deviceItemViewModel)
+        {
+            return !string.IsNullOrWhiteSpace(deviceItemViewModel?.Serial) &&
+                   deviceItemViewModel.Serial.Contains(":");
+        }
+
+        /// <summary>
+        /// 按以太网 IP 地址排序。
+        /// </summary>
+        /// <param name="leftSerial">左侧序列号。</param>
+        /// <param name="rightSerial">右侧序列号。</param>
+        /// <returns>排序结果。</returns>
+        private static int CompareEthernetSerial(string leftSerial, string rightSerial)
+        {
+            var leftHost = GetEthernetHost(leftSerial);
+            var rightHost = GetEthernetHost(rightSerial);
+
+            var leftBytes = TryGetIpBytes(leftHost);
+            var rightBytes = TryGetIpBytes(rightHost);
+
+            if (leftBytes != null && rightBytes != null)
+            {
+                var length = Math.Min(leftBytes.Length, rightBytes.Length);
+                for (var index = 0; index < length; index++)
+                {
+                    var compare = leftBytes[index].CompareTo(rightBytes[index]);
+                    if (compare != 0)
+                    {
+                        return compare;
+                    }
+                }
+
+                var lengthCompare = leftBytes.Length.CompareTo(rightBytes.Length);
+                if (lengthCompare != 0)
+                {
+                    return lengthCompare;
+                }
+            }
+
+            return StringComparer.OrdinalIgnoreCase.Compare(leftSerial ?? string.Empty, rightSerial ?? string.Empty);
+        }
+
+        /// <summary>
+        /// 提取以太网设备的主机部分。
+        /// </summary>
+        /// <param name="serial">ADB 序列号。</param>
+        /// <returns>主机地址。</returns>
+        private static string GetEthernetHost(string serial)
+        {
+            if (string.IsNullOrWhiteSpace(serial))
+            {
+                return string.Empty;
+            }
+
+            var colonIndex = serial.IndexOf(':');
+            return colonIndex > 0 ? serial.Substring(0, colonIndex) : serial;
+        }
+
+        /// <summary>
+        /// 解析 IP 字节数组，失败时返回 null。
+        /// </summary>
+        /// <param name="host">主机地址。</param>
+        /// <returns>IP 字节数组。</returns>
+        private static byte[] TryGetIpBytes(string host)
+        {
+            if (string.IsNullOrWhiteSpace(host))
+            {
+                return null;
+            }
+
+            if (!IPAddress.TryParse(host, out var ipAddress))
+            {
+                return null;
+            }
+
+            return ipAddress.GetAddressBytes();
         }
 
         /// <summary>

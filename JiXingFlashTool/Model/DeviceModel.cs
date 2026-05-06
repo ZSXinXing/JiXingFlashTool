@@ -33,6 +33,10 @@ namespace JiXingFlashTool.Model
         /// </summary>
         public string RetailModel { get; set; }
         /// <summary>
+        /// 设备品牌，对应 ro.product.brand。
+        /// </summary>
+        public string Brand { get; set; }
+        /// <summary>
         /// AndroidId
         /// </summary>
         public string AndroidId { get; set; }
@@ -69,9 +73,11 @@ namespace JiXingFlashTool.Model
             this.Model = deviceData.Model;
             this.Product = deviceData.Product;
             this.Name = deviceData.Name;
+            this.Brand = string.Empty;
             this.Features = deviceData.Features;
             this.Usb = deviceData.Usb;
             this.TransportId = deviceData.TransportId;
+            this.RootType = SystemRootType.None;
             this.AndroidId = "";
             this.AndroidVersion = "";
             this.RoSerialNo = "";

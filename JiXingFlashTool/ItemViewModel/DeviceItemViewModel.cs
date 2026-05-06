@@ -192,11 +192,11 @@ namespace JiXingFlashTool.ItemViewModel
         }
 
         /// <summary>
-        /// 任务详情展示文案，空值时显示默认空闲提示。
+        /// 任务详情展示文案，空值时直接保持为空，避免显示默认占位提示。
         /// </summary>
         public string TaskDetailDisplayMessage
         {
-            get => string.IsNullOrWhiteSpace(TaskDetailMessage) ? "空闲中，等待指令" : TaskDetailMessage;
+            get => string.IsNullOrWhiteSpace(TaskDetailMessage) ? string.Empty : TaskDetailMessage;
         }
 
         /// <summary>

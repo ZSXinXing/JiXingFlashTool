@@ -40,10 +40,10 @@ namespace JiXingFlashTool.Tasks
                     await adb.ExecuteRemoteCommandAsync("reboot download");
                     break;
                 case Enums.CommandType.OpenFlashlight:
-                    await adb.ExecuteRemoteCommandAsync("\"echo 1 > /sys/class/camera/flash/rear_flash\"");
+                    await adb.ExecuteRootCommandAsync("echo 1 > /sys/class/camera/flash/rear_flash");
                     break;
                 case Enums.CommandType.CloseFlashlight:
-                    await adb.ExecuteRemoteCommandAsync("\"echo 0 > /sys/class/camera/flash/rear_flash\"");
+                    await adb.ExecuteRootCommandAsync("echo 0 > /sys/class/camera/flash/rear_flash");
                     break;
                 case Enums.CommandType.ExecuteShell:
                     break;
