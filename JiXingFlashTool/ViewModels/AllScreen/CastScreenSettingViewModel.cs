@@ -13,68 +13,169 @@ using JiXingFlashTool.Properties;
 
 namespace JiXingFlashTool.ViewModels.AllScreen
 {
-    public class CastScreenSettingViewModel : ObservableObject
+    public partial class CastScreenSettingViewModel : ObservableObject
     {
         public static string CSSCastScreenParamterChangeMessageKey = "CSSCastScreenParamterChangeMessageKey";
-        public Dialog Dialog { get; set; }
 
+        /// <summary>
+        /// 当前弹窗实例。
+        /// </summary>
+        private Dialog dialog;
+
+        /// <summary>
+        /// 当前弹窗实例。
+        /// </summary>
+        public Dialog Dialog
+        {
+            get => dialog;
+            set => SetProperty(ref dialog, value);
+        }
+
+        /// <summary>
+        /// 小屏分辨率列表。
+        /// </summary>
         private List<int> miniCastScreenResolutionList;
+
+        /// <summary>
+        /// 小屏分辨率列表。
+        /// </summary>
         public List<int> MiniCastScreenResolutionList
         {
-            get { return miniCastScreenResolutionList; }
-            set { SetProperty(ref miniCastScreenResolutionList, value); }
+            get => miniCastScreenResolutionList;
+            set => SetProperty(ref miniCastScreenResolutionList, value);
         }
 
+        /// <summary>
+        /// 小屏帧率列表。
+        /// </summary>
         private List<int> miniCastScreenRateList;
+
+        /// <summary>
+        /// 小屏帧率列表。
+        /// </summary>
         public List<int> MiniCastScreenRateList
         {
-            get { return miniCastScreenRateList; }
-            set { SetProperty(ref miniCastScreenRateList, value); }
+            get => miniCastScreenRateList;
+            set => SetProperty(ref miniCastScreenRateList, value);
         }
 
+        /// <summary>
+        /// 主控分辨率列表。
+        /// </summary>
         private List<int> controlCastScreenResolutionList;
+
+        /// <summary>
+        /// 主控分辨率列表。
+        /// </summary>
         public List<int> ControlCastScreenResolutionList
         {
-            get { return controlCastScreenResolutionList; }
-            set { SetProperty(ref controlCastScreenResolutionList, value); }
+            get => controlCastScreenResolutionList;
+            set => SetProperty(ref controlCastScreenResolutionList, value);
         }
 
+        /// <summary>
+        /// 主控帧率列表。
+        /// </summary>
         private List<int> controlCastScreenRateList;
+
+        /// <summary>
+        /// 主控帧率列表。
+        /// </summary>
         public List<int> ControlCastScreenRateList
         {
-            get { return controlCastScreenRateList; }
-            set { SetProperty(ref controlCastScreenRateList, value); }
+            get => controlCastScreenRateList;
+            set => SetProperty(ref controlCastScreenRateList, value);
         }
 
+        /// <summary>
+        /// 主控帧率。
+        /// </summary>
         private int controlCastScreenRate;
+
+        /// <summary>
+        /// 主控帧率。
+        /// </summary>
         public int ControlCastScreenRate
         {
-            get { return controlCastScreenRate; }
-            set { SetProperty(ref controlCastScreenRate, value); }
+            get => controlCastScreenRate;
+            set => SetProperty(ref controlCastScreenRate, value);
         }
 
+        /// <summary>
+        /// 主控分辨率。
+        /// </summary>
         private int controlCastScreenResolution;
+
+        /// <summary>
+        /// 主控分辨率。
+        /// </summary>
         public int ControlCastScreenResolution
         {
-            get { return controlCastScreenResolution; }
-            set { SetProperty(ref controlCastScreenResolution, value); }
+            get => controlCastScreenResolution;
+            set => SetProperty(ref controlCastScreenResolution, value);
         }
 
+        /// <summary>
+        /// 小屏帧率。
+        /// </summary>
         private int miniCastScreenRate;
+
+        /// <summary>
+        /// 小屏帧率。
+        /// </summary>
         public int MiniCastScreenRate
         {
-            get { return miniCastScreenRate; }
-            set { SetProperty(ref miniCastScreenRate, value); }
+            get => miniCastScreenRate;
+            set => SetProperty(ref miniCastScreenRate, value);
         }
 
+        /// <summary>
+        /// 小屏分辨率。
+        /// </summary>
         private int miniCastScreenResolution;
+
+        /// <summary>
+        /// 小屏分辨率。
+        /// </summary>
         public int MiniCastScreenResolution
         {
-            get { return miniCastScreenResolution; }
-            set { SetProperty(ref miniCastScreenResolution, value); }
+            get => miniCastScreenResolution;
+            set => SetProperty(ref miniCastScreenResolution, value);
         }
 
+        /// <summary>
+        /// 保存命令。
+        /// </summary>
         public RelayCommand SaveCommand => new Lazy<RelayCommand>(() => new RelayCommand(Save)).Value;
+
+        /// <summary>
+        /// 保存群控参数。
+        /// </summary>
+        private void Save()
+        {
+            int oldMiniCastScreenRate = AppService.Instance.AppConfig.MiniCastScreenRate;
+            int oldMiniCastScreenResolution  = AppService.Instance.AppConfig.MiniCastScreenResolution;
+            int oldControlCastScreenRate = AppService.Instance.AppConfig.ControlCastScreenRate = ControlCastScreenRate;
+            int oldControlCastScreenResolution = AppService.Instance.AppConfig.ControlCastScreenResolution;
+
+            AppService.Instance.AppConfig.MiniCastScreenRate = MiniCastScreenRate;
+            AppService.Instance.AppConfig.MiniCastScreenResolution = MiniCastScreenResolution;
+            AppService.Instance.AppConfig.ControlCastScreenRate = ControlCastScreenRate;
+            AppService.Instance.AppConfig.ControlCastScreenResolution = ControlCastScreenResolution;
+
+            AppService.Instance.Save();
+
+            if (
+                oldMiniCastScreenRate != MiniCastScreenRate ||
+                oldMiniCastScreenResolution != MiniCastScreenResolution ||
+                oldControlCastScreenRate != ControlCastScreenRate ||
+                oldControlCastScreenResolution != ControlCastScreenResolution)
+            {
+                WeakReferenceMessenger.Default.Send<ValueChangedMessage<int>, string>(new ValueChangedMessage<int>(0), CSSCastScreenParamterChangeMessageKey);
+            }
+
+            this.Dialog.Close();
+        }
 
         public void ViewLoad() {
 
@@ -89,33 +190,5 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             ControlCastScreenResolution = AppService.Instance.AppConfig.ControlCastScreenResolution;
         }
 
-        private void Save()
-        {
-
-            int oldMiniCastScreenRate = AppService.Instance.AppConfig.MiniCastScreenRate;
-            int oldMiniCastScreenResolution  = AppService.Instance.AppConfig.MiniCastScreenResolution;
-            int oldControlCastScreenRate = AppService.Instance.AppConfig.ControlCastScreenRate = ControlCastScreenRate;
-            int oldControlCastScreenResolution = AppService.Instance.AppConfig.ControlCastScreenResolution;
-
-            AppService.Instance.AppConfig.MiniCastScreenRate = MiniCastScreenRate;
-            AppService.Instance.AppConfig.MiniCastScreenResolution = MiniCastScreenResolution;
-            AppService.Instance.AppConfig.ControlCastScreenRate = ControlCastScreenRate;
-            AppService.Instance.AppConfig.ControlCastScreenResolution = ControlCastScreenResolution;
-
-            AppService.Instance.Save();
-
-            //如果发生改变就通知重新修改
-            if (
-                oldMiniCastScreenRate != MiniCastScreenRate ||
-                oldMiniCastScreenResolution != MiniCastScreenResolution ||
-                oldControlCastScreenRate != ControlCastScreenRate ||
-                oldControlCastScreenResolution != ControlCastScreenResolution) {
-
-                WeakReferenceMessenger.Default.Send<ValueChangedMessage<int>, string>(new ValueChangedMessage<int>(0), CSSCastScreenParamterChangeMessageKey);
-            }
-
-
-            this.Dialog.Close();
-        }
     }
 }

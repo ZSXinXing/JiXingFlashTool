@@ -19,24 +19,80 @@ namespace JiXingFlashTool.ViewModels
 {
     public class AdbListViewModel : ObservableObject
     {
-        public List<DeviceItemViewModel> SelectDeviceList { get; set; } = new List<DeviceItemViewModel>();
+        private List<DeviceItemViewModel> selectDeviceList = new List<DeviceItemViewModel>();
+        /// <summary>
+        /// 当前选中的设备列表。
+        /// </summary>
+        public List<DeviceItemViewModel> SelectDeviceList
+        {
+            get => selectDeviceList;
+            set => SetProperty(ref selectDeviceList, value);
+        }
 
-        protected ObservableCollection<AdbCommandModel> commandCollection = new ObservableCollection<AdbCommandModel>();
-        public ObservableCollection<AdbCommandModel> CommandCollection { get => commandCollection; set => SetProperty(ref commandCollection, value); }
+        private ObservableCollection<AdbCommandModel> commandCollection = new ObservableCollection<AdbCommandModel>();
+        /// <summary>
+        /// 常用 ADB 指令集合。
+        /// </summary>
+        public ObservableCollection<AdbCommandModel> CommandCollection
+        {
+            get => commandCollection;
+            set => SetProperty(ref commandCollection, value);
+        }
 
-        public RelayCommand<AdbCommandModel> AdbCommand => new Lazy<RelayCommand<AdbCommandModel>>(() => new RelayCommand<AdbCommandModel>(AdbCommandExecute)).Value;
-        public RelayCommand ExecuteCustomCommand => new Lazy<RelayCommand>(() => new RelayCommand(ExecuteCustom)).Value;
-        public CommonFinishDelegate FinishDelegate { get; set; }
-        public string CustomCommandTxt { get; set; }
-        public Dialog dialog { get; set; }
-        private ShowCommandType ShowCommandType;
+        private CommonFinishDelegate finishDelegate;
+        /// <summary>
+        /// 指令执行完成后的回调。
+        /// </summary>
+        public CommonFinishDelegate FinishDelegate
+        {
+            get => finishDelegate;
+            set => SetProperty(ref finishDelegate, value);
+        }
+
+        private string customCommandTxt;
+        /// <summary>
+        /// 自定义指令输入内容。
+        /// </summary>
+        public string CustomCommandTxt
+        {
+            get => customCommandTxt;
+            set => SetProperty(ref customCommandTxt, value);
+        }
+
+        private Dialog dialog;
+        /// <summary>
+        /// 当前弹窗实例。
+        /// </summary>
+        public Dialog Dialog
+        {
+            get => dialog;
+            set => SetProperty(ref dialog, value);
+        }
+
+        private ShowCommandType showCommandType;
 
         public AdbListViewModel() {
             InitCommand();
         }
 
-        private void AdbCommandExecute(AdbCommandModel model) => ExecuteAdbCommand(model);
+        /// <summary>
+        /// 执行指令命令。
+        /// </summary>
+        public RelayCommand<AdbCommandModel> AdbCommand => new Lazy<RelayCommand<AdbCommandModel>>(() => new RelayCommand<AdbCommandModel>(Adb)).Value;
 
+        /// <summary>
+        /// 执行自定义指令命令。
+        /// </summary>
+        public RelayCommand ExecuteCustomCommand => new Lazy<RelayCommand>(() => new RelayCommand(ExecuteCustom)).Value;
+
+        /// <summary>
+        /// 执行常用指令。
+        /// </summary>
+        private void Adb(AdbCommandModel model) => ExecuteAdbCommand(model);
+
+        /// <summary>
+        /// 执行自定义指令。
+        /// </summary>
         private void ExecuteCustom() => ExecuteAdbCommand(new AdbCommandModel("自定义指令", CustomCommandTxt) { IsCustom = true});
 
         private void ExecuteAdbCommand(AdbCommandModel model) {

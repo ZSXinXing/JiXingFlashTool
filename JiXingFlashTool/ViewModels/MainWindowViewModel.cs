@@ -34,6 +34,11 @@ namespace JiXingFlashTool.ViewModels
     /// </summary>
     public class MainWindowViewModel : ObservableObject
     {
+        /// <summary>
+        /// 主窗口视图模型单例，供任务和服务层按需回查当前设备列表。
+        /// </summary>
+        public static MainWindowViewModel Instance { get; private set; }
+
         private string _title = string.Empty;
         private bool _isLoading;
         private bool _hasLoadError;
@@ -361,6 +366,7 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         public MainWindowViewModel()
         {
+            Instance = this;
             InitializeStaticFilters();
             InitializeTitle();
 
@@ -441,7 +447,7 @@ namespace JiXingFlashTool.ViewModels
             {
                 DataContext = viewModel
             };
-            viewModel.dialog = Dialog.Show(dialog);
+            viewModel.Dialog = Dialog.Show(dialog);
             viewModel.FinishDelegate = value =>
             {
                 if (value == null)
@@ -706,7 +712,7 @@ namespace JiXingFlashTool.ViewModels
                     ShowAdbCommandView();
                     break;
                 case "RootDevice":
-                    Growl.Warning("当前版本暂未接入刷入 ROOT 的任务执行逻辑。");
+                    EnqueueSingleCommand(selectList, CommandType.FlashMagisk);
                     break;
                 case "CheckSystemUpdate":
                     UpdateSystem();

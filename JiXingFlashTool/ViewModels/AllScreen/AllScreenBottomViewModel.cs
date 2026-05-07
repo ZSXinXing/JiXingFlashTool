@@ -13,7 +13,6 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Threading;
 using JiXingFlashTool.EventArg;
-using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Services;
 using static System.Windows.Forms.LinkLabel;
 
@@ -25,51 +24,68 @@ namespace JiXingFlashTool.ViewModels.AllScreen
         public static string ASBVMScreenSizeChanageMessageKey = "ASBVMScreenSizeChanageMessageKey";
         #endregion
 
+        /// <summary>
+        /// 当前投屏条的宽度。
+        /// </summary>
         private int screenCurrentWidth;
-        public int ScreenCurrentWidth {
-            get { 
-                return screenCurrentWidth;
-            }
+        /// <summary>
+        /// 当前投屏条的宽度。
+        /// </summary>
+        public int ScreenCurrentWidth
+        {
+            get => screenCurrentWidth;
             set => SetProperty(ref screenCurrentWidth, value);
         }
 
+        /// <summary>
+        /// 投屏条允许的最小宽度。
+        /// </summary>
         private int screenMiniWidth;
+        /// <summary>
+        /// 投屏条允许的最小宽度。
+        /// </summary>
         public int ScreenMiniWidth
         {
-            get
-            {
-                return screenMiniWidth;
-            }
+            get => screenMiniWidth;
             set => SetProperty(ref screenMiniWidth, value);
         }
 
+        /// <summary>
+        /// 投屏条允许的最大宽度。
+        /// </summary>
         private int screenMaxWidth;
+        /// <summary>
+        /// 投屏条允许的最大宽度。
+        /// </summary>
         public int ScreenMaxWidth
         {
-            get
-            {
-                return screenMaxWidth;
-            }
+            get => screenMaxWidth;
             set => SetProperty(ref screenMaxWidth, value);
         }
 
-        private int deviceCount = 0;
+        /// <summary>
+        /// 当前连接设备数量。
+        /// </summary>
+        private int deviceCount;
+        /// <summary>
+        /// 当前连接设备数量。
+        /// </summary>
         public int DeviceCount
         {
-            get
-            {
-                return deviceCount;
-            }
+            get => deviceCount;
             set => SetProperty(ref deviceCount, value);
         }
 
-        private int castScreenCount = 0;
+        /// <summary>
+        /// 当前投屏设备数量。
+        /// </summary>
+        private int castScreenCount;
+        /// <summary>
+        /// 当前投屏设备数量。
+        /// </summary>
         public int CastScreenCount
         {
-            get
-            {
-                return castScreenCount;
-            }
+            get => castScreenCount;
             set => SetProperty(ref castScreenCount, value);
         }
 

@@ -38,6 +38,7 @@ namespace JiXingFlashTool.ItemViewModel
         /// 当前项对应的设备模型。
         /// </summary>
         public DeviceModel Device { get { return device; } }
+
         private DeviceTaskService service;
         /// <summary>
         /// 当前设备任务服务，按需创建以降低初始化开销。
@@ -104,7 +105,6 @@ namespace JiXingFlashTool.ItemViewModel
             }
         }
 
-
         /// <summary>
         /// 系统版本号。
         /// </summary>
@@ -164,18 +164,38 @@ namespace JiXingFlashTool.ItemViewModel
             }
         }
 
-
         private bool isSelect;
+
         /// <summary>
         /// 当前设备是否被选中。
         /// </summary>
         public bool IsSelect
         {
             get => isSelect;
-            set => SetProperty(ref isSelect, value);
+            set
+            {
+                if (SetProperty(ref isSelect, value))
+                {
+                    RefreshItemBackgroundColor();
+                    RefreshItemForegroundColor();
+                    RefreshItemBorderThickness();
+                }
+            }
+        }
+
+        private bool isKeepWhenDisconnected;
+
+        /// <summary>
+        /// 断开连接时是否保留该设备项，不立即从列表移除。
+        /// </summary>
+        public bool IsKeepWhenDisconnected
+        {
+            get => isKeepWhenDisconnected;
+            set => SetProperty(ref isKeepWhenDisconnected, value);
         }
 
         private string taskDetailMessage;
+
         /// <summary>
         /// 当前任务详情文案。
         /// </summary>
@@ -373,19 +393,13 @@ namespace JiXingFlashTool.ItemViewModel
         {
             OnPropertyChanged(nameof(BorderThickness));
         }
-        #endregion
 
-        /// <summary>
-        /// 创建并冻结画刷，避免重复分配。
-        /// </summary>
-        /// <param name="colorValue">十六进制颜色值。</param>
-        /// <returns>冻结后的纯色画刷。</returns>
-        private static SolidColorBrush CreateBrush(string colorValue)
+        private static SolidColorBrush CreateBrush(string colorHex)
         {
-            var brush = (SolidColorBrush)new BrushConverter().ConvertFrom(colorValue);
+            var brush = (SolidColorBrush)new BrushConverter().ConvertFrom(colorHex);
             brush.Freeze();
             return brush;
         }
+        #endregion
     }
 }
-

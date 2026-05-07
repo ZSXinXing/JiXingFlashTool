@@ -23,28 +23,86 @@ using JiXingFlashTool.Model;
 
 namespace JiXingFlashTool.ViewModels
 {
-    public class SyncFileProgressViewModel : ObservableObject
+    public partial class SyncFileProgressViewModel : ObservableObject
     {
+        /// <summary>
+        /// 是否完成全部同步。
+        /// </summary>
         private bool finishSync = false;
-        public bool FinishSync { get => finishSync; set => SetProperty(ref finishSync, value); }
-        private int FinishCount = 0;
 
+        /// <summary>
+        /// 是否完成全部同步。
+        /// </summary>
+        public bool FinishSync
+        {
+            get => finishSync;
+            set => SetProperty(ref finishSync, value);
+        }
+
+        private int finishCount = 0;
+
+        /// <summary>
+        /// 设备进度集合。
+        /// </summary>
         private ObservableCollection<DeviceInstallItemViewModel> deviceCollection = new ObservableCollection<DeviceInstallItemViewModel>();
-        public ObservableCollection<DeviceInstallItemViewModel> DeviceCollection { get => deviceCollection; set => SetProperty(ref deviceCollection, value); }
 
-        public RelayCommand CloseCommand => new Lazy<RelayCommand>(() => new RelayCommand(Close)).Value;
-        public RelayCommand FinishCommand => new Lazy<RelayCommand>(() => new RelayCommand(Finish)).Value;
-        
-        public Dialog Dialog { get; set; }
+        /// <summary>
+        /// 设备进度集合。
+        /// </summary>
+        public ObservableCollection<DeviceInstallItemViewModel> DeviceCollection
+        {
+            get => deviceCollection;
+            set => SetProperty(ref deviceCollection, value);
+        }
 
-        public List<DeviceModel> DeviceList { get; set; }
-        public List<FileModel> FileList { get; set; }
+        /// <summary>
+        /// 当前弹窗实例。
+        /// </summary>
+        private Dialog dialog;
+
+        /// <summary>
+        /// 当前弹窗实例。
+        /// </summary>
+        public Dialog Dialog
+        {
+            get => dialog;
+            set => SetProperty(ref dialog, value);
+        }
+
+        /// <summary>
+        /// 当前设备列表。
+        /// </summary>
+        private List<DeviceModel> deviceList;
+
+        /// <summary>
+        /// 当前设备列表。
+        /// </summary>
+        public List<DeviceModel> DeviceList
+        {
+            get => deviceList;
+            set => SetProperty(ref deviceList, value);
+        }
+
+        /// <summary>
+        /// 当前文件列表。
+        /// </summary>
+        private List<FileModel> fileList;
+
+        /// <summary>
+        /// 当前文件列表。
+        /// </summary>
+        public List<FileModel> FileList
+        {
+            get => fileList;
+            set => SetProperty(ref fileList, value);
+        }
 
         private List<DeviceInstallItemViewModel> deviceInstallModels = new List<DeviceInstallItemViewModel>();
 
         private Thread syncFileThread;
         private List<Thread> AllSyncFileThread = new List<Thread>();
         private List<Thread> AllInstallThread = new List<Thread>();
+        [RelayCommand]
         public void Start() {
 
             //组装数组
@@ -156,6 +214,7 @@ namespace JiXingFlashTool.ViewModels
             thread.Start();
             AllSyncFileThread.Add(thread);
         }
+        [RelayCommand]
         private void Close(){
 
             foreach (Thread thread in AllInstallThread) {
@@ -168,13 +227,14 @@ namespace JiXingFlashTool.ViewModels
             this.Dialog.Close();
         }
 
+        [RelayCommand]
         private void Finish() {
             Close();
         }
 
         private void CheckProgress(bool finish) {
-            if (finish) FinishCount++;
-            if (FinishCount >= deviceInstallModels.Count) {
+            if (finish) finishCount++;
+            if (finishCount >= deviceInstallModels.Count) {
                 FinishSync = true;
             }
         }

@@ -21,30 +21,92 @@ using System.Windows.Controls;
 
 namespace JiXingFlashTool.ViewModels
 {
-    public class DeviceScreenViewModel : ObservableObject
+    public partial class DeviceScreenViewModel : ObservableObject
     {
         private static int MAX_WINDOW_HEIGHT = 750;
         private static int MAX_WINDOW_WIDTH = 800;
 
         private bool CtrlKeyDown = false;
 
+        /// <summary>
+        /// 窗口宽度。
+        /// </summary>
         private double screenWidth;
-        public double ScreenWidth { get => screenWidth; set => SetProperty(ref screenWidth, value); }
 
+        /// <summary>
+        /// 窗口宽度。
+        /// </summary>
+        public double ScreenWidth
+        {
+            get => screenWidth;
+            set => SetProperty(ref screenWidth, value);
+        }
+
+        /// <summary>
+        /// 窗口高度。
+        /// </summary>
         private double screenHeight;
-        public double ScreenHeight { get => screenHeight; set => SetProperty(ref screenHeight, value); }
 
+        /// <summary>
+        /// 窗口高度。
+        /// </summary>
+        public double ScreenHeight
+        {
+            get => screenHeight;
+            set => SetProperty(ref screenHeight, value);
+        }
 
+        /// <summary>
+        /// 窗口标题。
+        /// </summary>
         private string title;
-        public string Title { get => title; set => SetProperty(ref title, value); }
 
+        /// <summary>
+        /// 窗口标题。
+        /// </summary>
+        public string Title
+        {
+            get => title;
+            set => SetProperty(ref title, value);
+        }
+
+        /// <summary>
+        /// 当前显示的投屏项。
+        /// </summary>
         private CastScreenItemViewModel ob;
-        public CastScreenItemViewModel OB { get => ob; set => SetProperty(ref ob, value); }
 
-        public RelayCommand CloseCommand => new Lazy<RelayCommand>(() => new RelayCommand(CloseWindow)).Value;
-        public RelayCommand MiniCommand => new Lazy<RelayCommand>(() => new RelayCommand(MiniWindow)).Value;
+        /// <summary>
+        /// 当前显示的投屏项。
+        /// </summary>
+        public CastScreenItemViewModel OB
+        {
+            get => ob;
+            set => SetProperty(ref ob, value);
+        }
+
+        /// <summary>
+        /// 关闭命令。
+        /// </summary>
+        public RelayCommand CloseCommand => new Lazy<RelayCommand>(() => new RelayCommand(Close)).Value;
+
+        /// <summary>
+        /// 最小化命令。
+        /// </summary>
+        public RelayCommand MiniCommand => new Lazy<RelayCommand>(() => new RelayCommand(Mini)).Value;
+
+        /// <summary>
+        /// 返回命令。
+        /// </summary>
         public RelayCommand BackCommand => new Lazy<RelayCommand>(() => new RelayCommand(Back)).Value;
+
+        /// <summary>
+        /// Home 命令。
+        /// </summary>
         public RelayCommand HomeCommand => new Lazy<RelayCommand>(() => new RelayCommand(Home)).Value;
+
+        /// <summary>
+        /// 菜单命令。
+        /// </summary>
         public RelayCommand MenuCommand => new Lazy<RelayCommand>(() => new RelayCommand(Menu)).Value;
 
         public DeviceScreenView DeviceScreenView { get; set; }
@@ -69,6 +131,46 @@ namespace JiXingFlashTool.ViewModels
             service.ScreenResult += OnScreenResult;
             service.D3DChanage += OnD3DChanage;
             service.Start(resolution, 1, rate);
+        }
+
+        /// <summary>
+        /// 关闭窗口命令。
+        /// </summary>
+        private void Close()
+        {
+            CloseWindow();
+        }
+
+        /// <summary>
+        /// 最小化窗口命令。
+        /// </summary>
+        private void Mini()
+        {
+            MiniWindow();
+        }
+
+        /// <summary>
+        /// 返回按键命令。
+        /// </summary>
+        private void Back()
+        {
+            AdbService.Instance.Back(Device);
+        }
+
+        /// <summary>
+        /// Home 按键命令。
+        /// </summary>
+        private void Home()
+        {
+            AdbService.Instance.Home(Device);
+        }
+
+        /// <summary>
+        /// 菜单按键命令。
+        /// </summary>
+        private void Menu()
+        {
+            AdbService.Instance.Menu(Device);
         }
 
         private void DeviceDisconnected(object sender, EventArg.DeviceEventArgs e)
@@ -105,8 +207,11 @@ namespace JiXingFlashTool.ViewModels
 
                     //ScreenWidth = width;
                     //ScreenHeight = height;
-                    DeviceScreenView.d3dIS.Width = width;
-                    DeviceScreenView.d3dIS.Height = height;
+                    if (DeviceScreenView.d3dIS != null)
+                    {
+                        DeviceScreenView.d3dIS.Width = width;
+                        DeviceScreenView.d3dIS.Height = height;
+                    }
                 }, null);
             });
 
@@ -126,27 +231,6 @@ namespace JiXingFlashTool.ViewModels
         private void MiniWindow()
         {
             DeviceScreenView.WindowState = System.Windows.WindowState.Minimized;
-        }
-
-        private void Back()
-        {
-            AdbService.Instance.Back(Device);
-        }
-
-        private void Home()
-        {
-            AdbService.Instance.Home(Device);
-        }
-
-        private void Menu()
-        {
-            AdbService.Instance.Menu(Device);
-        }
-
-
-        private void Close()
-        {
-
         }
 
         #region 屏幕鼠标操作

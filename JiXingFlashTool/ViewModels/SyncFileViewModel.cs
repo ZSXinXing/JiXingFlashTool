@@ -23,20 +23,51 @@ using JiXingFlashTool.Model;
 
 namespace JiXingFlashTool.ViewModels
 {
-    public class SyncFileViewModel : ObservableObject
+    public partial class SyncFileViewModel : ObservableObject
     {
+        /// <summary>
+        /// 待同步文件集合。
+        /// </summary>
         private ObservableCollection<FileModel> fileCollection = new ObservableCollection<FileModel>();
-        public ObservableCollection<FileModel> FileCollection { get => fileCollection; set => SetProperty(ref fileCollection, value); }
 
-        public RelayCommand<FileModel> DeleteCommand => new Lazy<RelayCommand<FileModel>>(() => new RelayCommand<FileModel>(DeleteFile)).Value;
-        public RelayCommand AddFileCommand => new Lazy<RelayCommand>(() => new RelayCommand(AddFile)).Value;
-        public RelayCommand StartCommand => new Lazy<RelayCommand>(() => new RelayCommand(Start)).Value;
-        public RelayCommand<FileModel> NeedInstallCommand => new Lazy<RelayCommand<FileModel>>(() => new RelayCommand<FileModel>(NeedInstall)).Value;
-        public RelayCommand<FileModel> UsePhoneApkCommand => new Lazy<RelayCommand<FileModel>>(() => new RelayCommand<FileModel>(UsePhoneApk)).Value;
-        public List<DeviceModel> NeedInstallDeviceList;
-        public Dialog Dialog { get; set; }
+        /// <summary>
+        /// 待同步文件集合。
+        /// </summary>
+        public ObservableCollection<FileModel> FileCollection
+        {
+            get => fileCollection;
+            set => SetProperty(ref fileCollection, value);
+        }
 
+        /// <summary>
+        /// 需要执行安装的设备列表。
+        /// </summary>
+        private List<DeviceModel> needInstallDeviceList;
 
+        /// <summary>
+        /// 需要执行安装的设备列表。
+        /// </summary>
+        public List<DeviceModel> NeedInstallDeviceList
+        {
+            get => needInstallDeviceList;
+            set => SetProperty(ref needInstallDeviceList, value);
+        }
+
+        /// <summary>
+        /// 当前同步窗口弹窗实例。
+        /// </summary>
+        private Dialog dialog;
+
+        /// <summary>
+        /// 当前同步窗口弹窗实例。
+        /// </summary>
+        public Dialog Dialog
+        {
+            get => dialog;
+            set => SetProperty(ref dialog, value);
+        }
+
+        [RelayCommand]
         private void AddFile() {
             using (System.Windows.Forms.OpenFileDialog ofd = new System.Windows.Forms.OpenFileDialog())
             {
@@ -77,6 +108,7 @@ namespace JiXingFlashTool.ViewModels
             }
         }
 
+        [RelayCommand]
         private void DeleteFile(FileModel model) {
             List<FileModel> fileList = fileCollection.ToList();
             int findIndex = -1;
@@ -91,14 +123,17 @@ namespace JiXingFlashTool.ViewModels
             }
         }
 
+        [RelayCommand]
         private void UsePhoneApk(FileModel model) { 
             
         }
 
+        [RelayCommand]
         private void NeedInstall(FileModel model)
         {
         }
 
+        [RelayCommand]
         private void Start() {
 
             if (fileCollection.ToList().Count == 0)

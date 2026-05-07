@@ -183,9 +183,38 @@ namespace JiXingFlashTool.Services
 
         }
 
+        /// <summary>
+        /// 推送本地文件到设备，并回传进度。
+        /// </summary>
+        /// <param name="device">目标设备。</param>
+        /// <param name="filePath">本地文件路径。</param>
+        /// <param name="remotePath">设备端目标路径。</param>
+        /// <param name="progress">进度回调。</param>
+        /// <param name="cancellationToken">取消令牌。</param>
+        public void Push(DeviceData device, string filePath, string remotePath, IProgress<int> progress, CancellationToken cancellationToken = default)
+        {
+            using (Stream stream = File.OpenRead(filePath))
+            {
+                client.Push(device, remotePath, stream, 777, DateTimeOffset.Now, null, progress, cancellationToken);
+            }
+        }
+
         public void Push(DeviceData device, Stream fileStream, string remotePath)
         {
             client.Push(device, remotePath, fileStream, 777, DateTimeOffset.Now, null);
+        }
+
+        /// <summary>
+        /// 推送文件流到设备，并回传进度。
+        /// </summary>
+        /// <param name="device">目标设备。</param>
+        /// <param name="fileStream">文件流。</param>
+        /// <param name="remotePath">设备端目标路径。</param>
+        /// <param name="progress">进度回调。</param>
+        /// <param name="cancellationToken">取消令牌。</param>
+        public void Push(DeviceData device, Stream fileStream, string remotePath, IProgress<int> progress, CancellationToken cancellationToken = default)
+        {
+            client.Push(device, remotePath, fileStream, 777, DateTimeOffset.Now, null, progress, cancellationToken);
         }
 
         public void SendText(DeviceModel device, string text)

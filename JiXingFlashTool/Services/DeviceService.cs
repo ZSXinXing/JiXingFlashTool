@@ -17,6 +17,8 @@ using JiXingFlashTool.Model;
 using JiXingFlashTool.EventArg;
 using JiXingFlashTool.Utils;
 using HandyControl.Controls;
+using JiXingFlashTool.ItemViewModel;
+using JiXingFlashTool.ViewModels;
 
 namespace JiXingFlashTool.Services
 {
@@ -284,6 +286,15 @@ namespace JiXingFlashTool.Services
                 if (it == null) return false;
                 return it.Serial.Equals(removeDevice.Serial);
             });
+
+            if (device != null)
+            {
+                DeviceItemViewModel deviceItem = MainWindowViewModel.Instance?.DeviceCollection?.FirstOrDefault(it => it != null && it.Serial == device.Serial);
+                if (deviceItem != null && deviceItem.IsKeepWhenDisconnected)
+                {
+                    return;
+                }
+            }
 
             DeviceEventArgs deviceEventArgs = new DeviceEventArgs(device);
 

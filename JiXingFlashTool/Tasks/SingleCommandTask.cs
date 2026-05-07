@@ -1,13 +1,13 @@
+using System.Threading.Tasks;
+using JiXingFlashTool.Enums;
 using JiXingFlashTool.Interface;
 using JiXingFlashTool.Model.Payload;
 using TaskCore.Tasks;
-using System.Threading.Tasks;
-using JiXingFlashTool.Services;
 
 namespace JiXingFlashTool.Tasks
 {
     /// <summary>
-    /// 单条通用指令任务，负责根据指令类型执行对应的设备动作。
+    /// 单条指令任务，根据指令类型执行对应设备动作。
     /// </summary>
     public sealed class SingleCommandTask : IDeviceTask<SingleCommandPayload>
     {
@@ -17,10 +17,10 @@ namespace JiXingFlashTool.Tasks
         public string TaskType => "SingleCommandTask";
 
         /// <summary>
-        /// 执行单条指令任务。
+        /// 执行单条指令。
         /// </summary>
-        /// <param name="ctx">任务上下文，包含设备、负载和日志回调。</param>
-        /// <returns>异步执行结果。</returns>
+        /// <param name="ctx">任务上下文。</param>
+        /// <returns>异步任务。</returns>
         public async Task ExecuteAsync(TaskContext<SingleCommandPayload> ctx)
         {
             var adb = ctx.Device.GetCapability<IAdbCapability>();
@@ -30,24 +30,25 @@ namespace JiXingFlashTool.Tasks
 
             switch (commandType)
             {
-                case Enums.CommandType.RebootSystem:
-                    await adb.ExecuteRemoteCommandAsync("reboot system");
+                case CommandType.RebootSystem:
+                    await adb.ExecuteRemoteCommandAsync("reboot system", ctx.CancellationToken);
                     break;
-                case Enums.CommandType.RebootRecovery:
-                    await adb.ExecuteRemoteCommandAsync("reboot recovery");
+                case CommandType.RebootRecovery:
+                    await adb.ExecuteRemoteCommandAsync("reboot recovery", ctx.CancellationToken);
                     break;
-                case Enums.CommandType.RebootDownload:
-                    await adb.ExecuteRemoteCommandAsync("reboot download");
+                case CommandType.RebootDownload:
+                    await adb.ExecuteRemoteCommandAsync("reboot download", ctx.CancellationToken);
                     break;
-                case Enums.CommandType.OpenFlashlight:
-                    await adb.ExecuteRootCommandAsync("echo 1 > /sys/class/camera/flash/rear_flash");
+                case CommandType.OpenFlashlight:
+                    await adb.ExecuteRootCommandAsync("echo 1 > /sys/class/camera/flash/rear_flash", ctx.CancellationToken);
                     break;
-                case Enums.CommandType.CloseFlashlight:
-                    await adb.ExecuteRootCommandAsync("echo 0 > /sys/class/camera/flash/rear_flash");
+                case CommandType.CloseFlashlight:
+                    await adb.ExecuteRootCommandAsync("echo 0 > /sys/class/camera/flash/rear_flash", ctx.CancellationToken);
                     break;
-                case Enums.CommandType.ExecuteShell:
+                case CommandType.ExecuteShell:
                     break;
-                case Enums.CommandType.FlashMagisk:
+                case CommandType.FlashMagisk:
+                    await new FlashRootTask().ExecuteAsync(ctx);
                     break;
             }
 

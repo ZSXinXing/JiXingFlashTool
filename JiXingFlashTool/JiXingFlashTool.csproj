@@ -137,6 +137,7 @@
     <Compile Include="Services\DeviceTaskService.cs" />
     <Compile Include="Services\SQLService.cs" />
     <Compile Include="Services\TCSocketService.cs" />
+    <Compile Include="Tasks\FlashRootTask.cs" />
     <Compile Include="Tasks\SingleCommandTask.cs" />
     <Compile Include="TaskCoreBridge\AdbDeviceSession.cs" />
     <Compile Include="TaskCoreBridge\AdbDeviceSessionFactory.cs" />
@@ -203,6 +204,22 @@
     <Compile Include="Views\SyncFileView.xaml.cs">
       <DependentUpon>SyncFileView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="obj\Debug\App.g.cs" />
+    <Compile Include="obj\Debug\GeneratedInternalTypeHelper.g.cs" />
+    <Compile Include="obj\Debug\JiXingFlashTool_Content.g.cs" />
+    <Compile Include="obj\Debug\Control\IconButton.g.cs" />
+    <Compile Include="obj\Debug\Views\AdbListView.g.cs" />
+    <Compile Include="obj\Debug\Views\CommandListView.g.cs" />
+    <Compile Include="obj\Debug\Views\DeviceScreenView.g.cs" />
+    <Compile Include="obj\Debug\Views\MainWindow.g.cs" />
+    <Compile Include="obj\Debug\Views\SyncFileProgressView.g.cs" />
+    <Compile Include="obj\Debug\Views\SyncFileView.g.cs" />
+    <Compile Include="obj\Debug\Views\AllScreen\AllScreenBottomView.g.cs" />
+    <Compile Include="obj\Debug\Views\AllScreen\AllScreenLeftView.g.cs" />
+    <Compile Include="obj\Debug\Views\AllScreen\AllScreenTopView.g.cs" />
+    <Compile Include="obj\Debug\Views\AllScreen\CastScreenSettingView.g.cs" />
+    <Compile Include="obj\Debug\Views\AllScreen\DeviceScreenListView.g.cs" />
+    <Compile Include="obj\Debug\Views\AllScreen\DeviceScreenWindow.g.cs" />
     <Page Include="Views\AdbListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -278,6 +295,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <EmbeddedResource Include="Resources\Magisk.apk" />
     <None Include="Resources\scrcpy-server">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -474,8 +492,76 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="CommunityToolkit.Mvvm">
+      <HintPath>$(UserProfile)\.nuget\packages\communitytoolkit.mvvm\8.2.2\lib\netstandard2.0\CommunityToolkit.Mvvm.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="HandyControl">
+      <HintPath>$(UserProfile)\.nuget\packages\handycontrol\3.5.1\lib\net48\HandyControl.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="FFmpeg.AutoGen">
+      <HintPath>$(UserProfile)\.nuget\packages\ffmpeg.autogen\4.4.0\lib\net45\FFmpeg.AutoGen.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IndexRange">
+      <HintPath>$(UserProfile)\.nuget\packages\indexrange\1.0.3\lib\net47\IndexRange.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.Core">
+      <HintPath>$(UserProfile)\.nuget\packages\npoi\2.7.0\lib\net472\NPOI.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.OOXML">
+      <HintPath>$(UserProfile)\.nuget\packages\npoi\2.7.0\lib\net472\NPOI.OOXML.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net">
+      <HintPath>$(UserProfile)\.nuget\packages\npoi\2.7.0\lib\net472\NPOI.OpenXml4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats">
+      <HintPath>$(UserProfile)\.nuget\packages\npoi\2.7.0\lib\net472\NPOI.OpenXmlFormats.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpDX">
+      <HintPath>$(UserProfile)\.nuget\packages\sharpdx\4.2.0\lib\net45\SharpDX.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SharpDX.Direct3D9">
+      <HintPath>$(UserProfile)\.nuget\packages\sharpdx.direct3d9\4.2.0\lib\net45\SharpDX.Direct3D9.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SQLite-net">
+      <HintPath>$(UserProfile)\.nuget\packages\sqlite-net-pcl\1.8.116\lib\netstandard2.0\SQLite-net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Buffers">
+      <HintPath>$(UserProfile)\.nuget\packages\system.buffers\4.5.1\ref\net45\System.Buffers.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Memory">
+      <HintPath>$(UserProfile)\.nuget\packages\system.memory\4.5.5\lib\net461\System.Memory.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Numerics.Vectors">
+      <HintPath>$(UserProfile)\.nuget\packages\system.numerics.vectors\4.5.0\ref\net46\System.Numerics.Vectors.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>$(UserProfile)\.nuget\packages\system.runtime.compilerservices.unsafe\6.1.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Tasks.Extensions.4.6.3\lib\net462\System.Threading.Tasks.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces">
+      <HintPath>$(UserProfile)\.nuget\packages\microsoft.bcl.asyncinterfaces\10.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions">
+      <HintPath>$(UserProfile)\.nuget\packages\system.threading.tasks.extensions\4.6.3\lib\net462\System.Threading.Tasks.Extensions.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
