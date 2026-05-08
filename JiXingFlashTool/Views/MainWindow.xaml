@@ -1062,7 +1062,7 @@
                                                 ButtonText="执行 Shell"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="ShellCommand" />
-                            <control:IconButton
+                                <control:IconButton
                                                 Height="24.5"
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#9C27B0"
@@ -1071,7 +1071,7 @@
                                                 ButtonText="刷入 ROOT"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="RootDevice" />
-                            <control:IconButton
+                                <control:IconButton
                                                 Height="24.5"
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#5C82FD"
@@ -1244,7 +1244,7 @@
                                                         <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProFormatDataIcon}" Stretch="Uniform" />
                                                     </Rectangle.OpacityMask>
                                                 </Rectangle>
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="格式化 Data" Foreground="#333333" />
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="格式化" Foreground="#333333" />
                                             </Grid>
                                         </Button>
                                         </StackPanel>
@@ -1311,16 +1311,7 @@
                                 </Border>
                             </Popup>
 
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#7B9EFF"
-                                                ButtonBorderBrush="#7B9EFF"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProSideloadIcon}"
-                                                ButtonText="进入侧载"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="Sideload" />
-                            <control:IconButton
+                                <control:IconButton
                                                 Height="24.5"
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#FF9800"
@@ -1329,16 +1320,7 @@
                                                 ButtonText="刷入文件"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="FlashFile" />
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#FF9800"
-                                                ButtonBorderBrush="#FF9800"
-                                                ButtonIcon="{x:Static local:IconResources.TwrpProDecryptIcon}"
-                                                ButtonText="解密"
-                                                ButtonCommand="{Binding ProfessionalInstructionCommand}"
-                                                ButtonCommandParameter="Decrypt" />
-                            <control:IconButton
+                                <control:IconButton
                                                 Height="24.5"
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#FF9800"

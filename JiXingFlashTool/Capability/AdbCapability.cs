@@ -1,4 +1,12 @@
-﻿using System;
+﻿using JiXingFlashTool.Enums;
+using JiXingFlashTool.Extensions;
+using JiXingFlashTool.Interface;
+using JiXingFlashTool.Model;
+using JiXingFlashTool.Services;
+using JXAdbCore.Receivers;
+using NPOI.OpenXmlFormats.Spreadsheet;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,11 +15,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using JXAdbCore.Receivers;
-using JiXingFlashTool.Enums;
-using JiXingFlashTool.Interface;
-using JiXingFlashTool.Model;
-using JiXingFlashTool.Services;
 
 namespace JiXingFlashTool.Capability
 {
@@ -49,14 +52,12 @@ namespace JiXingFlashTool.Capability
         /// </summary>
         /// <param name="command">指令内容。</param>
         /// <param name="cancellationToken">取消令牌。</param>
-        /// <returns>异步任务。</returns>
-        public Task ExecuteRemoteCommandAsync(string command, CancellationToken cancellationToken = default)
+        /// <returns>指令输出。</returns>
+        public string ExecuteRemoteCommand(string command, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                AdbService.Instance.ExecuteShellCommand(_device, command, null);
-            }, cancellationToken);
+            var receiver = new ConsoleOutputReceiver();
+            AdbService.Instance.ExecuteShellCommand(_device, command, receiver);
+            return receiver.ToString();
         }
 
         /// <summary>
@@ -126,6 +127,73 @@ namespace JiXingFlashTool.Capability
         }
 
         /// <summary>
+        /// 获取当前设备所处状态。
+        /// </summary>
+        /// <returns>设备状态枚举。</returns>
+        public JXAdbCore.Enums.DeviceState GetDeviceState()
+        {
+            if (_device == null)
+            {
+                return JXAdbCore.Enums.DeviceState.Offline;
+            }
+
+            try
+            {
+                var latestDevice = AdbService.Instance
+                    .Devices()
+                    .FirstOrDefault(item => item != null && string.Equals(item.Serial, _device.Serial, StringComparison.OrdinalIgnoreCase));
+
+                if (latestDevice != null)
+                {
+                    _device.State = latestDevice.State;
+                    return latestDevice.State;
+                }
+            }
+            catch
+            {
+            }
+
+            return _device.State;
+        }
+
+        /// <summary>
+        /// 判断当前设备是否已经安装可正常开机的系统。
+        /// </summary>
+        /// <returns>已经安装且可正常开机返回 true。</returns>
+        public bool HasBootableSystem()
+        {
+            if (_device == null)
+            {
+                return false;
+            }
+
+            var currentState = GetDeviceState();
+            if (currentState != JXAdbCore.Enums.DeviceState.Online &&
+                currentState != JXAdbCore.Enums.DeviceState.Recovery &&
+                currentState != JXAdbCore.Enums.DeviceState.Sideload)
+            {
+                return false;
+            }
+
+            string systemCheck = ExecuteRemoteCommand("if [ -d /system ] || [ -d /system/system ] || [ -d /system_ext ]; then echo 1; else echo 0; fi");
+            if (!string.Equals(systemCheck?.Trim(), "1", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            string[] bootCandidates =
+            {
+                "/dev/block/bootdevice/by-name/boot",
+                "/dev/block/platform/soc/1d84000.ufshc/by-name/boot",
+                "/dev/block/platform/11120000.ufs/by-name/boot",
+                "/dev/block/platform/15570000.ufs/by-name/boot",
+                "/dev/block/platform/155a0000.ufs/by-name/boot"
+            };
+
+            return bootCandidates.Any(path => AdbService.Instance.FileExist(_device, path));
+        }
+
+        /// <summary>
         /// 异步执行需要 root 权限的指令。
         /// </summary>
         /// <param name="command">原始指令。</param>
@@ -168,6 +236,60 @@ namespace JiXingFlashTool.Capability
                 cancellationToken.ThrowIfCancellationRequested();
                 AdbService.Instance.Push(_device, stream, remotePath, progress, cancellationToken);
             }
+        }
+
+        /// <summary>
+        /// 执行侧载刷入指令。
+        /// </summary>
+        /// <param name="filePath">本地刷入文件路径。</param>
+        /// <param name="progress">数字进度回调。</param>
+        /// <param name="cancellationToken">取消令牌。</param>
+        /// <returns>指令输出。</returns>
+        public string SideloadFile(string filePath, IProgress<int> progress = null, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("刷入文件路径不能为空。", nameof(filePath));
+            }
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("刷入文件不存在。", filePath);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            string escapedFilePath = EscapeShellArgument(filePath);
+            string command = $"sideload \"{escapedFilePath}\"";
+            int lastReportedProgress = -1;
+            string output = AdbService.Instance.CMDExcute($"-s {_device.Serial} {command}", line =>
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    return;
+                }
+
+                string percentageText = line.MatchedPercentage();
+                if (string.IsNullOrWhiteSpace(percentageText))
+                {
+                    return;
+                }
+
+                if (!int.TryParse(percentageText.TrimEnd('%'), out int percentage))
+                {
+                    return;
+                }
+
+                if (percentage == lastReportedProgress)
+                {
+                    return;
+                }
+
+                lastReportedProgress = percentage;
+                progress?.Report(percentage);
+            });
+
+            return output ?? string.Empty;
         }
 
         /// <summary>
@@ -320,6 +442,43 @@ namespace JiXingFlashTool.Capability
         }
 
         /// <summary>
+        /// 获取设备端可用的 ext4 格式化指令名。
+        /// </summary>
+        /// <returns>返回可用指令名；都不存在则返回空字符串。</returns>
+        public string GetAvailableExt4FormatCommand()
+        {
+            if (HasRemoteCommand("make_ext4fs"))
+            {
+                return "make_ext4fs";
+            }
+
+            if (HasRemoteCommand("mke2fs"))
+            {
+                return "mke2fs";
+            }
+
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// 检查设备端是否存在指定 shell 指令。
+        /// </summary>
+        /// <param name="commandName">指令名称。</param>
+        /// <returns>存在返回 true。</returns>
+        private bool HasRemoteCommand(string commandName)
+        {
+            if (string.IsNullOrWhiteSpace(commandName))
+            {
+                return false;
+            }
+
+            string escapedCommandName = EscapeShellArgument(commandName.Trim());
+            string command = $"if command -v \"{escapedCommandName}\" >/dev/null 2>&1; then echo 1; else echo 0; fi";
+            string output = ExecuteRemoteCommand(command);
+            return string.Equals((output ?? string.Empty).Trim(), "1", StringComparison.Ordinal);
+        }
+
+        /// <summary>
         /// 比较设备文件与本地文件的 MD5 是否一致。
         /// </summary>
         /// <param name="remotePath">设备文件路径。</param>
@@ -388,6 +547,47 @@ namespace JiXingFlashTool.Capability
                 : ExecuteRemoteCommand($"cat \"{escapedPath}\"");
 
             return string.Equals(output?.Replace("\r\n", "\n").Trim(), (expectedContent ?? string.Empty).Replace("\r\n", "\n").Trim(), StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// 获取设备中已安装的软件包名。
+        /// </summary>
+        /// <param name="includeSystemPackages">是否包含系统应用包名。</param>
+        /// <returns>已安装的软件包名列表。</returns>
+        public IReadOnlyList<string> GetInstalledPackageNames(bool includeSystemPackages = false)
+        {
+            string command = includeSystemPackages ? "pm list packages" : "pm list packages -3";
+            string output = ExecuteRemoteCommand(command);
+
+            if (string.IsNullOrWhiteSpace(output))
+            {
+                return Array.Empty<string>();
+            }
+
+            return output
+                .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(line => line.Trim())
+                .Where(line => line.StartsWith("package:", StringComparison.OrdinalIgnoreCase))
+                .Select(line => line.Substring("package:".Length).Trim())
+                .Where(packageName => !string.IsNullOrWhiteSpace(packageName))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// 根据包名检查应用是否已安装。
+        /// </summary>
+        /// <param name="packageName">包名。</param>
+        /// <returns>已安装返回 true。</returns>
+        public bool IsAppInstalled(string packageName)
+        {
+            if (string.IsNullOrWhiteSpace(packageName))
+            {
+                return false;
+            }
+
+            return GetInstalledPackageNames(true)
+                .Any(name => string.Equals(name, packageName, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

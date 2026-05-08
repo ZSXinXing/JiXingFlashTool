@@ -287,14 +287,9 @@ namespace JiXingFlashTool.Services
                 return it.Serial.Equals(removeDevice.Serial);
             });
 
-            if (device != null)
-            {
-                DeviceItemViewModel deviceItem = MainWindowViewModel.Instance?.DeviceCollection?.FirstOrDefault(it => it != null && it.Serial == device.Serial);
-                if (deviceItem != null && deviceItem.IsKeepWhenDisconnected)
-                {
-                    return;
-                }
-            }
+            if (device == null) return; 
+
+            if (device.IsKeepLink) return;
 
             DeviceEventArgs deviceEventArgs = new DeviceEventArgs(device);
 

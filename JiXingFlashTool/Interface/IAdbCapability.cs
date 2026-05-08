@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace JiXingFlashTool.Interface
         /// <summary>
         /// 执行异步 ADB 指令。
         /// </summary>
-        Task ExecuteRemoteCommandAsync(string command, CancellationToken cancellationToken = default);
+        string ExecuteRemoteCommand(string command, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 获取系统属性。
@@ -43,6 +44,18 @@ namespace JiXingFlashTool.Interface
         bool IsDeviceOnline();
 
         /// <summary>
+        /// 获取当前设备所处状态。
+        /// </summary>
+        /// <returns>设备状态枚举。</returns>
+        JXAdbCore.Enums.DeviceState GetDeviceState();
+
+        /// <summary>
+        /// 判断当前设备是否已经安装可正常开机的系统。
+        /// </summary>
+        /// <returns>已经安装且可正常开机返回 true。</returns>
+        bool HasBootableSystem();
+
+        /// <summary>
         /// 异步执行需要 root 权限的指令。
         /// </summary>
         Task ExecuteRootCommandAsync(string command, CancellationToken cancellationToken = default);
@@ -56,6 +69,15 @@ namespace JiXingFlashTool.Interface
         /// 安装本地 APK 文件。
         /// </summary>
         void InstallApkFromLocalFile(string apkFilePath, bool useRoot = false, IProgress<int> progress = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 执行侧载刷入指令。
+        /// </summary>
+        /// <param name="filePath">本地刷入文件路径。</param>
+        /// <param name="progress">数字进度回调。</param>
+        /// <param name="cancellationToken">取消令牌。</param>
+        /// <returns>指令输出。</returns>
+        string SideloadFile(string filePath, IProgress<int> progress = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 将文本内容写入设备指定路径。
@@ -83,6 +105,12 @@ namespace JiXingFlashTool.Interface
         bool CheckRemoteFileExists(string remotePath, bool useRoot = false);
 
         /// <summary>
+        /// 检查设备端是否存在指定 shell 指令。
+        /// </summary>
+        /// <returns>返回可用的格式化 ext4 指令名；都不存在则返回空字符串。</returns>
+        string GetAvailableExt4FormatCommand();
+
+        /// <summary>
         /// 比较设备文件与本地文件的 MD5 是否一致。
         /// </summary>
         bool IsRemoteFileMd5EqualToLocalFile(string remotePath, string localFilePath, bool useRoot = false);
@@ -96,5 +124,19 @@ namespace JiXingFlashTool.Interface
         /// 检查设备指定路径中的文本内容是否与期望内容一致。
         /// </summary>
         bool IsRemoteFileTextEqual(string remotePath, string expectedContent, bool useRoot = false);
+
+        /// <summary>
+        /// 获取设备中已安装的软件包名。
+        /// </summary>
+        /// <param name="includeSystemPackages">是否包含系统应用包名。</param>
+        /// <returns>已安装的软件包名列表。</returns>
+        IReadOnlyList<string> GetInstalledPackageNames(bool includeSystemPackages = false);
+
+        /// <summary>
+        /// 根据包名检查应用是否已安装。
+        /// </summary>
+        /// <param name="packageName">包名。</param>
+        /// <returns>已安装返回 true。</returns>
+        bool IsAppInstalled(string packageName);
     }
 }

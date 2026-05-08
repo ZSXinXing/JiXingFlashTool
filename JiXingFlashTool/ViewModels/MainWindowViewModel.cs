@@ -521,43 +521,16 @@ namespace JiXingFlashTool.ViewModels
                     EnqueueSingleCommand(selectList, CommandType.RebootDownload);
                     break;
                 case "Wipe":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            deviceItemViewModel.Service.Wipe();
-                        }
-                    });
+                    EnqueueSingleCommand(selectList, CommandType.WipeUserData);
                     break;
                 case "ClearSystem":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            deviceItemViewModel.Service.DeleteSystem();
-                        }
-                    });
+                    EnqueueSingleCommand(selectList, CommandType.WipeSystem);
                     break;
                 case "FormatData":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            deviceItemViewModel.Service.FormatPhone();
-                        }
-                    });
-                    break;
-                case "Sideload":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            deviceItemViewModel.Service.Sideload();
-                        }
-                    });
+                    EnqueueSingleCommand(selectList, CommandType.Format);
                     break;
                 case "FlashFile":
-                    ExecuteProfessionalFileCommand(selectList, "ZIP 文件 (*.zip)|*.zip", (deviceItemViewModel, filePath) => deviceItemViewModel.Service.FlashFile(filePath));
+                    ExecuteProfessionalFileCommand(selectList, "刷入文件 (*.zip;*.apk;*.ps)|*.zip;*.apk;*.ps", EnqueueFlashFileTask);
                     break;
                 case "FlashKernel":
                     ExecuteProfessionalFileCommand(selectList, "IMG 文件 (*.img)|*.img", (deviceItemViewModel, filePath) => deviceItemViewModel.Service.FlashKernel(filePath));
@@ -575,22 +548,10 @@ namespace JiXingFlashTool.ViewModels
                     });
                     break;
                 case "DisableDeveloper":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            AdbService.Instance.ExecuteShellCommand(deviceItemViewModel.Device, "settings put global development_settings_enabled 0", null);
-                        }
-                    });
+                    EnqueueSingleCommand(selectList, CommandType.CloseDeveloperMode);
                     break;
                 case "SkipGuide":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            AdbService.Instance.ExecuteShellCommand(deviceItemViewModel.Device, "settings put secure user_setup_complete 1 && settings put global device_provisioned 1", null);
-                        }
-                    });
+                    EnqueueSingleCommand(selectList, CommandType.SkipGuide);
                     break;
                 case "0":
                     EnqueueSingleCommand(selectList, CommandType.RebootSystem);
@@ -611,18 +572,6 @@ namespace JiXingFlashTool.ViewModels
         /// <param name="commandType">需要执行的指令类型。</param>
         private void EnqueueSingleCommand(List<DeviceItemViewModel> selectList, CommandType commandType)
         {
-            RunOnUiThread(() =>
-            {
-                foreach (var deviceItemViewModel in selectList)
-                {
-                    if (deviceItemViewModel == null)
-                    {
-                        continue;
-                    }
-
-                    deviceItemViewModel.TaskDetailMessage = string.Empty;
-                }
-            });
 
             Task.Run(async () =>
             {
@@ -633,14 +582,28 @@ namespace JiXingFlashTool.ViewModels
                         continue;
                     }
 
+                    deviceItemViewModel.TaskDetailMessage = string.Empty;
+
                     var payload = new SingleCommandPayload(deviceItemViewModel.Device, commandType);
-                    await _taskScheduler.EnqueueAsync(
-                        deviceItemViewModel.Device.Serial,
-                        new SingleCommandTask(),
-                        payload,
-                        detail: commandType.ToString());
+                  _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial,new SingleCommandTask(), payload,detail: commandType.ToString());
                 }
             });
+        }
+
+        /// <summary>
+        /// 将选中的设备批量封装为刷入文件任务入队。
+        /// </summary>
+        /// <param name="deviceItemViewModel">设备项。</param>
+        /// <param name="filePath">本地刷入文件路径。</param>
+        private void EnqueueFlashFileTask(DeviceItemViewModel deviceItemViewModel, string filePath)
+        {
+            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            var payload = new FlashFilePayload(deviceItemViewModel.Device, filePath);
+            _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new FlashFileTask(), payload, detail: "FlashFile");
         }
 
         /// <summary>
@@ -712,6 +675,9 @@ namespace JiXingFlashTool.ViewModels
                     ShowAdbCommandView();
                     break;
                 case "RootDevice":
+                    EnqueueSingleCommand(selectList, CommandType.FlashMagisk);
+                    break;
+                case "CheckRootDevice":
                     EnqueueSingleCommand(selectList, CommandType.FlashMagisk);
                     break;
                 case "CheckSystemUpdate":

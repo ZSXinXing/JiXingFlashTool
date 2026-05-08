@@ -3,7 +3,7 @@
   <Import Condition=" '$(EAZFUSCATOR_NET_HOME)' != '' and Exists('$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets') " Project="$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>10.0</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{528C87A2-2EE0-44CD-8E43-A41225E0E5D0}</ProjectGuid>
@@ -119,8 +119,10 @@
     <Compile Include="Model\ControlMessage.cs" />
     <Compile Include="Model\DeviceInstallModel.cs" />
     <Compile Include="Model\DeviceModel.cs" />
+    <Compile Include="Model\DeviceModel.KeepLink.cs" />
     <Compile Include="Model\EthernetSNModel.cs" />
     <Compile Include="Model\FileModel.cs" />
+    <Compile Include="Model\Payload\FlashFilePayload.cs" />
     <Compile Include="Model\Payload\SingleCommandPayload.cs" />
     <Compile Include="Model\SocketPackageModel.cs" />
     <Compile Include="Model\YuvModel.cs" />
@@ -137,6 +139,7 @@
     <Compile Include="Services\DeviceTaskService.cs" />
     <Compile Include="Services\SQLService.cs" />
     <Compile Include="Services\TCSocketService.cs" />
+    <Compile Include="Tasks\FlashFileTask.cs" />
     <Compile Include="Tasks\FlashRootTask.cs" />
     <Compile Include="Tasks\SingleCommandTask.cs" />
     <Compile Include="TaskCoreBridge\AdbDeviceSession.cs" />
@@ -146,6 +149,7 @@
     <Compile Include="Utils\FileUtil.cs" />
     <Compile Include="Utils\KeycodeHelper.cs" />
     <Compile Include="Utils\IconResources.cs" />
+    <Compile Include="Utils\RecoveryFstabTool.cs" />
     <Compile Include="Utils\StaticConstant.cs" />
     <Compile Include="Utils\VideoStreamDecoder.cs" />
     <Compile Include="Compatibility\IsExternalInit.cs" />
@@ -295,7 +299,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <EmbeddedResource Include="Resources\Magisk.apk" />
+    <None Include="Resources\Magisk.apk">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\scrcpy-server">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

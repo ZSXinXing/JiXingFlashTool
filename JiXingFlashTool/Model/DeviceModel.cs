@@ -21,7 +21,7 @@ namespace JiXingFlashTool.Model
         Offline
     }
 
-    public class DeviceModel : DeviceData
+    public partial class DeviceModel : DeviceData
     {
 
         /// <summary>

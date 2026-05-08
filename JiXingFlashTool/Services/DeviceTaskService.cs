@@ -1,4 +1,5 @@
-﻿using JiXingFlashTool.Enums;
+﻿using JiXingFlashTool.Capability;
+using JiXingFlashTool.Enums;
 using JiXingFlashTool.Extensions;
 using JiXingFlashTool.Interface;
 using JiXingFlashTool.Model;
@@ -283,10 +284,21 @@ namespace JiXingFlashTool.Services
                     // String cmd = $"-s {Device.Serial} shell make_ext4fs /dev/block/platform/{ufsName}/by-name/{userdata}";
                     //  AdbService.Instance.CMDExcute(cmd);
                     //string resultString = receiver.ToString();
+                    string formatCommandName = new AdbCapability(Device).GetAvailableExt4FormatCommand();
 
-                    string formatCmd = $"/dev/block/platform/{ufsName}/by-name/{userdata}";
-                    if (Device.Name == DeviceModelEnum.dreamlte.ToString() || Device.Name == DeviceModelEnum.dream2lte.ToString()) formatCmd = "mke2fs " + formatCmd;
-                    else formatCmd = $"make_ext4fs " + formatCmd;
+                    if (string.IsNullOrWhiteSpace(formatCommandName))
+                    {
+                        if (Device.Name == DeviceModelEnum.dreamlte.ToString() || Device.Name == DeviceModelEnum.dream2lte.ToString())
+                        {
+                            formatCommandName = "mke2fs";
+                        }
+                        else
+                        {
+                            formatCommandName = "make_ext4fs";
+                        }
+                    }
+
+                    string formatCmd = $"{formatCommandName} /dev/block/platform/{ufsName}/by-name/{userdata}";
                     formatCmd = $"-s {Device.Serial} shell {formatCmd}";
                     string result = AdbService.Instance.CMDExcute(formatCmd);
                     Thread.Sleep(1000);
