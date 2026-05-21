@@ -318,6 +318,13 @@ namespace JiXingFlashTool.ItemViewModel
         /// 刷入系统更新包。
         /// </summary>
         public void UpdateSystem(string filePath) => Service.UpdateSystem(filePath);
+
+        /// <summary>
+        /// 刷入系统更新包，并按需清除数据。
+        /// </summary>
+        /// <param name="filePath">更新包路径。</param>
+        /// <param name="wipeData">是否清除数据。</param>
+        public void UpdateSystem(string filePath, bool wipeData) => Service.UpdateSystem(filePath, wipeData);
         /// <summary>
         /// 删除设备中的更新文件。
         /// </summary>

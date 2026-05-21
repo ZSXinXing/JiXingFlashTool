@@ -21,6 +21,21 @@ namespace JiXingFlashTool.Utils
         public static string PhoneSyncFolder = $"sdcard/JX/";
 
         public static string TWRPCommandPath = "/cache/recovery/command";
+
+        /// <summary>
+        /// 根据是否清除数据生成系统更新命令内容。
+        /// </summary>
+        /// <param name="wipeData">是否清除数据。</param>
+        /// <returns>更新命令内容。</returns>
+        public static string BuildUpdateSystemFileContext(bool wipeData)
+        {
+            if (!wipeData)
+            {
+                return "boot-recovery\r\n--update_package=/data/local/tmp/update.zip\r\nreboot";
+            }
+
+            return UpdateSystemFileContext;
+        }
     }
 }
 

@@ -24,6 +24,7 @@
     <Window.Resources>
         <converter:VisibilityBoolConverter x:Key="VisibilityBoolConverter" />
         <converter:InverseVisibilityBoolConverter x:Key="InverseVisibilityBoolConverter" />
+        <converter:BooleanToGridLengthConverter x:Key="BooleanToGridLengthConverter" />
         <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#FAFAFA" />
         <SolidColorBrush x:Key="SidebarBorderBrush" Color="#E0E0E0" />
         <SolidColorBrush x:Key="PageBackgroundBrush" Color="#FFFFFF" />
@@ -143,6 +144,50 @@
                                 <Setter TargetName="RootBorder" Property="Opacity" Value="0.98" />
                             </Trigger>
                         </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateSystemActionButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="87" />
+            <Setter Property="Height" Value="31" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="#5C82FD" />
+            <Setter Property="BorderBrush" Value="#5C82FD" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3.5">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="1.5"
+                                                  ShadowDepth="1"
+                                                  Direction="270"
+                                                  Color="#1A000000"
+                                                  Opacity="1" />
+                            </Border.Effect>
+                            <Grid>
+                                <Image Width="12.25"
+                                       Height="12.25"
+                                       Margin="10.5,6.13,0,0"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Top"
+                                       Source="{x:Static local:IconResources.MaintenanceUpdateIcon}" />
+                                <TextBlock Margin="28.5,4.25,0,0"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Top"
+                                           FontSize="10.5"
+                                           FontWeight="Medium"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           Text="更新文件" />
+                            </Grid>
+                        </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -790,7 +835,8 @@
                                         Height="35"
                                         Margin="0,0,0,7"
                                         Background="#FFF4F4"
-                                        BorderThickness="0">
+                                        BorderThickness="0"
+                                        Command="{Binding ProfessionalModeCommand}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="14" />
@@ -890,7 +936,7 @@
                                         Height="31.5"
                                         Background="Transparent"
                                         BorderThickness="0"
-                                        Command="{Binding SingleScreenCommand}">
+                                        Command="{Binding ProfessionalModeCommand}">
                                     <Viewbox Width="14" Height="14">
                                         <Canvas Width="14" Height="14">
                                             <Path Fill="Transparent" Stroke="#333333" Opacity="0.7" StrokeThickness="1.16667" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M11.6667 7.58333C11.6667 10.5 9.625 11.9583 7.19833 12.8042C7.07126 12.8472 6.93323 12.8452 6.8075 12.7983C4.375 11.9583 2.33333 10.5 2.33333 7.58333V3.5C2.33333 3.34529 2.39479 3.19692 2.50419 3.08752C2.61358 2.97813 2.76196 2.91667 2.91667 2.91667C4.08333 2.91667 5.54167 2.21667 6.55667 1.33C6.68025 1.22442 6.83746 1.1664 7 1.1664C7.16254 1.1664 7.31975 1.22442 7.44333 1.33C8.46417 2.2225 9.91667 2.91667 11.0833 2.91667C11.238 2.91667 11.3864 2.97813 11.4958 3.08752C11.6052 3.19692 11.6667 3.34529 11.6667 3.5V7.58333Z" />
@@ -974,7 +1020,7 @@
             <Grid Grid.Column="1"
                   Background="{StaticResource PageBackgroundBrush}">
             <Grid.RowDefinitions>
-                <RowDefinition Height="142" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="53.5" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="32.5" />
@@ -988,7 +1034,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="28" />
                         <RowDefinition Height="8.75" />
-                        <RowDefinition Height="84.25" />
+                        <RowDefinition Height="{Binding IsProfessionalModeEnabled, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=84.25;24.5}" />
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0">
@@ -1007,9 +1053,9 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="24.5" />
                             <RowDefinition Height="8.75" />
-                            <RowDefinition Height="17.5" />
-                            <RowDefinition Height="7" />
-                            <RowDefinition Height="24.5" />
+                            <RowDefinition Height="{Binding IsProfessionalModeEnabled, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=17.5;0}" />
+                            <RowDefinition Height="{Binding IsProfessionalModeEnabled, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=7;0}" />
+                            <RowDefinition Height="{Binding IsProfessionalModeEnabled, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=24.5;0}" />
                         </Grid.RowDefinitions>
 
                         <Border Grid.RowSpan="5"
@@ -1084,14 +1130,16 @@
                         <StackPanel Grid.Row="2"
                                     Margin="0,0,0,0"
                                     Panel.ZIndex="1"
-                                    Orientation="Horizontal">
-                                <TextBlock Text="TWRP 专业指令" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" />
+                                    Orientation="Horizontal"
+                                    Visibility="{Binding IsProfessionalModeEnabled, Converter={StaticResource VisibilityBoolConverter}}">
+                                <TextBlock Text="专业指令" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" />
                             </StackPanel>
 
                         <StackPanel Grid.Row="4"
                                     Margin="0,0,0,0"
                                     Panel.ZIndex="1"
-                                    Orientation="Horizontal">
+                                    Orientation="Horizontal"
+                                    Visibility="{Binding IsProfessionalModeEnabled, Converter={StaticResource VisibilityBoolConverter}}">
                             <ToggleButton x:Name="ProfessionalRebootDropDownButton"
                                           Style="{StaticResource TwrpDropDownToggleButtonStyle}"
                                           ClickMode="Press"
@@ -1320,6 +1368,12 @@
                                                 ButtonText="刷入文件"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="FlashFile" />
+                            
+                                <Button Margin="7,0,0,0"
+                                        Style="{StaticResource UpdateSystemActionButtonStyle}"
+                                        Command="{Binding UpdateSystemCommand}" />
+                            
+
                                 <control:IconButton
                                                 Height="24.5"
                                                 Margin="7,0,0,0"

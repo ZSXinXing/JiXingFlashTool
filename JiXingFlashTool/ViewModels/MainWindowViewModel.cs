@@ -51,6 +51,7 @@ namespace JiXingFlashTool.ViewModels
         private string _appVersionText = "版本号：v1.0.0";
         private bool _isSelectAll;
         private bool _isSidebarExpanded = true;
+        private bool _isProfessionalModeEnabled;
         private int _listCount;
         private const double SidebarWidthScale = 0.8D;
         private const double SidebarCollapsedWidth = 60D;
@@ -230,6 +231,15 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
+        /// 当前是否已解锁专业模式。
+        /// </summary>
+        public bool IsProfessionalModeEnabled
+        {
+            get => _isProfessionalModeEnabled;
+            set => SetProperty(ref _isProfessionalModeEnabled, value);
+        }
+
+        /// <summary>
         /// 侧边栏当前宽度。
         /// </summary>
         public double SidebarPanelWidth => IsSidebarExpanded ? 223D * SidebarWidthScale : SidebarCollapsedWidth;
@@ -315,6 +325,11 @@ namespace JiXingFlashTool.ViewModels
         /// 打开常用 ADB 命令窗口。
         /// </summary>
         public RelayCommand SystemShowViewCommand => new Lazy<RelayCommand>(() => new RelayCommand(ShowAdbCommandView)).Value;
+
+        /// <summary>
+        /// 打开专业模式登录弹窗。
+        /// </summary>
+        public RelayCommand ProfessionalModeCommand => new Lazy<RelayCommand>(() => new RelayCommand(OpenProfessionalModeDialog)).Value;
 
         /// <summary>
         /// 打开系统更新窗口。
@@ -482,18 +497,42 @@ namespace JiXingFlashTool.ViewModels
                 return;
             }
 
-            using (var openFileDialog = new OpenFileDialog())
+            var viewModel = new UpdateSystemDialogViewModel(selectList, EnqueueUpdateTask);
+            var dialog = new UpdateSystemDialogView
             {
-                openFileDialog.Filter = "更新文件|*.zip";
-                openFileDialog.Multiselect = false;
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    foreach (var deviceItemViewModel in selectList)
-                    {
-                        deviceItemViewModel.UpdateSystem(openFileDialog.FileName);
-                    }
-                }
+                DataContext = viewModel
+            };
+
+            viewModel.Dialog = Dialog.Show(dialog);
+        }
+
+        /// <summary>
+        /// 打开专业模式登录弹窗。
+        /// </summary>
+        private void OpenProfessionalModeDialog()
+        {
+            if (IsProfessionalModeEnabled)
+            {
+                Growl.Info("专业模式已解锁");
+                return;
             }
+
+            var viewModel = new LoginDialogViewModel(EnableProfessionalMode);
+            var dialog = new LoginDialogView
+            {
+                DataContext = viewModel
+            };
+
+            viewModel.Dialog = Dialog.Show(dialog);
+        }
+
+        /// <summary>
+        /// 解锁专业模式并刷新界面状态。
+        /// </summary>
+        private void EnableProfessionalMode()
+        {
+            IsProfessionalModeEnabled = true;
+            Growl.Success("已进入专业模式");
         }
 
         /// <summary>
@@ -533,10 +572,10 @@ namespace JiXingFlashTool.ViewModels
                     ExecuteProfessionalFileCommand(selectList, "刷入文件 (*.zip;*.apk;*.ps)|*.zip;*.apk;*.ps", EnqueueFlashFileTask);
                     break;
                 case "FlashKernel":
-                    ExecuteProfessionalFileCommand(selectList, "IMG 文件 (*.img)|*.img", (deviceItemViewModel, filePath) => deviceItemViewModel.Service.FlashKernel(filePath));
+                    ExecuteProfessionalFileCommand(selectList, "文件 (*.*)|*.*", EnqueueUpdateBootRecoveryTaskForKernel);
                     break;
                 case "UpdateTwrp":
-                    ExecuteProfessionalFileCommand(selectList, "IMG 文件 (*.img)|*.img", (deviceItemViewModel, filePath) => deviceItemViewModel.Service.UpdateTwrp(filePath));
+                    ExecuteProfessionalFileCommand(selectList, "IMG 文件 (*.img)|*.img", EnqueueUpdateBootRecoveryTask);
                     break;
                 case "Decrypt":
                     Task.Run(() =>
@@ -604,6 +643,55 @@ namespace JiXingFlashTool.ViewModels
 
             var payload = new FlashFilePayload(deviceItemViewModel.Device, filePath);
             _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new FlashFileTask(), payload, detail: "FlashFile");
+        }
+
+        /// <summary>
+        /// 将选中的设备封装为系统更新任务入队。
+        /// </summary>
+        /// <param name="deviceItemViewModel">设备项。</param>
+        /// <param name="filePath">本地更新文件路径。</param>
+        /// <param name="wipeData">是否清除用户数据。</param>
+        private void EnqueueUpdateTask(DeviceItemViewModel deviceItemViewModel, string filePath, bool wipeData)
+        {
+            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            var payload = new UpdateTaskPayload(deviceItemViewModel.Device, filePath, wipeData);
+            _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new UpdateTask(), payload, detail: "UpdateTask");
+        }
+
+        /// <summary>
+        /// 将选中的设备批量封装为 Boot / Recovery 更新任务入队。
+        /// </summary>
+        /// <param name="deviceItemViewModel">设备项。</param>
+        /// <param name="filePath">本地镜像路径。</param>
+        private void EnqueueUpdateBootRecoveryTask(DeviceItemViewModel deviceItemViewModel, string filePath)
+        {
+            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            var payload = new UpdateBootRecoveryPayload(deviceItemViewModel.Device, filePath, TWRPCommandType.UpdateTWRP);
+            _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new UpdateBootRecoveryTask(), payload, detail: "UpdateTwrp");
+        }
+
+        /// <summary>
+        /// 将选中的设备批量封装为内核更新任务入队。
+        /// </summary>
+        /// <param name="deviceItemViewModel">设备项。</param>
+        /// <param name="filePath">本地镜像路径。</param>
+        private void EnqueueUpdateBootRecoveryTaskForKernel(DeviceItemViewModel deviceItemViewModel, string filePath)
+        {
+            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            var payload = new UpdateBootRecoveryPayload(deviceItemViewModel.Device, filePath, TWRPCommandType.FlashKernel);
+            _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new UpdateBootRecoveryTask(), payload, detail: "FlashKernel");
         }
 
         /// <summary>

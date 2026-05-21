@@ -442,6 +442,29 @@ namespace JiXingFlashTool.Capability
         }
 
         /// <summary>
+        /// 移除设备端指定文件。
+        /// </summary>
+        /// <param name="remotePath">设备文件路径。</param>
+        /// <param name="useRoot">是否使用 root 权限。</param>
+        public void RemoveRemoteFile(string remotePath, bool useRoot = false)
+        {
+            if (string.IsNullOrWhiteSpace(remotePath))
+            {
+                throw new ArgumentException("设备文件路径不能为空。", nameof(remotePath));
+            }
+
+            string escapedPath = EscapeShellArgument(remotePath);
+            string command = $"rm -f \"{escapedPath}\"";
+            if (useRoot)
+            {
+                ExecuteRootCommand(command);
+                return;
+            }
+
+            ExecuteRemoteCommand(command);
+        }
+
+        /// <summary>
         /// 获取设备端可用的 ext4 格式化指令名。
         /// </summary>
         /// <returns>返回可用指令名；都不存在则返回空字符串。</returns>

@@ -105,6 +105,13 @@ namespace JiXingFlashTool.Interface
         bool CheckRemoteFileExists(string remotePath, bool useRoot = false);
 
         /// <summary>
+        /// 移除设备端指定文件。
+        /// </summary>
+        /// <param name="remotePath">设备文件路径。</param>
+        /// <param name="useRoot">是否使用 root 权限。</param>
+        void RemoveRemoteFile(string remotePath, bool useRoot = false);
+
+        /// <summary>
         /// 检查设备端是否存在指定 shell 指令。
         /// </summary>
         /// <returns>返回可用的格式化 ext4 指令名；都不存在则返回空字符串。</returns>

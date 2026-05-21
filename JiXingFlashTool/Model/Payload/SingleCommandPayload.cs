@@ -1,3 +1,4 @@
+using JiXingFlashTool.Model;
 using JiXingFlashTool.Enums;
 
 namespace JiXingFlashTool.Model.Payload

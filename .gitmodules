@@ -1,0 +1,4 @@
+[submodule "JXAutomatorService"]
+	path = JXAutomatorService
+	url = https://github.com/ZhongshanXinxingNetworkTechnologyCo-Ltd/JXAutomatorService.git
+	branch = 1.0.0_dev

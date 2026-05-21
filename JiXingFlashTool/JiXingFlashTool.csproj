@@ -90,6 +90,7 @@
     </ApplicationDefinition>
     <Compile Include="Converters\DeviceMiniBorderStyleConverter.cs" />
     <Compile Include="Converters\DevicetListStyleConverter.cs" />
+    <Compile Include="Converters\BooleanToGridLengthConverter.cs" />
     <Compile Include="Converters\IndexConverter.cs" />
     <Compile Include="Converters\IntListStrConverter.cs" />
     <Compile Include="Converters\InverseVisibilityBoolConverter.cs" />
@@ -123,6 +124,8 @@
     <Compile Include="Model\EthernetSNModel.cs" />
     <Compile Include="Model\FileModel.cs" />
     <Compile Include="Model\Payload\FlashFilePayload.cs" />
+    <Compile Include="Model\Payload\UpdateBootRecoveryPayload.cs" />
+    <Compile Include="Model\Payload\UpdateTaskPayload.cs" />
     <Compile Include="Model\Payload\SingleCommandPayload.cs" />
     <Compile Include="Model\SocketPackageModel.cs" />
     <Compile Include="Model\YuvModel.cs" />
@@ -144,6 +147,8 @@
     <Compile Include="Tasks\SingleCommandTask.cs" />
     <Compile Include="TaskCoreBridge\AdbDeviceSession.cs" />
     <Compile Include="TaskCoreBridge\AdbDeviceSessionFactory.cs" />
+    <Compile Include="Tasks\UpdateBootRecoveryTask.cs" />
+    <Compile Include="Tasks\UpdateTask.cs" />
     <Compile Include="Utils\CommonTool.cs" />
     <Compile Include="Utils\D3DImageSource.cs" />
     <Compile Include="Utils\FileUtil.cs" />
@@ -166,8 +171,10 @@
     <Compile Include="ViewModels\CommandListViewModel.cs" />
     <Compile Include="ViewModels\DeviceScreenWindowModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\LoginDialogViewModel.cs" />
     <Compile Include="ViewModels\SyncFileProgressViewModel.cs" />
     <Compile Include="ViewModels\SyncFileViewModel.cs" />
+    <Compile Include="ViewModels\UpdateSystemDialogViewModel.cs" />
     <Compile Include="Views\AdbListView.xaml.cs">
       <DependentUpon>AdbListView.xaml</DependentUpon>
     </Compile>
@@ -198,6 +205,9 @@
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\LoginDialogView.xaml.cs">
+      <DependentUpon>LoginDialogView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -208,6 +218,9 @@
     <Compile Include="Views\SyncFileView.xaml.cs">
       <DependentUpon>SyncFileView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\UpdateSystemDialogView.xaml.cs">
+      <DependentUpon>UpdateSystemDialogView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="obj\Debug\App.g.cs" />
     <Compile Include="obj\Debug\GeneratedInternalTypeHelper.g.cs" />
     <Compile Include="obj\Debug\JiXingFlashTool_Content.g.cs" />
@@ -215,9 +228,11 @@
     <Compile Include="obj\Debug\Views\AdbListView.g.cs" />
     <Compile Include="obj\Debug\Views\CommandListView.g.cs" />
     <Compile Include="obj\Debug\Views\DeviceScreenView.g.cs" />
+    <Compile Include="obj\Debug\Views\LoginDialogView.g.cs" />
     <Compile Include="obj\Debug\Views\MainWindow.g.cs" />
     <Compile Include="obj\Debug\Views\SyncFileProgressView.g.cs" />
     <Compile Include="obj\Debug\Views\SyncFileView.g.cs" />
+    <Compile Include="obj\Debug\Views\UpdateSystemDialogView.g.cs" />
     <Compile Include="obj\Debug\Views\AllScreen\AllScreenBottomView.g.cs" />
     <Compile Include="obj\Debug\Views\AllScreen\AllScreenLeftView.g.cs" />
     <Compile Include="obj\Debug\Views\AllScreen\AllScreenTopView.g.cs" />
@@ -248,6 +263,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\LoginDialogView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AllScreen\DeviceScreenWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -269,6 +288,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\SyncFileView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\UpdateSystemDialogView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

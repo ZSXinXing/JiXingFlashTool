@@ -2,7 +2,6 @@ using JiXingFlashTool.Enums;
 using JiXingFlashTool.Interface;
 using JiXingFlashTool.Model.Payload;
 using JiXingFlashTool.Utils;
-using NPOI.OpenXmlFormats.Spreadsheet;
 using System;
 using System.Threading.Tasks;
 using TaskCore.Tasks;
@@ -51,10 +50,10 @@ namespace JiXingFlashTool.Tasks
                 case CommandType.ExecuteShell:
                     break;
                 case CommandType.WipeUserData:
-                    await adb.ExecuteRootCommandAsync("twrp wipe dalvik && twrp wipe cache && twrp wipe data", ctx.CancellationToken);
+                    adb.ExecuteRemoteCommand("twrp wipe dalvik && twrp wipe cache && twrp wipe data", ctx.CancellationToken);
                     break;
                 case CommandType.WipeSystem:
-                    await adb.ExecuteRootCommandAsync("twrp wipe system", ctx.CancellationToken);
+                    adb.ExecuteRemoteCommand("twrp wipe system", ctx.CancellationToken);
                     break;
                 case CommandType.CloseDeveloperMode:
                     ctx.Log?.Invoke(new TaskLog("开始关闭开发者选项"));
@@ -67,17 +66,24 @@ namespace JiXingFlashTool.Tasks
                     await adb.ExecuteRootCommandAsync("settings put secure user_setup_complete 1 && settings put global device_provisioned 1", ctx.CancellationToken);
                     ctx.Log?.Invoke(new TaskLog("跳过向导完成"));
                     break;
-                case CommandType.Format: await Format(ctx);break;
+                case CommandType.Format:
+                    await FormatAsync(ctx);
+                    break;
             }
 
             ctx.Log?.Invoke(new TaskLog($"指令执行完成: {commandType}"));
         }
 
-        private async Task Format(TaskContext<SingleCommandPayload> ctx) {
-
+        /// <summary>
+        /// 执行分区格式化。
+        /// </summary>
+        /// <param name="ctx">任务上下文。</param>
+        /// <returns>异步任务。</returns>
+        private async Task FormatAsync(TaskContext<SingleCommandPayload> ctx)
+        {
             var adb = ctx.Device.GetCapability<IAdbCapability>();
 
-            ctx.Log?.Invoke(new TaskLog("获取资料"));
+            ctx.Log?.Invoke(new TaskLog("获取格式化工具"));
             string ext4 = adb.GetAvailableExt4FormatCommand();
             if (string.IsNullOrEmpty(ext4))
             {
@@ -95,8 +101,9 @@ namespace JiXingFlashTool.Tasks
 
             await Task.Delay(2000, ctx.CancellationToken);
             ctx.Log?.Invoke(new TaskLog("开始格式化"));
-            var formatCommand = $"{ext4} -F {userData}";
-            var result = adb.ExecuteRemoteCommand(formatCommand, ctx.CancellationToken);
+
+            string formatCommand = $"{ext4} -F {userData}";
+            string result = adb.ExecuteRemoteCommand(formatCommand, ctx.CancellationToken);
             if (result.IndexOf("done", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 ctx.Log?.Invoke(new TaskLog("格式成功"));

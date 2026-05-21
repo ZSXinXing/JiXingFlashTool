@@ -485,7 +485,17 @@ namespace JiXingFlashTool.Services
         #endregion
 
         #region 更新系统资料
-        public void UpdateSystem(string filePath) {
+        public void UpdateSystem(string filePath)
+        {
+            UpdateSystem(filePath, true);
+        }
+
+        /// <summary>
+        /// 刷入系统更新包，并按需写入清除数据指令。
+        /// </summary>
+        /// <param name="filePath">更新文件路径。</param>
+        /// <param name="wipeData">是否清除数据。</param>
+        public void UpdateSystem(string filePath, bool wipeData) {
             if (Device.State != JXAdbCore.Enums.DeviceState.Online)
             {
                 OB.TaskDetailMessage = $"手机不在系统";
@@ -528,7 +538,7 @@ namespace JiXingFlashTool.Services
                     if (Device.RootType == SystemRootType.Shell)
                     {
 
-                        AdbService.Instance.CreateFile(Device, StaticConstant.UpdateSystemFileContext, StaticConstant.UpdateSystemCommandPath);
+                        AdbService.Instance.CreateFile(Device, StaticConstant.BuildUpdateSystemFileContext(wipeData), StaticConstant.UpdateSystemCommandPath);
                         fileExist = AdbService.Instance.FileExist(Device, StaticConstant.UpdateSystemCommandPath);
                         if (fileExist == false)
                         {
@@ -540,7 +550,7 @@ namespace JiXingFlashTool.Services
                     {
                         string updateCommand = "/data/local/tmp/command";
                         //创建
-                        bool createResult = AdbService.Instance.CreateFile(Device, StaticConstant.UpdateSystemFileContext, updateCommand);
+                        bool createResult = AdbService.Instance.CreateFile(Device, StaticConstant.BuildUpdateSystemFileContext(wipeData), updateCommand);
                         AdbService.Instance.ExecuteRemoteCommand($"su -c mv {updateCommand} {StaticConstant.UpdateSystemCommandPath}",Device);
                         //然后移动
                         fileExist = AdbService.Instance.FileExist(Device, StaticConstant.UpdateSystemCommandPath);
