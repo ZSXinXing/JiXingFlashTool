@@ -1,31 +1,43 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
+using JiXingFlashTool.Enums;
 using JiXingFlashTool.ItemViewModel.Odin;
+using JiXingFlashTool.Model.Payload;
+using JiXingFlashTool.TaskCoreBridge;
+using JiXingFlashTool.Tasks;
 using JiXingFlashTool.Views.Odin;
 using JXHeimdall.Models;
 using JXHeimdall.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Management;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using TaskCore.Scheduling;
+using TaskCore.Sessions;
+using TaskCore.Tasks;
 
 namespace JiXingFlashTool.ViewModels.Odin
 {
     /// <summary>
-    /// Odin 刷机页面 ViewModel，负责 Download 设备列表、固件分配和 Heimdall 刷机流程编排。
+    /// Odin 刷机页面 ViewModel，负责 Download 设备列表、固件分配和 TaskCore 刷机任务入队。
     /// </summary>
     public sealed class OdinFlashViewModel : ObservableObject
     {
         private readonly HeimdallProcessService _processService = new HeimdallProcessService();
-        private readonly HeimdallFirmwarePackageService _firmwarePackageService = new HeimdallFirmwarePackageService();
+        private readonly IDeviceTaskScheduler _taskScheduler;
+        private readonly Dictionary<string, HeimdallDeviceModel> _downloadDevicesByTaskId = new Dictionary<string, HeimdallDeviceModel>(StringComparer.OrdinalIgnoreCase);
+        private ManagementEventWatcher _downloadDeviceChangeWatcher;
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private string _searchKeyword = string.Empty;
         private bool _isLoading;
         private bool _isFlashing;
         private bool _isSelectAll;
+        private int _downloadDeviceRefreshVersion;
         private string _summaryText = "共 0 台设备 · 等待 0 台 · 刷机中 0 台 · 完成 0 台";
 
         /// <summary>
@@ -34,13 +46,16 @@ namespace JiXingFlashTool.ViewModels.Odin
         public OdinFlashViewModel()
         {
             DeviceService = new HeimdallDeviceService(_processService);
-            PitService = new HeimdallPitService(_processService);
-            FlashService = new HeimdallFlashService(_processService, PitService, _firmwarePackageService);
+            var sessionFactory = new HeimdallDeviceSessionFactory(ResolveDeviceByTaskId);
+            _taskScheduler = new DeviceTaskScheduler(new EphemeralDeviceSessionProvider(sessionFactory));
+            _taskScheduler.Log += OnTaskSchedulerLog;
+            _taskScheduler.TaskStateChanged += OnTaskStateChanged;
             RefreshDevicesCommand = new AsyncRelayCommand(RefreshDevicesAsync);
             OpenFirmwareDialogCommand = new RelayCommand(OpenFirmwareDialog, HasSelectedDevices);
             StopSelectedDevicesCommand = new RelayCommand(StopSelectedDevices, HasSelectedDevices);
             StartFlashCommand = new AsyncRelayCommand(StartFlashAsync, CanStartFlash);
             FlashTwrpCommand = new AsyncRelayCommand(FlashTwrpAsync, CanStartTwrpFlash);
+            StartDownloadDeviceChangeWatcher();
         }
 
         /// <summary>
@@ -49,22 +64,12 @@ namespace JiXingFlashTool.ViewModels.Odin
         public ObservableCollection<OdinDeviceItemViewModel> Devices { get; } = new ObservableCollection<OdinDeviceItemViewModel>();
 
         /// <summary>
-        /// Heimdall 设备服务。
+        /// Heimdall 设备扫描服务。
         /// </summary>
         public HeimdallDeviceService DeviceService { get; }
 
         /// <summary>
-        /// Heimdall PIT 服务。
-        /// </summary>
-        public HeimdallPitService PitService { get; }
-
-        /// <summary>
-        /// Heimdall 刷机服务。
-        /// </summary>
-        public HeimdallFlashService FlashService { get; }
-
-        /// <summary>
-        /// 搜索关键字。
+        /// 搜索关键字，保留属性以兼容页面旧绑定。
         /// </summary>
         public string SearchKeyword
         {
@@ -73,7 +78,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         }
 
         /// <summary>
-        /// 是否正在加载设备列表。
+        /// 是否正在加载 Download 设备列表。
         /// </summary>
         public bool IsLoading
         {
@@ -82,7 +87,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         }
 
         /// <summary>
-        /// 是否正在执行刷机流程。
+        /// 是否存在正在执行或排队的 Odin 刷机任务。
         /// </summary>
         public bool IsFlashing
         {
@@ -124,7 +129,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         public int SelectedDeviceCount => Devices.Count(item => item.IsSelected);
 
         /// <summary>
-        /// 是否显示选择固件按钮。
+        /// 是否存在已选中设备。
         /// </summary>
         public bool HasSelectedDevicesForFirmware => SelectedDeviceCount > 0;
 
@@ -158,24 +163,24 @@ namespace JiXingFlashTool.ViewModels.Odin
         public RelayCommand OpenFirmwareDialogCommand { get; }
 
         /// <summary>
-        /// 停止当前选中设备刷机流程命令。
+        /// 停止当前选中设备刷机任务命令。
         /// </summary>
         public RelayCommand StopSelectedDevicesCommand { get; }
 
         /// <summary>
-        /// 开始普通 Odin 固件刷入命令。
+        /// 开始普通 Odin 固件刷入命令，完成后由 Heimdall 默认流程重启。
         /// </summary>
         public AsyncRelayCommand StartFlashCommand { get; }
 
         /// <summary>
-        /// 按 TWRP 流程刷入并进入 Recovery 命令。
+        /// 刷入 TWRP 并进入 Recovery 命令。
         /// </summary>
         public AsyncRelayCommand FlashTwrpCommand { get; }
 
         /// <summary>
         /// 刷新 Download 模式设备列表。
         /// </summary>
-        /// <returns>异步任务。</returns>
+        /// <returns>异步刷新任务。</returns>
         public async Task RefreshDevicesAsync()
         {
             IsLoading = true;
@@ -183,14 +188,27 @@ namespace JiXingFlashTool.ViewModels.Odin
             {
                 var devices = await DeviceService.GetDownloadModeDevicesAsync(_cancellationTokenSource.Token);
                 Devices.Clear();
+                _downloadDevicesByTaskId.Clear();
                 foreach (var device in devices)
                 {
                     var item = new OdinDeviceItemViewModel(device);
+                    _downloadDevicesByTaskId[GetTaskDeviceId(item)] = device;
                     item.PropertyChanged += (_, args) =>
                     {
                         if (args.PropertyName == nameof(OdinDeviceItemViewModel.IsSelected))
                         {
                             RefreshSelectionState();
+                            return;
+                        }
+
+                        if (args.PropertyName == nameof(OdinDeviceItemViewModel.ApFilePath) ||
+                            args.PropertyName == nameof(OdinDeviceItemViewModel.BlFilePath) ||
+                            args.PropertyName == nameof(OdinDeviceItemViewModel.TwrpFilePath) ||
+                            args.PropertyName == nameof(OdinDeviceItemViewModel.CpFilePath) ||
+                            args.PropertyName == nameof(OdinDeviceItemViewModel.CscFilePath) ||
+                            args.PropertyName == nameof(OdinDeviceItemViewModel.UserdataFilePath))
+                        {
+                            RefreshCommandState();
                         }
                     };
                     Devices.Add(item);
@@ -211,6 +229,22 @@ namespace JiXingFlashTool.ViewModels.Odin
         }
 
         /// <summary>
+        /// 释放 Odin 页面设备监听资源，避免页面卸载后继续持有 WMI 事件订阅。
+        /// </summary>
+        public void Dispose()
+        {
+            try
+            {
+                _downloadDeviceChangeWatcher?.Stop();
+                _downloadDeviceChangeWatcher?.Dispose();
+                _downloadDeviceChangeWatcher = null;
+            }
+            catch (ManagementException)
+            {
+            }
+        }
+
+        /// <summary>
         /// 打开固件选择弹窗，并把选择结果分配给当前选中设备。
         /// </summary>
         private void OpenFirmwareDialog()
@@ -222,19 +256,22 @@ namespace JiXingFlashTool.ViewModels.Odin
                 return;
             }
 
-            var viewModel = new OdinFirmwareSelectionDialogViewModel(selectedDevices.Count, dialogViewModel =>
+            var viewModel = new OdinFirmwareSelectionDialogViewModel(selectedDevices.Count, async dialogViewModel =>
             {
                 foreach (var device in selectedDevices)
                 {
                     device.AssignFirmware(
                         dialogViewModel.BlFilePath,
                         dialogViewModel.ApFilePath,
+                        dialogViewModel.TwrpFilePath,
+                        dialogViewModel.CpFilePath,
                         dialogViewModel.CscFilePath,
                         dialogViewModel.UserdataFilePath);
                 }
 
                 RefreshCommandState();
                 RefreshSummary();
+                await EnqueueSelectedDevicesAsync(ResolveFlashMode(dialogViewModel));
             });
             var view = new OdinFirmwareSelectionDialogView
             {
@@ -244,7 +281,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         }
 
         /// <summary>
-        /// 停止当前选中设备的刷机流程并更新列表状态。
+        /// 停止当前选中设备的 TaskCore Odin 刷机任务。
         /// </summary>
         private void StopSelectedDevices()
         {
@@ -259,9 +296,13 @@ namespace JiXingFlashTool.ViewModels.Odin
             _cancellationTokenSource = new CancellationTokenSource();
             foreach (var device in selectedDevices)
             {
+                var taskDeviceId = GetTaskDeviceId(device);
+                _ = _taskScheduler.CancelCurrentAsync(taskDeviceId);
+                CancelQueuedTasks(taskDeviceId);
                 device.StatusText = "已停止";
             }
 
+            IsFlashing = Devices.Any(IsDeviceTaskActive);
             RefreshCommandState();
             RefreshSummary();
         }
@@ -281,7 +322,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// <returns>可刷入时返回 true。</returns>
         private bool CanStartFlash()
         {
-            return !IsFlashing && Devices.Any(item => item.IsSelected && !string.IsNullOrWhiteSpace(item.BlFilePath) && !string.IsNullOrWhiteSpace(item.ApFilePath));
+            return !IsFlashing && Devices.Any(item => item.IsSelected && !string.IsNullOrWhiteSpace(item.ApFilePath));
         }
 
         /// <summary>
@@ -294,29 +335,29 @@ namespace JiXingFlashTool.ViewModels.Odin
         }
 
         /// <summary>
-        /// 启动普通 Odin 固件刷入流程。
+        /// 启动普通 Odin 固件刷入任务。
         /// </summary>
-        /// <returns>异步任务。</returns>
+        /// <returns>异步入队任务。</returns>
         private async Task StartFlashAsync()
         {
-            await FlashSelectedDevicesAsync(false);
+            await EnqueueSelectedDevicesAsync(OdinFlashMode.FirmwareReboot);
         }
 
         /// <summary>
-        /// 启动 TWRP 刷入流程。
+        /// 启动 TWRP 刷入并进入 Recovery 任务。
         /// </summary>
-        /// <returns>异步任务。</returns>
+        /// <returns>异步入队任务。</returns>
         private async Task FlashTwrpAsync()
         {
-            await FlashSelectedDevicesAsync(true);
+            await EnqueueSelectedDevicesAsync(OdinFlashMode.TwrpRebootRecovery);
         }
 
         /// <summary>
-        /// 对当前选中设备执行刷机流程。
+        /// 将当前选中设备的 Odin 刷机任务加入 TaskCore 队列。
         /// </summary>
-        /// <param name="twrpMode">是否按 TWRP 模式刷入。</param>
-        /// <returns>异步任务。</returns>
-        private async Task FlashSelectedDevicesAsync(bool twrpMode)
+        /// <param name="flashMode">刷机模式。</param>
+        /// <returns>异步入队任务。</returns>
+        private async Task EnqueueSelectedDevicesAsync(OdinFlashMode flashMode)
         {
             var selectedDevices = Devices.Where(item => item.IsSelected).ToList();
             if (selectedDevices.Count == 0)
@@ -330,66 +371,216 @@ namespace JiXingFlashTool.ViewModels.Odin
             {
                 foreach (var device in selectedDevices)
                 {
-                    device.StatusText = "刷机中";
-                    var request = BuildRequest(device, twrpMode);
-                    var result = twrpMode
-                        ? await FlashService.FlashTwrpAndBootRecoveryAsync(request, _cancellationTokenSource.Token)
-                        : await FlashService.FlashFirmwareAsync(request, _cancellationTokenSource.Token);
-                    device.StatusText = result.IsSuccess ? "完成" : "失败";
+                    device.StatusText = "等待刷机";
+                    await _taskScheduler.EnqueueAsync(
+                        GetTaskDeviceId(device),
+                        new OdinFlashTask(),
+                        BuildPayload(device, flashMode),
+                        detail: flashMode == OdinFlashMode.TwrpRebootRecovery ? "TWRP-Recovery" : "Firmware-Reboot");
                 }
 
                 RefreshSummary();
             }
             catch (Exception ex)
             {
-                Growl.Error("刷机流程失败：" + ex.Message);
+                Growl.Error("刷机任务入队失败：" + ex.Message);
+                IsFlashing = Devices.Any(IsDeviceTaskActive);
             }
             finally
             {
-                IsFlashing = false;
                 RefreshCommandState();
             }
         }
 
         /// <summary>
-        /// 根据设备固件分配构建 Heimdall 刷机请求。
+        /// 根据弹窗选择内容判断本次刷入模式，单独选择 TWRP AP 包时进入 TWRP Recovery 流程。
         /// </summary>
-        /// <param name="device">待刷入设备。</param>
-        /// <param name="twrpMode">是否为 TWRP 刷入模式。</param>
-        /// <returns>Heimdall 刷机请求。</returns>
-        private HeimdallFlashRequest BuildRequest(OdinDeviceItemViewModel device, bool twrpMode)
+        /// <param name="dialogViewModel">固件选择弹窗 ViewModel。</param>
+        /// <returns>本次 Odin 刷机模式。</returns>
+        private static OdinFlashMode ResolveFlashMode(OdinFirmwareSelectionDialogViewModel dialogViewModel)
         {
-            var request = new HeimdallFlashRequest
+            var isOnlyApSelected =
+                !dialogViewModel.HasBlFile &&
+                dialogViewModel.HasApFile &&
+                !dialogViewModel.HasTwrpFile &&
+                !dialogViewModel.HasCpFile &&
+                !dialogViewModel.HasCscFile &&
+                !dialogViewModel.HasUserdataFile;
+
+            if (isOnlyApSelected &&
+                (dialogViewModel.ApFileName.IndexOf("twrp", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 dialogViewModel.ApFileName.EndsWith(".img", StringComparison.OrdinalIgnoreCase)))
             {
-                Device = device.Device,
-                RebootToRecoveryAfterFlash = twrpMode,
-                Log = message => UpdateDeviceStatus(device, message)
-            };
-            if (!twrpMode && !string.IsNullOrWhiteSpace(device.BlFilePath))
-            {
-                request.FirmwareFiles[HeimdallFirmwareSlot.BL] = device.BlFilePath;
+                return OdinFlashMode.TwrpRebootRecovery;
             }
 
-            if (!string.IsNullOrWhiteSpace(device.ApFilePath))
-            {
-                request.FirmwareFiles[twrpMode ? HeimdallFirmwareSlot.TWRP : HeimdallFirmwareSlot.AP] = device.ApFilePath;
-            }
-
-            if (!twrpMode && !string.IsNullOrWhiteSpace(device.CscFilePath))
-            {
-                request.FirmwareFiles[HeimdallFirmwareSlot.CSC] = device.CscFilePath;
-            }
-
-            if (!twrpMode && !string.IsNullOrWhiteSpace(device.UserdataFilePath))
-            {
-                request.FirmwareFiles[HeimdallFirmwareSlot.USERDATA] = device.UserdataFilePath;
-            }
-
-            return request;
+            return OdinFlashMode.FirmwareReboot;
         }
 
         /// <summary>
-        /// 在 UI 线程更新单台设备刷机状态，避免 Heimdall 后台输出回调跨线程触发绑定通知。
+        /// 根据设备固件分配构建 Odin 刷机任务参数。
+        /// </summary>
+        /// <param name="device">待刷入设备。</param>
+        /// <param name="flashMode">刷机模式。</param>
+        /// <returns>Odin 刷机任务参数。</returns>
+        private static OdinFlashPayload BuildPayload(OdinDeviceItemViewModel device, OdinFlashMode flashMode)
+        {
+            return new OdinFlashPayload(
+                device.Device,
+                device.BlFilePath,
+                device.ApFilePath,
+                device.TwrpFilePath,
+                device.CpFilePath,
+                device.CscFilePath,
+                device.UserdataFilePath,
+                flashMode);
+        }
+
+        /// <summary>
+        /// 接收 TaskCore 日志并同步到 Odin 设备行。
+        /// </summary>
+        /// <param name="deviceId">TaskCore 设备标识。</param>
+        /// <param name="log">任务日志。</param>
+        private void OnTaskSchedulerLog(string deviceId, TaskLog log)
+        {
+            RunOnUiThread(() => UpdateDeviceStatus(FindDeviceByTaskId(deviceId), GetTaskLogDisplayMessage(log)));
+        }
+
+        /// <summary>
+        /// 获取 TaskCore 日志的列表展示文本，失败日志优先显示异常详情而不是通用 Error。
+        /// </summary>
+        /// <param name="log">TaskCore 任务日志。</param>
+        /// <returns>适合任务详情列显示的文本。</returns>
+        private static string GetTaskLogDisplayMessage(TaskLog log)
+        {
+            if (log == null)
+            {
+                return string.Empty;
+            }
+
+            if (string.Equals(log.Message, "Error", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrWhiteSpace(log.Level))
+            {
+                var firstLine = log.Level
+                    .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None)
+                    .FirstOrDefault();
+                return NormalizeTaskDetailMessage(string.IsNullOrWhiteSpace(firstLine) ? log.Message : firstLine);
+            }
+
+            return NormalizeTaskDetailMessage(log.Message ?? string.Empty);
+        }
+
+        /// <summary>
+        /// 清理 TaskCore 异常日志中的类型前缀，只保留 Odin 页面需要展示的任务详情。
+        /// </summary>
+        /// <param name="message">原始任务日志。</param>
+        /// <returns>可直接展示给用户的任务详情。</returns>
+        private static string NormalizeTaskDetailMessage(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return string.Empty;
+            }
+
+            const string invalidOperationPrefix = "System.InvalidOperationException: ";
+            return message.StartsWith(invalidOperationPrefix, StringComparison.Ordinal)
+                ? message.Substring(invalidOperationPrefix.Length)
+                : message;
+        }
+
+        /// <summary>
+        /// 接收 TaskCore 状态变更并刷新 Odin 设备行状态。
+        /// </summary>
+        /// <param name="args">任务状态变更参数。</param>
+        private void OnTaskStateChanged(TaskStateChangedEvent args)
+        {
+            RunOnUiThread(() =>
+            {
+                var device = FindDeviceByTaskId(args.DeviceId);
+                if (device == null)
+                {
+                    return;
+                }
+
+                device.StatusText = ConvertTaskStateToStatusText(args.State, args.Message);
+                if (args.State == DeviceTaskState.Completed || args.State == DeviceTaskState.Failed || args.State == DeviceTaskState.Canceled)
+                {
+                    IsFlashing = Devices.Any(IsDeviceTaskActive);
+                    RefreshSummary();
+                    RefreshCommandState();
+                    ScheduleDownloadDeviceRefresh();
+                }
+            });
+        }
+
+        /// <summary>
+        /// 启动 Windows 设备变更监听，用于在 USB 插拔或手机离开 Download 模式后刷新 Odin 设备列表。
+        /// </summary>
+        private void StartDownloadDeviceChangeWatcher()
+        {
+            try
+            {
+                _downloadDeviceChangeWatcher = new ManagementEventWatcher(
+                    new WqlEventQuery("SELECT * FROM Win32_DeviceChangeEvent WHERE EventType = 2 OR EventType = 3"));
+                _downloadDeviceChangeWatcher.EventArrived += (_, __) => ScheduleDownloadDeviceRefresh();
+                _downloadDeviceChangeWatcher.Start();
+            }
+            catch (ManagementException)
+            {
+            }
+        }
+
+        /// <summary>
+        /// 延迟刷新 Download 设备列表，合并短时间内连续的 USB 设备变更事件。
+        /// </summary>
+        private void ScheduleDownloadDeviceRefresh()
+        {
+            var refreshVersion = Interlocked.Increment(ref _downloadDeviceRefreshVersion);
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(1200).ConfigureAwait(false);
+                if (refreshVersion != _downloadDeviceRefreshVersion)
+                {
+                    return;
+                }
+
+                RunOnUiThread(() =>
+                {
+                    if (!IsFlashing)
+                    {
+                        _ = RefreshDevicesAsync();
+                    }
+                });
+            });
+        }
+
+        /// <summary>
+        /// 将 TaskCore 状态转换为 Odin 列表状态文本。
+        /// </summary>
+        /// <param name="state">任务状态。</param>
+        /// <param name="message">状态消息。</param>
+        /// <returns>列表状态文本。</returns>
+        private static string ConvertTaskStateToStatusText(DeviceTaskState state, string message)
+        {
+            switch (state)
+            {
+                case DeviceTaskState.Waiting:
+                    return "等待刷机";
+                case DeviceTaskState.Running:
+                    return "刷机中";
+                case DeviceTaskState.Completed:
+                    return "完成";
+                case DeviceTaskState.Canceled:
+                    return "已停止";
+                case DeviceTaskState.Failed:
+                    return string.IsNullOrWhiteSpace(message) ? "失败" : message;
+                default:
+                    return message ?? string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// 在 UI 线程更新单台设备刷机状态。
         /// </summary>
         /// <param name="device">设备项。</param>
         /// <param name="message">状态消息。</param>
@@ -400,14 +591,74 @@ namespace JiXingFlashTool.ViewModels.Odin
                 return;
             }
 
-            var dispatcher = Application.Current?.Dispatcher;
-            if (dispatcher == null || dispatcher.CheckAccess())
+            RunOnUiThread(() => device.StatusText = message);
+        }
+
+        /// <summary>
+        /// 取消指定设备队列中的未开始任务。
+        /// </summary>
+        /// <param name="taskDeviceId">TaskCore 设备标识。</param>
+        private void CancelQueuedTasks(string taskDeviceId)
+        {
+            var snapshot = _taskScheduler.GetSnapshot(taskDeviceId);
+            foreach (var queuedItem in snapshot.Queued)
             {
-                device.StatusText = message;
-                return;
+                _ = _taskScheduler.CancelQueuedAsync(taskDeviceId, queuedItem.Id);
+            }
+        }
+
+        /// <summary>
+        /// 判断指定设备是否仍有正在执行或排队的任务。
+        /// </summary>
+        /// <param name="device">设备项。</param>
+        /// <returns>存在活跃任务时返回 true。</returns>
+        private bool IsDeviceTaskActive(OdinDeviceItemViewModel device)
+        {
+            var snapshot = _taskScheduler.GetSnapshot(GetTaskDeviceId(device));
+            return snapshot.RunningId.HasValue || snapshot.Queued.Count > 0;
+        }
+
+        /// <summary>
+        /// 根据 TaskCore 设备标识查找 Odin 设备行。
+        /// </summary>
+        /// <param name="taskDeviceId">TaskCore 设备标识。</param>
+        /// <returns>匹配的 Odin 设备行。</returns>
+        private OdinDeviceItemViewModel FindDeviceByTaskId(string taskDeviceId)
+        {
+            return Devices.FirstOrDefault(item => string.Equals(GetTaskDeviceId(item), taskDeviceId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// 根据 TaskCore 设备标识解析 Download 模式设备模型。
+        /// </summary>
+        /// <param name="taskDeviceId">TaskCore 设备标识。</param>
+        /// <returns>匹配的 Download 设备模型。</returns>
+        private HeimdallDeviceModel ResolveDeviceByTaskId(string taskDeviceId)
+        {
+            return !string.IsNullOrWhiteSpace(taskDeviceId) && _downloadDevicesByTaskId.TryGetValue(taskDeviceId, out var device)
+                ? device
+                : null;
+        }
+
+        /// <summary>
+        /// 获取 Download 设备在 TaskCore 中使用的稳定标识。
+        /// </summary>
+        /// <param name="device">Odin 设备行。</param>
+        /// <returns>TaskCore 设备标识。</returns>
+        private static string GetTaskDeviceId(OdinDeviceItemViewModel device)
+        {
+            var downloadDevice = device?.Device;
+            if (!string.IsNullOrWhiteSpace(downloadDevice?.InstanceId))
+            {
+                return downloadDevice.InstanceId;
             }
 
-            dispatcher.BeginInvoke(new Action(() => device.StatusText = message));
+            if (!string.IsNullOrWhiteSpace(downloadDevice?.ContainerId))
+            {
+                return downloadDevice.ContainerId;
+            }
+
+            return downloadDevice?.DisplayName ?? string.Empty;
         }
 
         /// <summary>
@@ -439,10 +690,31 @@ namespace JiXingFlashTool.ViewModels.Odin
         private void RefreshSummary()
         {
             var totalCount = Devices.Count;
-            var flashingCount = Devices.Count(item => item.StatusText == "刷机中");
+            var flashingCount = Devices.Count(IsDeviceTaskActive);
             var finishedCount = Devices.Count(item => item.StatusText == "完成");
             var waitingCount = totalCount - flashingCount - finishedCount;
             SummaryText = $"共 {totalCount} 台设备 · 等待 {waitingCount} 台 · 刷机中 {flashingCount} 台 · 完成 {finishedCount} 台";
+        }
+
+        /// <summary>
+        /// 在 UI 线程执行界面更新。
+        /// </summary>
+        /// <param name="action">需要执行的界面更新。</param>
+        private static void RunOnUiThread(Action action)
+        {
+            if (action == null)
+            {
+                return;
+            }
+
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null || dispatcher.CheckAccess())
+            {
+                action();
+                return;
+            }
+
+            dispatcher.BeginInvoke(action);
         }
     }
 }

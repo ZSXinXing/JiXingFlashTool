@@ -33,7 +33,7 @@ namespace JXHeimdall.Services
         /// </summary>
         /// <param name="cancellationToken">取消令牌。</param>
         /// <returns>Download 模式设备列表。</returns>
-        public async Task<IReadOnlyList<HeimdallDeviceModel>> GetDownloadModeDevicesAsync(CancellationToken cancellationToken)
+        public Task<IReadOnlyList<HeimdallDeviceModel>> GetDownloadModeDevicesAsync(CancellationToken cancellationToken)
         {
             var candidates = new List<HeimdallDeviceModel>();
             var modemDisplayNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -86,12 +86,7 @@ namespace JXHeimdall.Services
                 devices[index].DisplayIndex = index + 1;
             }
 
-            if (devices.Count == 1 && _processService.IsAvailable)
-            {
-                devices[0].IsHeimdallDetected = await DetectAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            return devices;
+            return Task.FromResult<IReadOnlyList<HeimdallDeviceModel>>(devices);
         }
 
         /// <summary>
@@ -111,7 +106,7 @@ namespace JXHeimdall.Services
         /// </summary>
         /// <param name="instanceId">设备实例标识。</param>
         /// <param name="name">设备显示名称。</param>
-        /// <param name="service">设备服务名。</param>
+        /// <param name="service">设备服务名称。</param>
         /// <returns>可能是 Download 主设备时返回 true。</returns>
         private static bool LooksLikeDownloadMode(string instanceId, string name, string service)
         {
@@ -132,7 +127,7 @@ namespace JXHeimdall.Services
         /// </summary>
         /// <param name="instanceId">设备实例标识。</param>
         /// <param name="name">设备显示名称。</param>
-        /// <param name="service">设备服务名。</param>
+        /// <param name="service">设备服务名称。</param>
         /// <returns>是 Modem 接口时返回 true。</returns>
         private static bool LooksLikeModemInterface(string instanceId, string name, string service)
         {
@@ -247,7 +242,7 @@ namespace JXHeimdall.Services
         }
 
         /// <summary>
-        /// 安全读取 WMI 属性，避免部分 Windows 版本缺少属性时抛出“找不到”异常。
+        /// 安全读取 WMI 属性，避免部分 Windows 版本缺少属性时抛出异常。
         /// </summary>
         /// <param name="managementObject">WMI 设备对象。</param>
         /// <param name="propertyName">属性名。</param>

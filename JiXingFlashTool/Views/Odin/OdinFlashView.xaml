@@ -1,4 +1,4 @@
-<UserControl x:Class="JiXingFlashTool.Views.Odin.OdinFlashView"
+﻿<UserControl x:Class="JiXingFlashTool.Views.Odin.OdinFlashView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converter="clr-namespace:JiXingFlashTool.Converters"
@@ -18,6 +18,7 @@
             <Setter Property="TextAlignment" Value="Center" />
             <Setter Property="TextTrimming" Value="CharacterEllipsis" />
             <Setter Property="TextWrapping" Value="NoWrap" />
+            <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}" />
         </Style>
 
         <Style x:Key="OdinMutedCellTextStyle" TargetType="TextBlock" BasedOn="{StaticResource OdinCellTextStyle}">
@@ -154,6 +155,8 @@
                           IsReadOnly="False"
                           EnableRowVirtualization="True"
                           EnableColumnVirtualization="True"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto"
                           HorizontalGridLinesBrush="#80E0E0E0"
                           BorderThickness="0">
                     <DataGrid.Resources>
@@ -225,35 +228,26 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="序号" Width="78" IsReadOnly="True">
+                        <DataGridTemplateColumn Header="序号" Width="58" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding DisplayIndex, StringFormat={}{0:00}}" Style="{StaticResource OdinCellTextStyle}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="设备" Width="360" IsReadOnly="True">
+                        <DataGridTemplateColumn Header="设备" Width="190" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Serial}" Style="{StaticResource OdinCellTextStyle}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="连接方式" Width="105" IsReadOnly="True">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border Height="21" Padding="8.75,0" Background="#1A5C82FD" CornerRadius="10.5" HorizontalAlignment="Center">
-                                        <TextBlock Text="{Binding ConnectionType}" FontSize="10.5" FontWeight="Medium" Foreground="#5C82FD" VerticalAlignment="Center" />
-                                    </Border>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="BL" Width="65" Binding="{Binding BlFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="AP" Width="66" Binding="{Binding ApFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="CSC" Width="76" Binding="{Binding CscFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="USERDATA" Width="110" Binding="{Binding UserdataFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="状态 / 进度" Width="110" Binding="{Binding StatusText}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="操作" Width="78" Binding="{Binding OperationText}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="BL" Width="1.05*" Binding="{Binding BlFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="AP" Width="1.35*" Binding="{Binding ApFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="CP" Width="1.35*" Binding="{Binding CpFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="CSC" Width="1.05*" Binding="{Binding CscFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="USERDATA" Width="1.1*" Binding="{Binding UserdataFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="任务详情" Width="2.15*" Binding="{Binding StatusText}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>
@@ -275,3 +269,4 @@
         </Border>
     </Grid>
 </UserControl>
+

@@ -90,6 +90,7 @@ namespace JXHeimdall.Services
                 };
 
                 log?.Invoke("heimdall " + arguments);
+                HeimdallDebugLogService.Write("Process", "heimdall " + arguments);
                 process.Start();
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
@@ -101,7 +102,7 @@ namespace JXHeimdall.Services
                 }
 
                 stopwatch.Stop();
-                return new HeimdallProcessResult
+                var result = new HeimdallProcessResult
                 {
                     ExitCode = process.ExitCode,
                     StandardOutput = outputBuilder.ToString(),
@@ -109,6 +110,14 @@ namespace JXHeimdall.Services
                     Arguments = arguments,
                     Elapsed = stopwatch.Elapsed
                 };
+                HeimdallDebugLogService.Write(
+                    "Process",
+                    "exit-code=" + result.ExitCode +
+                    " elapsed=" + result.Elapsed +
+                    " stdout=" + result.StandardOutput.Trim() +
+                    " stderr=" + result.StandardError.Trim());
+
+                return result;
             }
         }
 

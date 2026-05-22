@@ -70,6 +70,7 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -131,7 +132,10 @@
     <Compile Include="Model\SocketPackageModel.cs" />
     <Compile Include="Model\YuvModel.cs" />
     <Compile Include="Capability\AdbCapability.cs" />
+    <Compile Include="Capability\HeimdallCapability.cs" />
+    <Compile Include="Enums\OdinFlashMode.cs" />
     <Compile Include="Interface\IAdbCapability.cs" />
+    <Compile Include="Interface\IHeimdallCapability.cs" />
     <Compile Include="ItemViewModel\DeviceItemViewModel.cs" />
     <Compile Include="ItemViewModel\Odin\OdinDeviceItemViewModel.cs" />
     <Compile Include="ItemViewModel\CastScreenItemViewModel.cs" />
@@ -145,11 +149,15 @@
     <Compile Include="Services\SQLService.cs" />
     <Compile Include="Services\TaskLogLocalizationService.cs" />
     <Compile Include="Services\TCSocketService.cs" />
+    <Compile Include="Model\Payload\OdinFlashPayload.cs" />
     <Compile Include="Tasks\FlashFileTask.cs" />
     <Compile Include="Tasks\FlashRootTask.cs" />
+    <Compile Include="Tasks\OdinFlashTask.cs" />
     <Compile Include="Tasks\SingleCommandTask.cs" />
     <Compile Include="TaskCoreBridge\AdbDeviceSession.cs" />
     <Compile Include="TaskCoreBridge\AdbDeviceSessionFactory.cs" />
+    <Compile Include="TaskCoreBridge\HeimdallDeviceSession.cs" />
+    <Compile Include="TaskCoreBridge\HeimdallDeviceSessionFactory.cs" />
     <Compile Include="Tasks\UpdateBootRecoveryTask.cs" />
     <Compile Include="Tasks\UpdateTask.cs" />
     <Compile Include="Utils\CommonTool.cs" />
@@ -343,6 +351,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Library\ADB\AdbWinUsbApi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Library\Heimdall\heimdall.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Library\Heimdall\libgcc_s_seh-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Library\Heimdall\libstdc++-6.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Library\Heimdall\libwinpthread-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Library\Heimdall\wdi-64bit.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\ffmpeg\avcodec-58.dll">

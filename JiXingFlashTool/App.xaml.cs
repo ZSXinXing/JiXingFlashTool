@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using LanguageCore;
 using LanguageCore.Model;
+using JXHeimdall.Services;
 
 namespace JiXingFlashTool
 {
@@ -30,6 +31,8 @@ namespace JiXingFlashTool
         /// <param name="e">启动参数。</param>
         protected override void OnStartup(StartupEventArgs e)
         {
+            HeimdallFirmwarePackageService.CleanupExtractRootDirectory();
+
             LocalizationService.Instance.Init(
                 typeof(App).Assembly,
                 $"{GetType().Namespace}.Resources.Lang",

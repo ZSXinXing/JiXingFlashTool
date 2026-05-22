@@ -34,6 +34,18 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="K4os.Compression.LZ4">
+      <HintPath>..\packages\K4os.Compression.LZ4.1.3.8\lib\net462\K4os.Compression.LZ4.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="K4os.Compression.LZ4.Streams">
+      <HintPath>..\packages\K4os.Compression.LZ4.Streams.1.3.8\lib\net462\K4os.Compression.LZ4.Streams.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="K4os.Hash.xxHash">
+      <HintPath>..\packages\K4os.Hash.xxHash.1.0.8\lib\net462\K4os.Hash.xxHash.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
@@ -48,11 +60,19 @@
     <Compile Include="Models\HeimdallFlashResult.cs" />
     <Compile Include="Models\HeimdallPitPartitionModel.cs" />
     <Compile Include="Models\HeimdallProcessResult.cs" />
+    <Compile Include="Models\OdinPitEntryModel.cs" />
+    <Compile Include="Services\HeimdallDebugLogService.cs" />
     <Compile Include="Services\HeimdallDeviceService.cs" />
+    <Compile Include="Services\HeimdallDriverService.cs" />
     <Compile Include="Services\HeimdallFirmwarePackageService.cs" />
     <Compile Include="Services\HeimdallFlashService.cs" />
     <Compile Include="Services\HeimdallPitService.cs" />
     <Compile Include="Services\HeimdallProcessService.cs" />
+    <Compile Include="Services\OdinBinaryExtensions.cs" />
+    <Compile Include="Services\OdinPitParserService.cs" />
+    <Compile Include="Services\OdinSerialFlashService.cs" />
+    <Compile Include="Services\OdinSerialPortService.cs" />
+    <Compile Include="Services\OdinSerialProtocolService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

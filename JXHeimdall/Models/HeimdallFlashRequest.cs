@@ -19,6 +19,11 @@ namespace JXHeimdall.Models
         public Dictionary<HeimdallFirmwareSlot, string> FirmwareFiles { get; } = new Dictionary<HeimdallFirmwareSlot, string>();
 
         /// <summary>
+        /// AP 包刷入时用于替换原厂 recovery 镜像的 TWRP 文件路径。
+        /// </summary>
+        public string RecoveryOverrideFilePath { get; set; } = string.Empty;
+
+        /// <summary>
         /// 是否按 TWRP 流程刷入并进入 Recovery。
         /// </summary>
         public bool RebootToRecoveryAfterFlash { get; set; }

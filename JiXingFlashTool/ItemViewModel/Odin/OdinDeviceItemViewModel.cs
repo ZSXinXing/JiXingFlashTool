@@ -12,6 +12,8 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         private bool _isSelected;
         private string _blFilePath = string.Empty;
         private string _apFilePath = string.Empty;
+        private string _twrpFilePath = string.Empty;
+        private string _cpFilePath = string.Empty;
         private string _cscFilePath = string.Empty;
         private string _userdataFilePath = string.Empty;
         private string _statusText = "-";
@@ -49,11 +51,6 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         /// 设备型号。
         /// </summary>
         public string ModelName => Device.ModelName;
-
-        /// <summary>
-        /// 连接方式。
-        /// </summary>
-        public string ConnectionType => "USB";
 
         /// <summary>
         /// 当前行操作列显示文本，设计稿初始状态为空占位。
@@ -95,6 +92,36 @@ namespace JiXingFlashTool.ItemViewModel.Odin
                 if (SetProperty(ref _apFilePath, value))
                 {
                     OnPropertyChanged(nameof(ApFileName));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 用于替换 AP 内置 Recovery 的 TWRP 镜像路径。
+        /// </summary>
+        public string TwrpFilePath
+        {
+            get => _twrpFilePath;
+            set
+            {
+                if (SetProperty(ref _twrpFilePath, value))
+                {
+                    OnPropertyChanged(nameof(TwrpFileName));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 已分配 CP 固件路径。
+        /// </summary>
+        public string CpFilePath
+        {
+            get => _cpFilePath;
+            set
+            {
+                if (SetProperty(ref _cpFilePath, value))
+                {
+                    OnPropertyChanged(nameof(CpFileName));
                 }
             }
         }
@@ -149,6 +176,16 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string ApFileName => GetDisplayFileName(ApFilePath);
 
         /// <summary>
+        /// TWRP 镜像文件名，未选择时显示占位横线。
+        /// </summary>
+        public string TwrpFileName => GetDisplayFileName(TwrpFilePath);
+
+        /// <summary>
+        /// CP 文件名，未选择时显示占位横线。
+        /// </summary>
+        public string CpFileName => GetDisplayFileName(CpFilePath);
+
+        /// <summary>
         /// CSC 文件名，未选择时显示占位横线。
         /// </summary>
         public string CscFileName => GetDisplayFileName(CscFilePath);
@@ -163,12 +200,15 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         /// </summary>
         /// <param name="blFilePath">BL 文件路径。</param>
         /// <param name="apFilePath">AP 文件路径。</param>
+        /// <param name="cpFilePath">CP 文件路径。</param>
         /// <param name="cscFilePath">CSC 文件路径。</param>
         /// <param name="userdataFilePath">USERDATA 文件路径。</param>
-        public void AssignFirmware(string blFilePath, string apFilePath, string cscFilePath, string userdataFilePath)
+        public void AssignFirmware(string blFilePath, string apFilePath, string twrpFilePath, string cpFilePath, string cscFilePath, string userdataFilePath)
         {
             BlFilePath = blFilePath;
             ApFilePath = apFilePath;
+            TwrpFilePath = twrpFilePath;
+            CpFilePath = cpFilePath;
             CscFilePath = cscFilePath;
             UserdataFilePath = userdataFilePath;
             StatusText = "已分配";

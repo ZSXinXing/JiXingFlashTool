@@ -1,3 +1,4 @@
+using JiXingFlashTool.ViewModels.Odin;
 using System.Windows.Controls;
 
 namespace JiXingFlashTool.Views.Odin
@@ -13,6 +14,20 @@ namespace JiXingFlashTool.Views.Odin
         public OdinFlashView()
         {
             InitializeComponent();
+            Unloaded += OnUnloaded;
+        }
+
+        /// <summary>
+        /// 页面卸载时释放 ViewModel 中的设备监听资源。
+        /// </summary>
+        /// <param name="sender">事件来源。</param>
+        /// <param name="e">事件参数。</param>
+        private void OnUnloaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (DataContext is OdinFlashViewModel viewModel)
+            {
+                viewModel.Dispose();
+            }
         }
     }
 }

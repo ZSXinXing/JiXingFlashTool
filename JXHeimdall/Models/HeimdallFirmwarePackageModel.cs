@@ -23,6 +23,11 @@ namespace JXHeimdall.Models
         public string WorkingDirectory { get; set; } = string.Empty;
 
         /// <summary>
+        /// 固件包内提取出的 PIT 文件路径，用于在设备读取 PIT 失败时本地解析分区表。
+        /// </summary>
+        public string PitFilePath { get; set; } = string.Empty;
+
+        /// <summary>
         /// 可参与刷入的固件文件集合。
         /// </summary>
         public List<HeimdallFirmwareFileModel> Files { get; } = new List<HeimdallFirmwareFileModel>();
