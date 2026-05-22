@@ -1,6 +1,7 @@
 using JiXingFlashTool.Enums;
 using JiXingFlashTool.Interface;
 using JiXingFlashTool.Model.Payload;
+using JiXingFlashTool.Services;
 using JiXingFlashTool.Utils;
 using System;
 using System.Threading.Tasks;
@@ -28,7 +29,7 @@ namespace JiXingFlashTool.Tasks
             var adb = ctx.Device.GetCapability<IAdbCapability>();
             var commandType = ctx.Payload.Type;
 
-            ctx.Log?.Invoke(new TaskLog($"开始执行指令 {commandType}"));
+            Log(ctx, "TaskLog_CommandStart", commandType);
 
             switch (commandType)
             {
@@ -56,22 +57,22 @@ namespace JiXingFlashTool.Tasks
                     adb.ExecuteRemoteCommand("twrp wipe system", ctx.CancellationToken);
                     break;
                 case CommandType.CloseDeveloperMode:
-                    ctx.Log?.Invoke(new TaskLog("开始关闭开发者选项"));
+                    Log(ctx, "TaskLog_DisableDeveloperStart");
                     await adb.ExecuteRootCommandAsync("settings put global development_settings_enabled 0", ctx.CancellationToken);
-                    ctx.Log?.Invoke(new TaskLog("关闭开发者选项完成"));
+                    Log(ctx, "TaskLog_DisableDeveloperComplete");
                     break;
                 case CommandType.Skip:
                 case CommandType.SkipGuide:
-                    ctx.Log?.Invoke(new TaskLog("开始跳过向导"));
+                    Log(ctx, "TaskLog_SkipGuideStart");
                     await adb.ExecuteRootCommandAsync("settings put secure user_setup_complete 1 && settings put global device_provisioned 1", ctx.CancellationToken);
-                    ctx.Log?.Invoke(new TaskLog("跳过向导完成"));
+                    Log(ctx, "TaskLog_SkipGuideComplete");
                     break;
                 case CommandType.Format:
                     await FormatAsync(ctx);
                     break;
             }
 
-            ctx.Log?.Invoke(new TaskLog($"指令执行完成: {commandType}"));
+            Log(ctx, "TaskLog_CommandComplete", commandType);
         }
 
         /// <summary>
@@ -83,11 +84,11 @@ namespace JiXingFlashTool.Tasks
         {
             var adb = ctx.Device.GetCapability<IAdbCapability>();
 
-            ctx.Log?.Invoke(new TaskLog("获取格式化工具"));
+            Log(ctx, "TaskLog_GetFormatTool");
             string ext4 = adb.GetAvailableExt4FormatCommand();
             if (string.IsNullOrEmpty(ext4))
             {
-                ctx.Log?.Invoke(new TaskLog("无法找到对应的格式化工具"));
+                Log(ctx, "TaskLog_FormatToolNotFound");
                 return;
             }
 
@@ -95,23 +96,34 @@ namespace JiXingFlashTool.Tasks
             RecoveryFstabTool.TryGetPartitionPath(ctx.Payload.Device.Name, "/data", out userData);
             if (string.IsNullOrEmpty(userData))
             {
-                ctx.Log?.Invoke(new TaskLog("无法找到对应的UserData"));
+                Log(ctx, "TaskLog_UserDataPartitionNotFound");
                 return;
             }
 
             await Task.Delay(2000, ctx.CancellationToken);
-            ctx.Log?.Invoke(new TaskLog("开始格式化"));
+            Log(ctx, "TaskLog_FormatStart");
 
             string formatCommand = $"{ext4} -F {userData}";
             string result = adb.ExecuteRemoteCommand(formatCommand, ctx.CancellationToken);
             if (result.IndexOf("done", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                ctx.Log?.Invoke(new TaskLog("格式成功"));
+                Log(ctx, "TaskLog_FormatSuccess");
             }
             else
             {
-                ctx.Log?.Invoke(new TaskLog("格式化失败"));
+                Log(ctx, "TaskLog_FormatFailed");
             }
+        }
+
+        /// <summary>
+        /// 写入可随语言切换刷新的任务日志。
+        /// </summary>
+        /// <param name="ctx">任务上下文。</param>
+        /// <param name="key">语言资源键。</param>
+        /// <param name="args">格式化参数。</param>
+        private static void Log(TaskContext<SingleCommandPayload> ctx, string key, params object[] args)
+        {
+            ctx.Log?.Invoke(TaskLogLocalizationService.CreateLog(key, args));
         }
     }
 }

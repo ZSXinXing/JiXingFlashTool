@@ -1,9 +1,9 @@
 using JiXingFlashTool.Enums;
 using JiXingFlashTool.Interface;
 using JiXingFlashTool.Model.Payload;
+using JiXingFlashTool.Services;
 using JiXingFlashTool.Utils;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using TaskCore.Tasks;
 
@@ -32,7 +32,7 @@ namespace JiXingFlashTool.Tasks
 
             if (!FileUtil.IsLocalFileExists(filePath))
             {
-                ctx.Log?.Invoke(new TaskLog("文件不存在，无法更新"));
+                Log(ctx, "TaskLog_FileNotFoundUnableToUpdate");
                 return;
             }
 
@@ -48,91 +48,108 @@ namespace JiXingFlashTool.Tasks
                 return;
             }
 
-            ctx.Log?.Invoke(new TaskLog("不支持该更新类型。"));
+            Log(ctx, "TaskLog_UnsupportedUpdateType");
         }
 
         /// <summary>
         /// 更新 Recovery 分区。
         /// </summary>
+        /// <param name="ctx">任务上下文。</param>
+        /// <param name="adb">ADB 能力接口。</param>
+        /// <param name="filePath">本地镜像路径。</param>
+        /// <returns>异步任务。</returns>
         private async Task UpdateRecoveryAsync(TaskContext<UpdateBootRecoveryPayload> ctx, IAdbCapability adb, string filePath)
         {
-            var deviceModel = ctx.Payload.Device;
             string localImagePath = filePath;
             string remoteImagePath = "/data/local/tmp/update_recovery.img";
             string recoveryPath;
 
-            if (!RecoveryFstabTool.TryGetPartitionPath(ctx.Payload.Device.Name,"/recovery",out recoveryPath)) {
-                ctx.Log?.Invoke(new TaskLog("无法获取TWRP节点信息"));
+            if (!RecoveryFstabTool.TryGetPartitionPath(ctx.Payload.Device.Name, "/recovery", out recoveryPath))
+            {
+                Log(ctx, "TaskLog_TwrpNodeNotFound");
                 return;
             }
 
-            ctx.Log?.Invoke(new TaskLog("开始传输文件"));
+            Log(ctx, "TaskLog_TransferFileStart");
             await Task.Delay(2000);
-            adb.PushLocalFile(localImagePath, remoteImagePath, new Progress<int>(value => ctx.Log?.Invoke(new TaskLog($"传输进度 {value}%"))), ctx.CancellationToken);
+            adb.PushLocalFile(localImagePath, remoteImagePath, new Progress<int>(value => Log(ctx, "TaskLog_TransferProgress", value)), ctx.CancellationToken);
 
             await Task.Delay(2000, ctx.CancellationToken);
 
-            //检查文件与MD5
             if (!(adb.CheckRemoteFileExists(remoteImagePath) && adb.IsRemoteFileMd5EqualToLocalFile(remoteImagePath, localImagePath)))
             {
-                ctx.Log?.Invoke(new TaskLog("文件推送失败，请重新尝试。"));
+                Log(ctx, "TaskLog_FilePushFailed");
                 return;
             }
 
-            ctx.Log?.Invoke(new TaskLog("更新TWRP"));
+            Log(ctx, "TaskLog_UpdateTwrpStart");
             string updateResult = adb.ExecuteRemoteCommand($"dd if={remoteImagePath} of={recoveryPath}", ctx.CancellationToken);
             adb.RemoveRemoteFile(remoteImagePath);
             if (updateResult.IndexOf("records in", StringComparison.OrdinalIgnoreCase) >= 0 &&
                 updateResult.IndexOf("records out", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                ctx.Log?.Invoke(new TaskLog("更新成功,5秒后重新进入TWRP生效"));
+                Log(ctx, "TaskLog_UpdateTwrpSuccessReboot");
                 await Task.Delay(5000);
                 adb.ExecuteRemoteCommand("reboot recovery");
                 return;
             }
-            else {
-                ctx.Log?.Invoke(new TaskLog("更新失败"));
-            }
+
+            Log(ctx, "TaskLog_UpdateFailed");
         }
 
         /// <summary>
         /// 更新 Boot 分区。
         /// </summary>
+        /// <param name="ctx">任务上下文。</param>
+        /// <param name="adb">ADB 能力接口。</param>
+        /// <param name="filePath">本地镜像路径。</param>
+        /// <returns>异步任务。</returns>
         private async Task UpdateBootAsync(TaskContext<UpdateBootRecoveryPayload> ctx, IAdbCapability adb, string filePath)
         {
-            var deviceModel = ctx.Payload.Device;
             string localImagePath = filePath;
             string remoteImagePath = "/data/local/tmp/update_boot.img";
             string bootPath = string.Empty;
 
             if (!RecoveryFstabTool.TryGetPartitionPath(ctx.Payload.Device.Name, "/boot", out bootPath))
             {
-                ctx.Log?.Invoke(new TaskLog("无法获取内核节点信息"));
+                Log(ctx, "TaskLog_KernelNodeNotFound");
                 return;
             }
 
-            ctx.Log?.Invoke(new TaskLog("传输文件"));
-            adb.PushLocalFile(localImagePath, remoteImagePath, new Progress<int>(value => ctx.Log?.Invoke(new TaskLog($"传输进度 {value}%"))), ctx.CancellationToken);
+            Log(ctx, "TaskLog_TransferFileStart");
+            adb.PushLocalFile(localImagePath, remoteImagePath, new Progress<int>(value => Log(ctx, "TaskLog_TransferProgress", value)), ctx.CancellationToken);
 
             await Task.Delay(2000, ctx.CancellationToken);
-            if ( !(adb.CheckRemoteFileExists(remoteImagePath) && adb.IsRemoteFileMd5EqualToLocalFile(remoteImagePath, localImagePath)))
+            if (!(adb.CheckRemoteFileExists(remoteImagePath) && adb.IsRemoteFileMd5EqualToLocalFile(remoteImagePath, localImagePath)))
             {
-                ctx.Log?.Invoke(new TaskLog("文件推送失败，请重新尝试。"));
+                Log(ctx, "TaskLog_FilePushFailed");
                 return;
             }
 
-            ctx.Log?.Invoke(new TaskLog("开始更新内核"));
+            Log(ctx, "TaskLog_UpdateKernelStart");
             await Task.Delay(2000);
             string updateResult = adb.ExecuteRemoteCommand($"dd if={remoteImagePath} of={bootPath}", ctx.CancellationToken);
             adb.RemoveRemoteFile(remoteImagePath);
             if (updateResult.IndexOf("records in", StringComparison.OrdinalIgnoreCase) >= 0 &&
                 updateResult.IndexOf("records out", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                ctx.Log?.Invoke(new TaskLog("更新成功,请手动进入系统生效"));
+                Log(ctx, "TaskLog_UpdateKernelSuccessManualBoot");
             }
-            else {
-                ctx.Log?.Invoke(new TaskLog("更新失败"));
+            else
+            {
+                Log(ctx, "TaskLog_UpdateFailed");
             }
+        }
+
+        /// <summary>
+        /// 写入可随语言切换刷新的任务日志。
+        /// </summary>
+        /// <param name="ctx">任务上下文。</param>
+        /// <param name="key">语言资源键。</param>
+        /// <param name="args">格式化参数。</param>
+        private static void Log(TaskContext<UpdateBootRecoveryPayload> ctx, string key, params object[] args)
+        {
+            ctx.Log?.Invoke(TaskLogLocalizationService.CreateLog(key, args));
         }
     }
 }

@@ -2,6 +2,7 @@
 using JiXingFlashTool.Model;
 using JiXingFlashTool.Models;
 using JiXingFlashTool.Services;
+using LanguageCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -133,27 +134,19 @@ namespace JiXingFlashTool.ItemViewModel
         }
 
         /// <summary>
-        /// 当前设备状态的中文文案。
+        /// 当前设备状态的本地化文案。
         /// </summary>
-        public string DeviceState {
-            get
-            {
-                if (device.State == JXAdbCore.Enums.DeviceState.BootLoader)
-                {
-                    return "Download";
-                }
-
-                return device.StateChinese;
-            }
-        }
+        public string DeviceState => GetDeviceStateText(device.State);
 
         /// <summary>
         /// 当前设备的连接方式文案。
         /// </summary>
-        public string ConnectionType
-        {
-            get => Device.Serial != null && Device.Serial.Contains(":") ? "以太网" : "USB";
-        }
+        public string ConnectionType => IsEthernetConnection ? GetLangText("Connection_Ethernet") : "USB";
+
+        /// <summary>
+        /// 当前设备是否通过以太网连接。
+        /// </summary>
+        private bool IsEthernetConnection => Device.Serial != null && Device.Serial.Contains(":");
 
         /// <summary>
         /// 编译日期。
@@ -216,7 +209,9 @@ namespace JiXingFlashTool.ItemViewModel
         /// </summary>
         public string TaskDetailDisplayMessage
         {
-            get => string.IsNullOrWhiteSpace(TaskDetailMessage) ? string.Empty : TaskDetailMessage;
+            get => string.IsNullOrWhiteSpace(TaskDetailMessage)
+                ? string.Empty
+                : TaskLogLocalizationService.ResolveMessage(TaskDetailMessage);
         }
 
         /// <summary>
@@ -224,7 +219,7 @@ namespace JiXingFlashTool.ItemViewModel
         /// </summary>
         public SolidColorBrush ConnectionTagBackground
         {
-            get => ConnectionType.Equals("以太网") ? EthernetTagBackgroundBrush : UsbTagBackgroundBrush;
+            get => IsEthernetConnection ? EthernetTagBackgroundBrush : UsbTagBackgroundBrush;
         }
 
         /// <summary>
@@ -232,7 +227,7 @@ namespace JiXingFlashTool.ItemViewModel
         /// </summary>
         public SolidColorBrush ConnectionTagForeground
         {
-            get => ConnectionType.Equals("以太网") ? EthernetTagForegroundBrush : UsbTagForegroundBrush;
+            get => IsEthernetConnection ? EthernetTagForegroundBrush : UsbTagForegroundBrush;
         }
 
         /// <summary>
@@ -303,6 +298,56 @@ namespace JiXingFlashTool.ItemViewModel
         /// 使用设备模型初始化展示模型。
         /// </summary>
         public DeviceItemViewModel(DeviceModel device) => this.device = device;
+
+        /// <summary>
+        /// 语言切换后刷新设备项中依赖语言资源的展示属性。
+        /// </summary>
+        public void RefreshLocalizedText()
+        {
+            OnPropertyChanged(nameof(DeviceState));
+            OnPropertyChanged(nameof(ConnectionType));
+            OnPropertyChanged(nameof(ConnectionTagBackground));
+            OnPropertyChanged(nameof(ConnectionTagForeground));
+            OnPropertyChanged(nameof(TaskDetailDisplayMessage));
+        }
+
+        /// <summary>
+        /// 获取当前语言下的设备状态文案。
+        /// </summary>
+        /// <param name="state">ADB 设备状态。</param>
+        /// <returns>本地化后的设备状态文案。</returns>
+        private static string GetDeviceStateText(JXAdbCore.Enums.DeviceState state)
+        {
+            switch (state)
+            {
+                case JXAdbCore.Enums.DeviceState.Online:
+                    return GetLangText("DeviceState_System");
+                case JXAdbCore.Enums.DeviceState.Recovery:
+                    return GetLangText("DeviceState_Recovery");
+                case JXAdbCore.Enums.DeviceState.BootLoader:
+                    return "Download";
+                case JXAdbCore.Enums.DeviceState.Sideload:
+                    return GetLangText("DeviceState_Sideload");
+                case JXAdbCore.Enums.DeviceState.Offline:
+                    return GetLangText("DeviceState_Offline");
+                case JXAdbCore.Enums.DeviceState.Unauthorized:
+                    return GetLangText("DeviceState_Unauthorized");
+                case JXAdbCore.Enums.DeviceState.NoPermissions:
+                    return GetLangText("DeviceState_NoPermission");
+                default:
+                    return GetLangText("DeviceState_Unknown");
+            }
+        }
+
+        /// <summary>
+        /// 获取当前语言下的设备项文案。
+        /// </summary>
+        /// <param name="key">语言资源键。</param>
+        /// <returns>当前语言对应文案。</returns>
+        private static string GetLangText(string key)
+        {
+            return LocalizationService.Instance.GetString(string.Empty, key);
+        }
 
         #region 调用任务的方法
         /// <summary>

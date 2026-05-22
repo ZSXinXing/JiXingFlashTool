@@ -33,6 +33,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <GenerateSatelliteAssembliesForCore Condition="'$(MSBuildRuntimeType)' == 'Core'">true</GenerateSatelliteAssembliesForCore>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
@@ -141,6 +142,7 @@
     <Compile Include="Services\DeviceService.cs" />
     <Compile Include="Services\DeviceTaskService.cs" />
     <Compile Include="Services\SQLService.cs" />
+    <Compile Include="Services\TaskLogLocalizationService.cs" />
     <Compile Include="Services\TCSocketService.cs" />
     <Compile Include="Tasks\FlashFileTask.cs" />
     <Compile Include="Tasks\FlashRootTask.cs" />
@@ -221,24 +223,6 @@
     <Compile Include="Views\UpdateSystemDialogView.xaml.cs">
       <DependentUpon>UpdateSystemDialogView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="obj\Debug\App.g.cs" />
-    <Compile Include="obj\Debug\GeneratedInternalTypeHelper.g.cs" />
-    <Compile Include="obj\Debug\JiXingFlashTool_Content.g.cs" />
-    <Compile Include="obj\Debug\Control\IconButton.g.cs" />
-    <Compile Include="obj\Debug\Views\AdbListView.g.cs" />
-    <Compile Include="obj\Debug\Views\CommandListView.g.cs" />
-    <Compile Include="obj\Debug\Views\DeviceScreenView.g.cs" />
-    <Compile Include="obj\Debug\Views\LoginDialogView.g.cs" />
-    <Compile Include="obj\Debug\Views\MainWindow.g.cs" />
-    <Compile Include="obj\Debug\Views\SyncFileProgressView.g.cs" />
-    <Compile Include="obj\Debug\Views\SyncFileView.g.cs" />
-    <Compile Include="obj\Debug\Views\UpdateSystemDialogView.g.cs" />
-    <Compile Include="obj\Debug\Views\AllScreen\AllScreenBottomView.g.cs" />
-    <Compile Include="obj\Debug\Views\AllScreen\AllScreenLeftView.g.cs" />
-    <Compile Include="obj\Debug\Views\AllScreen\AllScreenTopView.g.cs" />
-    <Compile Include="obj\Debug\Views\AllScreen\CastScreenSettingView.g.cs" />
-    <Compile Include="obj\Debug\Views\AllScreen\DeviceScreenListView.g.cs" />
-    <Compile Include="obj\Debug\Views\AllScreen\DeviceScreenWindow.g.cs" />
     <Page Include="Views\AdbListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -318,6 +302,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Lang\Lang.en.resx" />
+    <EmbeddedResource Include="Resources\Lang\Lang.zh-CN.resx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -490,6 +476,10 @@
       <Project>{b4882eef-8a5d-4fe6-8935-fae77afbd8e0}</Project>
       <Name>TaskCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LanguageCore\LanguageCore.csproj">
+      <Project>{fe807b2e-7ce4-4b96-b3de-2687119100ca}</Project>
+      <Name>LanguageCore</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm">
@@ -607,6 +597,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup />
+  <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk.WindowsDesktop\targets\Microsoft.WinFX.targets" Condition="'$(MSBuildRuntimeType)' == 'Core' And Exists('$(MSBuildSDKsPath)\Microsoft.NET.Sdk.WindowsDesktop\targets\Microsoft.WinFX.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>REM Eazfuscator.NET is integrated with this project at MSBuild level: https://help.gapotchenko.com/eazfuscator.net/kb/100036</PostBuildEvent>

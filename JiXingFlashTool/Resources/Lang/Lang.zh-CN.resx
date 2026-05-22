@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="App_Title" xml:space="preserve"><value>极星刷机工具</value></data>
+  <data name="Sidebar_ProductName" xml:space="preserve"><value>极星系统工具</value></data>
+  <data name="Sidebar_ProductSubtitle" xml:space="preserve"><value>系统更新维护工具</value></data>
+  <data name="Sidebar_DeviceManage" xml:space="preserve"><value>设备管理</value></data>
+  <data name="Sidebar_CastScreen" xml:space="preserve"><value>投屏</value></data>
+  <data name="Sidebar_MaintainerMode" xml:space="preserve"><value>维护者模式</value></data>
+  <data name="Sidebar_ExitMaintainerMode" xml:space="preserve"><value>退出维护者模式</value></data>
+  <data name="Sidebar_DeviceCount" xml:space="preserve"><value>已连接设备：{0} 台</value></data>
+  <data name="Version_Text" xml:space="preserve"><value>版本号：{0}</value></data>
+  <data name="Language_Toggle" xml:space="preserve"><value>EN</value></data>
+  <data name="Toolbar_MaintenanceCommand" xml:space="preserve"><value>维护指令</value></data>
+  <data name="Toolbar_RebootDevice" xml:space="preserve"><value>重启设备</value></data>
+  <data name="Toolbar_OpenFlashlight" xml:space="preserve"><value>打开手电筒</value></data>
+  <data name="Toolbar_CloseFlashlight" xml:space="preserve"><value>关闭手电筒</value></data>
+  <data name="Toolbar_ExecuteShell" xml:space="preserve"><value>执行 Shell</value></data>
+  <data name="Toolbar_FlashRoot" xml:space="preserve"><value>刷入 ROOT</value></data>
+  <data name="Toolbar_CheckSystemUpdate" xml:space="preserve"><value>检查系统更新</value></data>
+  <data name="Toolbar_ProfessionalCommand" xml:space="preserve"><value>专业指令</value></data>
+  <data name="Toolbar_Reboot" xml:space="preserve"><value>重启</value></data>
+  <data name="Toolbar_System" xml:space="preserve"><value>系统</value></data>
+  <data name="Toolbar_Twrp" xml:space="preserve"><value>TWRP</value></data>
+  <data name="Toolbar_Download" xml:space="preserve"><value>Download</value></data>
+  <data name="Toolbar_Clear" xml:space="preserve"><value>清除</value></data>
+  <data name="Toolbar_Wipe" xml:space="preserve"><value>双清</value></data>
+  <data name="Toolbar_ClearSystem" xml:space="preserve"><value>清除系统</value></data>
+  <data name="Toolbar_FormatData" xml:space="preserve"><value>格式化</value></data>
+  <data name="Toolbar_Update" xml:space="preserve"><value>更新</value></data>
+  <data name="Toolbar_UpdateKernel" xml:space="preserve"><value>更新内核</value></data>
+  <data name="Toolbar_UpdateTwrp" xml:space="preserve"><value>更新 TWRP</value></data>
+  <data name="Toolbar_FlashFile" xml:space="preserve"><value>刷入文件</value></data>
+  <data name="Toolbar_UpdateFile" xml:space="preserve"><value>更新文件</value></data>
+  <data name="Toolbar_DisableDeveloper" xml:space="preserve"><value>关闭开发者</value></data>
+  <data name="Toolbar_SkipGuide" xml:space="preserve"><value>跳过向导</value></data>
+  <data name="Filter_AllModel" xml:space="preserve"><value>全部型号</value></data>
+  <data name="Filter_AllConnection" xml:space="preserve"><value>全部连接</value></data>
+  <data name="Filter_AllState" xml:space="preserve"><value>全部状态</value></data>
+  <data name="Filter_All" xml:space="preserve"><value>全部</value></data>
+  <data name="Connection_Ethernet" xml:space="preserve"><value>以太网</value></data>
+  <data name="DeviceState_System" xml:space="preserve"><value>系统</value></data>
+  <data name="DeviceState_Recovery" xml:space="preserve"><value>恢复</value></data>
+  <data name="DeviceState_Sideload" xml:space="preserve"><value>侧载</value></data>
+  <data name="DeviceState_Offline" xml:space="preserve"><value>离线</value></data>
+  <data name="DeviceState_Verifying" xml:space="preserve"><value>验证中</value></data>
+  <data name="DeviceState_NoPermission" xml:space="preserve"><value>无权限</value></data>
+  <data name="DeviceState_Unauthorized" xml:space="preserve"><value>未验证</value></data>
+  <data name="DeviceState_NetworkMode" xml:space="preserve"><value>网络模式</value></data>
+  <data name="DeviceState_Unknown" xml:space="preserve"><value>未知状态</value></data>
+  <data name="Search_DevicePlaceholder" xml:space="preserve"><value>搜索设备 (序号/品牌/型号)...</value></data>
+  <data name="Table_Index" xml:space="preserve"><value>序号</value></data>
+  <data name="Table_AdbSerial" xml:space="preserve"><value>ADB 序号</value></data>
+  <data name="Table_Brand" xml:space="preserve"><value>品牌</value></data>
+  <data name="Table_Model" xml:space="preserve"><value>型号</value></data>
+  <data name="Table_AndroidVersion" xml:space="preserve"><value>安卓版本</value></data>
+  <data name="Table_SystemVersion" xml:space="preserve"><value>系统版本</value></data>
+  <data name="Table_ConnectionType" xml:space="preserve"><value>连接方式</value></data>
+  <data name="Table_State" xml:space="preserve"><value>状态</value></data>
+  <data name="Table_TaskMessage" xml:space="preserve"><value>任务消息</value></data>
+  <data name="Loading_DeviceServiceTitle" xml:space="preserve"><value>正在初始化设备服务...</value></data>
+  <data name="Loading_DeviceServiceDescription" xml:space="preserve"><value>请稍候，设备连接信息加载完成后会自动显示。</value></data>
+  <data name="Error_DeviceListLoadFailed" xml:space="preserve"><value>设备列表加载失败</value></data>
+  <data name="Action_RefreshView" xml:space="preserve"><value>刷新视图</value></data>
+  <data name="Message_DeviceListInitFailed" xml:space="preserve"><value>设备列表初始化失败，请检查设备连接状态。</value></data>
+  <data name="Message_DeviceServiceInitFailed" xml:space="preserve"><value>设备服务初始化失败，请检查 ADB 服务或设备连接。</value></data>
+  <data name="Message_SelectPhoneFirst" xml:space="preserve"><value>请先选择手机</value></data>
+  <data name="Message_EnterMaintainerMode" xml:space="preserve"><value>已进入维护者模式</value></data>
+  <data name="Message_ExitMaintainerMode" xml:space="preserve"><value>已退出维护者模式</value></data>
+  <data name="DeviceSummary_Text" xml:space="preserve"><value>共 {0} 台设备 · 系统 {1} 台 · 恢复 {2} 台 · 侧载 {3} 台 · Download {4} 台</value></data>
+  <data name="Login_Title" xml:space="preserve"><value>维护者登录</value></data>
+  <data name="Login_UserName" xml:space="preserve"><value>用户名</value></data>
+  <data name="Login_UserNamePlaceholder" xml:space="preserve"><value>请输入用户名</value></data>
+  <data name="Login_Password" xml:space="preserve"><value>密码</value></data>
+  <data name="Login_PasswordPlaceholder" xml:space="preserve"><value>请输入密码</value></data>
+  <data name="Login_Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Login_Button" xml:space="preserve"><value>登录</value></data>
+  <data name="Login_ButtonLoading" xml:space="preserve"><value>登录中...</value></data>
+  <data name="Login_InvalidCredential" xml:space="preserve"><value>用户名或密码错误，请重新输入。</value></data>
+  <data name="FileFilter_All" xml:space="preserve"><value>文件 (*.*)|*.*</value></data>
+  <data name="FileFilter_FlashPackage" xml:space="preserve"><value>刷入文件 (*.zip;*.apk;*.ps)|*.zip;*.apk;*.ps</value></data>
+  <data name="FileFilter_Img" xml:space="preserve"><value>IMG 文件 (*.img)|*.img</value></data>
+  <data name="TaskLog_TaskStarted" xml:space="preserve"><value>任务开始：{0}</value></data>
+  <data name="TaskLog_TaskCompleted" xml:space="preserve"><value>任务完成：{0}</value></data>
+  <data name="TaskLog_TaskCanceled" xml:space="preserve"><value>任务已取消：{0}</value></data>
+  <data name="TaskLog_TaskFailed" xml:space="preserve"><value>任务执行失败</value></data>
+  <data name="TaskLog_FileNotFoundUnableToFlash" xml:space="preserve"><value>文件不存在，无法刷入</value></data>
+  <data name="TaskLog_TransferFileStart" xml:space="preserve"><value>开始传输文件</value></data>
+  <data name="TaskLog_TransferProgress" xml:space="preserve"><value>传输进度：{0}%</value></data>
+  <data name="TaskLog_FileTransferVerifyFailed" xml:space="preserve"><value>文件传输校验失败，准备重试</value></data>
+  <data name="TaskLog_WriteFlashCommand" xml:space="preserve"><value>写入刷机指令</value></data>
+  <data name="TaskLog_SystemUpdateCommandVerifyFailed" xml:space="preserve"><value>系统更新指令校验失败，准备重试</value></data>
+  <data name="TaskLog_FlashTaskReady" xml:space="preserve"><value>刷机任务准备完成</value></data>
+  <data name="TaskLog_FlashingKeepPower" xml:space="preserve"><value>正在刷入，请保持设备供电</value></data>
+  <data name="TaskLog_FileInputSuccess" xml:space="preserve"><value>文件写入成功</value></data>
+  <data name="TaskLog_MagiskFileMissingUnableToRoot" xml:space="preserve"><value>Magisk 文件不存在，无法执行 ROOT 刷入</value></data>
+  <data name="TaskLog_FlashFileMissingUnableToSideload" xml:space="preserve"><value>刷入文件不存在，无法进入侧载</value></data>
+  <data name="TaskLog_PrepareEnterSideload" xml:space="preserve"><value>准备进入侧载模式</value></data>
+  <data name="TaskLog_EnteringSideloadKeepPower" xml:space="preserve"><value>正在进入侧载模式，请保持设备供电</value></data>
+  <data name="TaskLog_EnteredSideloadPrepareFlash" xml:space="preserve"><value>已进入侧载模式，准备刷入文件</value></data>
+  <data name="TaskLog_StartFlashFile" xml:space="preserve"><value>开始刷入文件</value></data>
+  <data name="TaskLog_FlashProgressKeepPower" xml:space="preserve"><value>刷入进度：{0}%，请保持设备供电</value></data>
+  <data name="TaskLog_FlashFailedRetry" xml:space="preserve"><value>刷入失败，准备重试</value></data>
+  <data name="TaskLog_FlashSuccess" xml:space="preserve"><value>刷入成功</value></data>
+  <data name="TaskLog_PrepareTransferRootFile" xml:space="preserve"><value>准备传输 ROOT 文件</value></data>
+  <data name="TaskLog_CheckPushResult" xml:space="preserve"><value>检查文件推送结果</value></data>
+  <data name="TaskLog_PushFailedRetry" xml:space="preserve"><value>推送失败，准备重试</value></data>
+  <data name="TaskLog_WriteUpdateCommand" xml:space="preserve"><value>写入更新指令</value></data>
+  <data name="TaskLog_WriteUpdateCommandFailedRetry" xml:space="preserve"><value>更新指令写入失败，准备重试</value></data>
+  <data name="TaskLog_StartFlashing" xml:space="preserve"><value>开始刷入</value></data>
+  <data name="TaskLog_FlashingWaitRebootKeepPower" xml:space="preserve"><value>正在刷入并等待重启，请保持设备供电</value></data>
+  <data name="TaskLog_BootedPrepareInstallMagisk" xml:space="preserve"><value>设备已启动，准备安装 Magisk</value></data>
+  <data name="TaskLog_InstallMagiskApp" xml:space="preserve"><value>安装 Magisk 应用</value></data>
+  <data name="TaskLog_InstallProgress" xml:space="preserve"><value>安装进度：{0}%</value></data>
+  <data name="TaskLog_InstallMagiskFailedRetry" xml:space="preserve"><value>Magisk 安装失败，准备重试</value></data>
+  <data name="TaskLog_RootInstallComplete" xml:space="preserve"><value>ROOT 安装完成</value></data>
+  <data name="TaskLog_CommandStart" xml:space="preserve"><value>开始执行指令：{0}</value></data>
+  <data name="TaskLog_DisableDeveloperStart" xml:space="preserve"><value>开始关闭开发者选项</value></data>
+  <data name="TaskLog_DisableDeveloperComplete" xml:space="preserve"><value>开发者选项已关闭</value></data>
+  <data name="TaskLog_SkipGuideStart" xml:space="preserve"><value>开始跳过开机向导</value></data>
+  <data name="TaskLog_SkipGuideComplete" xml:space="preserve"><value>开机向导已跳过</value></data>
+  <data name="TaskLog_CommandComplete" xml:space="preserve"><value>指令执行完成：{0}</value></data>
+  <data name="TaskLog_GetFormatTool" xml:space="preserve"><value>获取格式化工具</value></data>
+  <data name="TaskLog_FormatToolNotFound" xml:space="preserve"><value>未找到格式化工具</value></data>
+  <data name="TaskLog_UserDataPartitionNotFound" xml:space="preserve"><value>未找到用户数据分区</value></data>
+  <data name="TaskLog_FormatStart" xml:space="preserve"><value>开始格式化</value></data>
+  <data name="TaskLog_FormatSuccess" xml:space="preserve"><value>格式化成功</value></data>
+  <data name="TaskLog_FormatFailed" xml:space="preserve"><value>格式化失败</value></data>
+  <data name="TaskLog_FileNotFoundUnableToUpdate" xml:space="preserve"><value>文件不存在，无法更新</value></data>
+  <data name="TaskLog_UnsupportedUpdateType" xml:space="preserve"><value>不支持的更新类型</value></data>
+  <data name="TaskLog_TwrpNodeNotFound" xml:space="preserve"><value>未找到 TWRP 分区节点</value></data>
+  <data name="TaskLog_FilePushFailed" xml:space="preserve"><value>文件推送失败</value></data>
+  <data name="TaskLog_UpdateTwrpStart" xml:space="preserve"><value>开始更新 TWRP</value></data>
+  <data name="TaskLog_UpdateTwrpSuccessReboot" xml:space="preserve"><value>TWRP 更新成功，正在重启</value></data>
+  <data name="TaskLog_UpdateFailed" xml:space="preserve"><value>更新失败</value></data>
+  <data name="TaskLog_KernelNodeNotFound" xml:space="preserve"><value>未找到内核分区节点</value></data>
+  <data name="TaskLog_UpdateKernelStart" xml:space="preserve"><value>开始更新内核</value></data>
+  <data name="TaskLog_UpdateKernelSuccessManualBoot" xml:space="preserve"><value>内核更新成功，请手动启动设备</value></data>
+</root>

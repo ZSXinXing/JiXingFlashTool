@@ -1,12 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
+using LanguageCore;
 using System;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace JiXingFlashTool.ViewModels
 {
     /// <summary>
-    /// 专业模式登录弹窗视图模型，负责登录表单状态、校验提示与弹窗关闭流程。
+    /// 维护者登录弹窗视图模型，负责登录表单状态、异步登录流程与错误提示。
     /// </summary>
     public class LoginDialogViewModel : ObservableObject
     {
@@ -15,14 +18,15 @@ namespace JiXingFlashTool.ViewModels
         private readonly Action _loginSucceededAction;
         private readonly RelayCommand _cancelCommand;
         private readonly RelayCommand _togglePasswordVisibilityCommand;
-        private readonly RelayCommand _loginCommand;
+        private readonly AsyncRelayCommand _loginCommand;
         private string _userName = string.Empty;
         private string _password = string.Empty;
         private bool _isPasswordVisible;
+        private bool _isLoggingIn;
         private string _errorMessage = string.Empty;
 
         /// <summary>
-        /// 初始化专业模式登录弹窗视图模型。
+        /// 初始化维护者登录弹窗视图模型。
         /// </summary>
         /// <param name="loginSucceededAction">登录成功后的回调。</param>
         public LoginDialogViewModel(Action loginSucceededAction)
@@ -30,7 +34,11 @@ namespace JiXingFlashTool.ViewModels
             _loginSucceededAction = loginSucceededAction ?? throw new ArgumentNullException(nameof(loginSucceededAction));
             _cancelCommand = new RelayCommand(Cancel);
             _togglePasswordVisibilityCommand = new RelayCommand(TogglePasswordVisibility);
-            _loginCommand = new RelayCommand(Login);
+            _loginCommand = new AsyncRelayCommand(LoginAsync, CanLogin);
+            WeakEventManager<LocalizationService, EventArgs>.AddHandler(
+                LocalizationService.Instance,
+                nameof(LocalizationService.LanguageChanged),
+                OnLanguageChanged);
         }
 
         /// <summary>
@@ -69,12 +77,28 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
-        /// 当前是否以明文显示密码。
+        /// 当前是否显示明文密码。
         /// </summary>
         public bool IsPasswordVisible
         {
             get => _isPasswordVisible;
             set => SetProperty(ref _isPasswordVisible, value);
+        }
+
+        /// <summary>
+        /// 当前是否正在执行登录请求。
+        /// </summary>
+        public bool IsLoggingIn
+        {
+            get => _isLoggingIn;
+            set
+            {
+                if (SetProperty(ref _isLoggingIn, value))
+                {
+                    OnPropertyChanged(nameof(LoginButtonText));
+                    _loginCommand.NotifyCanExecuteChanged();
+                }
+            }
         }
 
         /// <summary>
@@ -92,6 +116,11 @@ namespace JiXingFlashTool.ViewModels
         public bool HasErrorMessage => !string.IsNullOrWhiteSpace(ErrorMessage);
 
         /// <summary>
+        /// 登录按钮当前文案。
+        /// </summary>
+        public string LoginButtonText => IsLoggingIn ? GetLangText("Login_ButtonLoading") : GetLangText("Login_Button");
+
+        /// <summary>
         /// 取消并关闭弹窗命令。
         /// </summary>
         public RelayCommand CancelCommand => _cancelCommand;
@@ -104,23 +133,43 @@ namespace JiXingFlashTool.ViewModels
         /// <summary>
         /// 登录命令。
         /// </summary>
-        public RelayCommand LoginCommand => _loginCommand;
+        public AsyncRelayCommand LoginCommand => _loginCommand;
 
         /// <summary>
-        /// 执行维护者登录。
+        /// 异步执行维护者登录。
         /// </summary>
-        private void Login()
+        private async Task LoginAsync()
         {
-            if (!string.Equals(UserName?.Trim(), DefaultUserName, StringComparison.Ordinal) ||
-                !string.Equals(Password, DefaultPassword, StringComparison.Ordinal))
-            {
-                ErrorMessage = "\u7528\u6237\u540D\u6216\u5BC6\u7801\u9519\u8BEF\uFF0C\u8BF7\u91CD\u65B0\u8F93\u5165\u3002";
-                OnPropertyChanged(nameof(HasErrorMessage));
-                return;
-            }
+            IsLoggingIn = true;
 
-            _loginSucceededAction.Invoke();
-            Dialog?.Close();
+            try
+            {
+                // 预留真实网络请求位置，当前用短暂异步等待模拟登录过程。
+                await Task.Delay(600);
+
+                if (!string.Equals(UserName?.Trim(), DefaultUserName, StringComparison.Ordinal) ||
+                    !string.Equals(Password, DefaultPassword, StringComparison.Ordinal))
+                {
+                    ErrorMessage = GetLangText("Login_InvalidCredential");
+                    OnPropertyChanged(nameof(HasErrorMessage));
+                    return;
+                }
+
+                _loginSucceededAction.Invoke();
+                Dialog?.Close();
+            }
+            finally
+            {
+                IsLoggingIn = false;
+            }
+        }
+
+        /// <summary>
+        /// 判断当前是否允许发起登录。
+        /// </summary>
+        private bool CanLogin()
+        {
+            return !IsLoggingIn;
         }
 
         /// <summary>
@@ -128,6 +177,11 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         private void Cancel()
         {
+            if (IsLoggingIn)
+            {
+                return;
+            }
+
             Dialog?.Close();
         }
 
@@ -136,6 +190,11 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         private void TogglePasswordVisibility()
         {
+            if (IsLoggingIn)
+            {
+                return;
+            }
+
             IsPasswordVisible = !IsPasswordVisible;
         }
 
@@ -151,6 +210,26 @@ namespace JiXingFlashTool.ViewModels
 
             ErrorMessage = string.Empty;
             OnPropertyChanged(nameof(HasErrorMessage));
+        }
+
+        /// <summary>
+        /// 获取当前语言下的登录弹窗文案。
+        /// </summary>
+        /// <param name="key">语言资源键。</param>
+        /// <returns>当前语言对应文案。</returns>
+        private static string GetLangText(string key)
+        {
+            return LocalizationService.Instance.GetString(string.Empty, key);
+        }
+
+        /// <summary>
+        /// 语言切换后刷新登录按钮动态文案。
+        /// </summary>
+        /// <param name="sender">事件来源。</param>
+        /// <param name="e">事件参数。</param>
+        private void OnLanguageChanged(object sender, EventArgs e)
+        {
+            OnPropertyChanged(nameof(LoginButtonText));
         }
     }
 }

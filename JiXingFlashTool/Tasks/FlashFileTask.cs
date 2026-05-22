@@ -1,8 +1,8 @@
 using JiXingFlashTool.Interface;
 using JiXingFlashTool.Model.Payload;
+using JiXingFlashTool.Services;
 using JiXingFlashTool.Utils;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using TaskCore.Tasks;
 
@@ -30,18 +30,18 @@ namespace JiXingFlashTool.Tasks
 
             if (!FileUtil.IsLocalFileExists(filePath))
             {
-                ctx.Log?.Invoke(new TaskLog("刷入文件不存在，无法执行侧载。"));
+                Log(ctx, "TaskLog_FlashFileMissingUnableToSideload");
                 return;
             }
 
             ctx.Payload.Device.IsKeepLink = true;
 
         Start_Flash_File:
-            ctx.Log?.Invoke(new TaskLog("准备进入侧载模式"));
+            Log(ctx, "TaskLog_PrepareEnterSideload");
             adb.ExecuteRemoteCommand("twrp sideload", ctx.CancellationToken);
             await Task.Delay(2000, ctx.CancellationToken);
 
-            ctx.Log?.Invoke(new TaskLog("正在进入侧载,保持电源,等待重新连接"));
+            Log(ctx, "TaskLog_EnteringSideloadKeepPower");
 
             while (adb.GetDeviceState() != JXAdbCore.Enums.DeviceState.Sideload &&
                    !ctx.CancellationToken.IsCancellationRequested)
@@ -49,25 +49,37 @@ namespace JiXingFlashTool.Tasks
                 await Task.Delay(1000, ctx.CancellationToken);
             }
 
-            ctx.Log?.Invoke(new TaskLog("已经进入侧载,准备刷入文件"));
+            Log(ctx, "TaskLog_EnteredSideloadPrepareFlash");
             await Task.Delay(2000, ctx.CancellationToken);
 
-            ctx.Log?.Invoke(new TaskLog("开始刷入文件"));
+            Log(ctx, "TaskLog_StartFlashFile");
             var result = adb.SideloadFile(filePath, new Progress<int>(progress =>
             {
-                ctx.Log?.Invoke(new TaskLog($"请保持电源,刷入进度{progress}%"));
+                Log(ctx, "TaskLog_FlashProgressKeepPower", progress);
             }), ctx.CancellationToken);
 
             if (!string.IsNullOrWhiteSpace(result) &&
                 (result.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0 ||
                  result.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0))
             {
-                ctx.Log?.Invoke(new TaskLog("刷入失败,5秒后重试"));
+                Log(ctx, "TaskLog_FlashFailedRetry");
                 await Task.Delay(5000);
                 goto Start_Flash_File;
             }
+
             ctx.Payload.Device.IsKeepLink = false;
-            ctx.Log?.Invoke(new TaskLog("刷入成功"));
+            Log(ctx, "TaskLog_FlashSuccess");
+        }
+
+        /// <summary>
+        /// 写入可随语言切换刷新的任务日志。
+        /// </summary>
+        /// <param name="ctx">任务上下文。</param>
+        /// <param name="key">语言资源键。</param>
+        /// <param name="args">格式化参数。</param>
+        private static void Log(TaskContext<FlashFilePayload> ctx, string key, params object[] args)
+        {
+            ctx.Log?.Invoke(TaskLogLocalizationService.CreateLog(key, args));
         }
     }
 }

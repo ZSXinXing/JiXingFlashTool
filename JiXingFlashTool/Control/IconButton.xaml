@@ -11,7 +11,7 @@
             Margin="0"
             BorderThickness="1"
             MinHeight="24.5"
-            MinWidth="0"
+            MinWidth="75.25"
             Background="{Binding ButtonBackground, RelativeSource={RelativeSource AncestorType=UserControl}}"
             BorderBrush="{Binding ButtonBorderBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
             Command="{Binding ButtonCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -58,7 +58,7 @@
                            VerticalAlignment="Center"
                            TextAlignment="Left"
                            TextWrapping="NoWrap"
-                           Margin="0,-1,0,0" />
+                           Margin="{Binding ButtonTextMargin, RelativeSource={RelativeSource AncestorType=UserControl}}" />
             </Grid>
         </Border>
     </Button>

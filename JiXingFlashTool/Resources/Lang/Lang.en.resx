@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="App_Title" xml:space="preserve"><value>JiXing Flash Tool</value></data>
+  <data name="Sidebar_ProductName" xml:space="preserve"><value>JiXing System Tool</value></data>
+  <data name="Sidebar_ProductSubtitle" xml:space="preserve"><value>System Update Maintenance</value></data>
+  <data name="Sidebar_DeviceManage" xml:space="preserve"><value>Devices</value></data>
+  <data name="Sidebar_CastScreen" xml:space="preserve"><value>Cast Screen</value></data>
+  <data name="Sidebar_MaintainerMode" xml:space="preserve"><value>Maintainer Mode</value></data>
+  <data name="Sidebar_ExitMaintainerMode" xml:space="preserve"><value>Exit Maintainer Mode</value></data>
+  <data name="Sidebar_DeviceCount" xml:space="preserve"><value>Connected devices: {0}</value></data>
+  <data name="Version_Text" xml:space="preserve"><value>Version: {0}</value></data>
+  <data name="Language_Toggle" xml:space="preserve"><value>中文</value></data>
+  <data name="Toolbar_MaintenanceCommand" xml:space="preserve"><value>Maintenance</value></data>
+  <data name="Toolbar_RebootDevice" xml:space="preserve"><value>Reboot</value></data>
+  <data name="Toolbar_OpenFlashlight" xml:space="preserve"><value>Flashlight On</value></data>
+  <data name="Toolbar_CloseFlashlight" xml:space="preserve"><value>Flashlight Off</value></data>
+  <data name="Toolbar_ExecuteShell" xml:space="preserve"><value>Run Shell</value></data>
+  <data name="Toolbar_FlashRoot" xml:space="preserve"><value>Flash ROOT</value></data>
+  <data name="Toolbar_CheckSystemUpdate" xml:space="preserve"><value>Check Update</value></data>
+  <data name="Toolbar_ProfessionalCommand" xml:space="preserve"><value>Advanced</value></data>
+  <data name="Toolbar_Reboot" xml:space="preserve"><value>Reboot</value></data>
+  <data name="Toolbar_System" xml:space="preserve"><value>System</value></data>
+  <data name="Toolbar_Twrp" xml:space="preserve"><value>TWRP</value></data>
+  <data name="Toolbar_Download" xml:space="preserve"><value>Download</value></data>
+  <data name="Toolbar_Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="Toolbar_Wipe" xml:space="preserve"><value>Wipe</value></data>
+  <data name="Toolbar_ClearSystem" xml:space="preserve"><value>Clear System</value></data>
+  <data name="Toolbar_FormatData" xml:space="preserve"><value>Format</value></data>
+  <data name="Toolbar_Update" xml:space="preserve"><value>Update</value></data>
+  <data name="Toolbar_UpdateKernel" xml:space="preserve"><value>Update Kernel</value></data>
+  <data name="Toolbar_UpdateTwrp" xml:space="preserve"><value>Update TWRP</value></data>
+  <data name="Toolbar_FlashFile" xml:space="preserve"><value>Flash File</value></data>
+  <data name="Toolbar_UpdateFile" xml:space="preserve"><value>Update File</value></data>
+  <data name="Toolbar_DisableDeveloper" xml:space="preserve"><value>Disable Dev</value></data>
+  <data name="Toolbar_SkipGuide" xml:space="preserve"><value>Skip Setup</value></data>
+  <data name="Filter_AllModel" xml:space="preserve"><value>All models</value></data>
+  <data name="Filter_AllConnection" xml:space="preserve"><value>All connections</value></data>
+  <data name="Filter_AllState" xml:space="preserve"><value>All states</value></data>
+  <data name="Filter_All" xml:space="preserve"><value>All</value></data>
+  <data name="Connection_Ethernet" xml:space="preserve"><value>Ethernet</value></data>
+  <data name="DeviceState_System" xml:space="preserve"><value>System</value></data>
+  <data name="DeviceState_Recovery" xml:space="preserve"><value>Recovery</value></data>
+  <data name="DeviceState_Sideload" xml:space="preserve"><value>Sideload</value></data>
+  <data name="DeviceState_Offline" xml:space="preserve"><value>Offline</value></data>
+  <data name="DeviceState_Verifying" xml:space="preserve"><value>Verifying</value></data>
+  <data name="DeviceState_NoPermission" xml:space="preserve"><value>No permission</value></data>
+  <data name="DeviceState_Unauthorized" xml:space="preserve"><value>Unauthorized</value></data>
+  <data name="DeviceState_NetworkMode" xml:space="preserve"><value>Network mode</value></data>
+  <data name="DeviceState_Unknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="Search_DevicePlaceholder" xml:space="preserve"><value>Search devices (index/brand/model)...</value></data>
+  <data name="Table_Index" xml:space="preserve"><value>Index</value></data>
+  <data name="Table_AdbSerial" xml:space="preserve"><value>ADB Serial</value></data>
+  <data name="Table_Brand" xml:space="preserve"><value>Brand</value></data>
+  <data name="Table_Model" xml:space="preserve"><value>Model</value></data>
+  <data name="Table_AndroidVersion" xml:space="preserve"><value>Android</value></data>
+  <data name="Table_SystemVersion" xml:space="preserve"><value>System</value></data>
+  <data name="Table_ConnectionType" xml:space="preserve"><value>Connection</value></data>
+  <data name="Table_State" xml:space="preserve"><value>State</value></data>
+  <data name="Table_TaskMessage" xml:space="preserve"><value>Task Message</value></data>
+  <data name="Loading_DeviceServiceTitle" xml:space="preserve"><value>Initializing device service...</value></data>
+  <data name="Loading_DeviceServiceDescription" xml:space="preserve"><value>Please wait. Device connection data will appear when loading is complete.</value></data>
+  <data name="Error_DeviceListLoadFailed" xml:space="preserve"><value>Failed to load device list</value></data>
+  <data name="Action_RefreshView" xml:space="preserve"><value>Refresh View</value></data>
+  <data name="Message_DeviceListInitFailed" xml:space="preserve"><value>Device list initialization failed. Check device connection status.</value></data>
+  <data name="Message_DeviceServiceInitFailed" xml:space="preserve"><value>Device service initialization failed. Check ADB service or device connection.</value></data>
+  <data name="Message_SelectPhoneFirst" xml:space="preserve"><value>Select a phone first</value></data>
+  <data name="Message_EnterMaintainerMode" xml:space="preserve"><value>Maintainer mode enabled</value></data>
+  <data name="Message_ExitMaintainerMode" xml:space="preserve"><value>Maintainer mode disabled</value></data>
+  <data name="DeviceSummary_Text" xml:space="preserve"><value>Total {0} devices · System {1} · Recovery {2} · Sideload {3} · Download {4}</value></data>
+  <data name="Login_Title" xml:space="preserve"><value>Maintainer Login</value></data>
+  <data name="Login_UserName" xml:space="preserve"><value>Username</value></data>
+  <data name="Login_UserNamePlaceholder" xml:space="preserve"><value>Enter username</value></data>
+  <data name="Login_Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Login_PasswordPlaceholder" xml:space="preserve"><value>Enter password</value></data>
+  <data name="Login_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Login_Button" xml:space="preserve"><value>Login</value></data>
+  <data name="Login_ButtonLoading" xml:space="preserve"><value>Logging in...</value></data>
+  <data name="Login_InvalidCredential" xml:space="preserve"><value>Incorrect username or password. Please try again.</value></data>
+  <data name="FileFilter_All" xml:space="preserve"><value>Files (*.*)|*.*</value></data>
+  <data name="FileFilter_FlashPackage" xml:space="preserve"><value>Flash packages (*.zip;*.apk;*.ps)|*.zip;*.apk;*.ps</value></data>
+  <data name="FileFilter_Img" xml:space="preserve"><value>IMG files (*.img)|*.img</value></data>
+  <data name="TaskLog_TaskStarted" xml:space="preserve"><value>Task started: {0}</value></data>
+  <data name="TaskLog_TaskCompleted" xml:space="preserve"><value>Task completed: {0}</value></data>
+  <data name="TaskLog_TaskCanceled" xml:space="preserve"><value>Task canceled: {0}</value></data>
+  <data name="TaskLog_TaskFailed" xml:space="preserve"><value>Task failed</value></data>
+  <data name="TaskLog_FileNotFoundUnableToFlash" xml:space="preserve"><value>File not found. Unable to flash.</value></data>
+  <data name="TaskLog_TransferFileStart" xml:space="preserve"><value>Starting file transfer</value></data>
+  <data name="TaskLog_TransferProgress" xml:space="preserve"><value>Transfer progress: {0}%</value></data>
+  <data name="TaskLog_FileTransferVerifyFailed" xml:space="preserve"><value>File transfer verification failed. Retrying.</value></data>
+  <data name="TaskLog_WriteFlashCommand" xml:space="preserve"><value>Writing flash command</value></data>
+  <data name="TaskLog_SystemUpdateCommandVerifyFailed" xml:space="preserve"><value>System update command verification failed. Retrying.</value></data>
+  <data name="TaskLog_FlashTaskReady" xml:space="preserve"><value>Flash task is ready</value></data>
+  <data name="TaskLog_FlashingKeepPower" xml:space="preserve"><value>Flashing. Keep the device powered.</value></data>
+  <data name="TaskLog_FileInputSuccess" xml:space="preserve"><value>File input succeeded</value></data>
+  <data name="TaskLog_MagiskFileMissingUnableToRoot" xml:space="preserve"><value>Magisk file is missing. Unable to flash ROOT.</value></data>
+  <data name="TaskLog_FlashFileMissingUnableToSideload" xml:space="preserve"><value>Flash file is missing. Unable to enter sideload.</value></data>
+  <data name="TaskLog_PrepareEnterSideload" xml:space="preserve"><value>Preparing to enter sideload mode</value></data>
+  <data name="TaskLog_EnteringSideloadKeepPower" xml:space="preserve"><value>Entering sideload mode. Keep the device powered.</value></data>
+  <data name="TaskLog_EnteredSideloadPrepareFlash" xml:space="preserve"><value>Sideload mode entered. Preparing to flash.</value></data>
+  <data name="TaskLog_StartFlashFile" xml:space="preserve"><value>Starting file flash</value></data>
+  <data name="TaskLog_FlashProgressKeepPower" xml:space="preserve"><value>Flash progress: {0}%. Keep the device powered.</value></data>
+  <data name="TaskLog_FlashFailedRetry" xml:space="preserve"><value>Flash failed. Retrying.</value></data>
+  <data name="TaskLog_FlashSuccess" xml:space="preserve"><value>Flash succeeded</value></data>
+  <data name="TaskLog_PrepareTransferRootFile" xml:space="preserve"><value>Preparing to transfer ROOT file</value></data>
+  <data name="TaskLog_CheckPushResult" xml:space="preserve"><value>Checking push result</value></data>
+  <data name="TaskLog_PushFailedRetry" xml:space="preserve"><value>Push failed. Retrying.</value></data>
+  <data name="TaskLog_WriteUpdateCommand" xml:space="preserve"><value>Writing update command</value></data>
+  <data name="TaskLog_WriteUpdateCommandFailedRetry" xml:space="preserve"><value>Update command write failed. Retrying.</value></data>
+  <data name="TaskLog_StartFlashing" xml:space="preserve"><value>Starting flash</value></data>
+  <data name="TaskLog_FlashingWaitRebootKeepPower" xml:space="preserve"><value>Flashing and waiting for reboot. Keep the device powered.</value></data>
+  <data name="TaskLog_BootedPrepareInstallMagisk" xml:space="preserve"><value>Device booted. Preparing to install Magisk.</value></data>
+  <data name="TaskLog_InstallMagiskApp" xml:space="preserve"><value>Installing Magisk app</value></data>
+  <data name="TaskLog_InstallProgress" xml:space="preserve"><value>Install progress: {0}%</value></data>
+  <data name="TaskLog_InstallMagiskFailedRetry" xml:space="preserve"><value>Magisk install failed. Retrying.</value></data>
+  <data name="TaskLog_RootInstallComplete" xml:space="preserve"><value>ROOT installation complete</value></data>
+  <data name="TaskLog_CommandStart" xml:space="preserve"><value>Starting command: {0}</value></data>
+  <data name="TaskLog_DisableDeveloperStart" xml:space="preserve"><value>Disabling developer options</value></data>
+  <data name="TaskLog_DisableDeveloperComplete" xml:space="preserve"><value>Developer options disabled</value></data>
+  <data name="TaskLog_SkipGuideStart" xml:space="preserve"><value>Skipping setup wizard</value></data>
+  <data name="TaskLog_SkipGuideComplete" xml:space="preserve"><value>Setup wizard skipped</value></data>
+  <data name="TaskLog_CommandComplete" xml:space="preserve"><value>Command completed: {0}</value></data>
+  <data name="TaskLog_GetFormatTool" xml:space="preserve"><value>Getting format tool</value></data>
+  <data name="TaskLog_FormatToolNotFound" xml:space="preserve"><value>Format tool not found</value></data>
+  <data name="TaskLog_UserDataPartitionNotFound" xml:space="preserve"><value>User data partition not found</value></data>
+  <data name="TaskLog_FormatStart" xml:space="preserve"><value>Starting format</value></data>
+  <data name="TaskLog_FormatSuccess" xml:space="preserve"><value>Format succeeded</value></data>
+  <data name="TaskLog_FormatFailed" xml:space="preserve"><value>Format failed</value></data>
+  <data name="TaskLog_FileNotFoundUnableToUpdate" xml:space="preserve"><value>File not found. Unable to update.</value></data>
+  <data name="TaskLog_UnsupportedUpdateType" xml:space="preserve"><value>Unsupported update type</value></data>
+  <data name="TaskLog_TwrpNodeNotFound" xml:space="preserve"><value>TWRP partition node not found</value></data>
+  <data name="TaskLog_FilePushFailed" xml:space="preserve"><value>File push failed</value></data>
+  <data name="TaskLog_UpdateTwrpStart" xml:space="preserve"><value>Starting TWRP update</value></data>
+  <data name="TaskLog_UpdateTwrpSuccessReboot" xml:space="preserve"><value>TWRP update succeeded. Rebooting.</value></data>
+  <data name="TaskLog_UpdateFailed" xml:space="preserve"><value>Update failed</value></data>
+  <data name="TaskLog_KernelNodeNotFound" xml:space="preserve"><value>Kernel partition node not found</value></data>
+  <data name="TaskLog_UpdateKernelStart" xml:space="preserve"><value>Starting kernel update</value></data>
+  <data name="TaskLog_UpdateKernelSuccessManualBoot" xml:space="preserve"><value>Kernel update succeeded. Please boot the device manually.</value></data>
+</root>

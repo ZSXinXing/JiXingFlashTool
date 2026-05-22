@@ -1,5 +1,6 @@
 using JiXingFlashTool.Interface;
 using JiXingFlashTool.Model.Payload;
+using JiXingFlashTool.Services;
 using JiXingFlashTool.Utils;
 using System;
 using System.Threading.Tasks;
@@ -31,35 +32,44 @@ namespace JiXingFlashTool.Tasks
 
             if (!FileUtil.IsLocalFileExists(filePath))
             {
-                ctx.Log?.Invoke(new TaskLog("更新文件不存在，无法执行系统更新。"));
+                Log(ctx, "TaskLog_FileNotFoundUnableToFlash");
                 return;
             }
 
-            ctx.Log?.Invoke(new TaskLog("开始传输更新文件。"));
+            Log(ctx, "TaskLog_TransferFileStart");
             adb.PushLocalFile(filePath, RemoteUpdateFilePath, new Progress<int>(value =>
             {
-                ctx.Log?.Invoke(new TaskLog($"传输进度 {value}%"));
+                Log(ctx, "TaskLog_TransferProgress", value);
             }), ctx.CancellationToken);
 
             await Task.Delay(2000, ctx.CancellationToken);
 
             if (!(adb.CheckRemoteFileExists(RemoteUpdateFilePath) && adb.IsRemoteFileMd5EqualToLocalFile(RemoteUpdateFilePath, filePath)))
             {
-                ctx.Log?.Invoke(new TaskLog("更新文件传输校验失败，请重新尝试。"));
+                Log(ctx, "TaskLog_FileTransferVerifyFailed");
                 return;
             }
 
-            ctx.Log?.Invoke(new TaskLog("写入系统更新命令。"));
+            Log(ctx, "TaskLog_WriteFlashCommand");
             adb.WriteTextToRemoteFile(BuildRecoveryCommand(ctx.Payload.WipeData), StaticConstant.UpdateSystemCommandPath, true, cancellationToken: ctx.CancellationToken);
+            await Task.Delay(500);
 
             if (!adb.IsRemoteFileTextEqual(StaticConstant.UpdateSystemCommandPath, BuildRecoveryCommand(ctx.Payload.WipeData), true))
             {
-                ctx.Log?.Invoke(new TaskLog("系统更新命令写入校验失败。"));
+                Log(ctx, "TaskLog_SystemUpdateCommandVerifyFailed");
                 return;
             }
 
-            ctx.Log?.Invoke(new TaskLog("系统更新任务准备完成，开始重启到 Recovery。"));
+            Log(ctx, "TaskLog_FlashTaskReady");
+            ctx.Payload.Device.IsKeepLink = true;
             adb.ExecuteRemoteCommand("reboot recovery", ctx.CancellationToken);
+
+            Log(ctx, "TaskLog_FlashingKeepPower");
+            while (!adb.IsDeviceOnline()) await Task.Delay(1000);
+
+            Log(ctx, "TaskLog_FileInputSuccess");
+            ctx.Payload.Device.IsKeepLink = false;
+            await Task.Delay(2000);
         }
 
         /// <summary>
@@ -75,6 +85,17 @@ namespace JiXingFlashTool.Tasks
             }
 
             return $"boot-recovery\r\n--update_package={RemoteUpdateFilePath}\r\n--wipe_data\r\n--wipe_cache\r\n--wipe_media\r\nreboot";
+        }
+
+        /// <summary>
+        /// 写入可随语言切换刷新的任务日志。
+        /// </summary>
+        /// <param name="ctx">任务上下文。</param>
+        /// <param name="key">语言资源键。</param>
+        /// <param name="args">格式化参数。</param>
+        private static void Log(TaskContext<UpdateTaskPayload> ctx, string key, params object[] args)
+        {
+            ctx.Log?.Invoke(TaskLogLocalizationService.CreateLog(key, args));
         }
     }
 }

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converter="clr-namespace:JiXingFlashTool.Converters"
         xmlns:control="clr-namespace:JiXingFlashTool.Control"
+        xmlns:lang="clr-namespace:LanguageCore;assembly=LanguageCore"
         xmlns:local="clr-namespace:JiXingFlashTool.Utils"
         xmlns:viewModel="clr-namespace:JiXingFlashTool.ViewModels"
         Title=""
@@ -93,9 +94,9 @@
         </Style>
 
         <Style x:Key="TwrpDropDownToggleButtonStyle" TargetType="ToggleButton">
-            <Setter Property="Width" Value="75.25" />
+            <Setter Property="MinWidth" Value="75.25" />
             <Setter Property="Height" Value="24.5" />
-            <Setter Property="Padding" Value="0" />
+            <Setter Property="Padding" Value="10.5,0,24,0" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="FontSize" Value="10.5" />
             <Setter Property="FontWeight" Value="Medium" />
@@ -112,26 +113,36 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="3.5"
                                 SnapsToDevicePixels="True">
-                            <Grid ClipToBounds="True" UseLayoutRounding="True">
+                            <Grid UseLayoutRounding="True">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="12.25" />
+                                    <ColumnDefinition Width="10.5" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="10.5" />
+                                </Grid.ColumnDefinitions>
                                 <Image Width="12.25"
                                        Height="12.25"
                                        Source="{TemplateBinding Tag}"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Top"
-                                       Margin="10.5,6.13,0,0" />
+                                       Grid.Column="0"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Margin="0" />
                                 <TextBlock Text="{TemplateBinding Content}"
+                                           Grid.Column="2"
                                            HorizontalAlignment="Left"
-                                           VerticalAlignment="Top"
+                                           VerticalAlignment="Center"
                                            TextAlignment="Center"
                                            Foreground="{TemplateBinding Foreground}"
                                            FontSize="{TemplateBinding FontSize}"
                                            FontWeight="{TemplateBinding FontWeight}"
-                                           Margin="28.5,4.25,0,0" />
-                                <Border Width="10.5"
+                                           TextWrapping="NoWrap"
+                                           Margin="0,-1,0,0" />
+                                <Border Grid.Column="3"
+                                        Width="10.5"
                                         Height="10.5"
-                                        HorizontalAlignment="Left"
-                                        VerticalAlignment="Top"
-                                        Margin="54.25,7,0,0">
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Margin="0">
                                     <Image Source="{x:Static local:IconResources.TwrpDropDownArrowIcon}"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
@@ -150,9 +161,9 @@
         </Style>
 
         <Style x:Key="UpdateSystemActionButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="87" />
+            <Setter Property="MinWidth" Value="96" />
             <Setter Property="Height" Value="31" />
-            <Setter Property="Padding" Value="0" />
+            <Setter Property="Padding" Value="10.5,0" />
             <Setter Property="Background" Value="#5C82FD" />
             <Setter Property="BorderBrush" Value="#5C82FD" />
             <Setter Property="BorderThickness" Value="1" />
@@ -173,19 +184,26 @@
                                                   Opacity="1" />
                             </Border.Effect>
                             <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="12.25" />
+                                    <ColumnDefinition Width="10.5" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
                                 <Image Width="12.25"
                                        Height="12.25"
-                                       Margin="10.5,6.13,0,0"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Top"
+                                       Grid.Column="0"
+                                       Margin="0"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
                                        Source="{x:Static local:IconResources.MaintenanceUpdateIcon}" />
-                                <TextBlock Margin="28.5,4.25,0,0"
+                                <TextBlock Grid.Column="2"
+                                           Margin="0,-1,0,0"
                                            HorizontalAlignment="Left"
-                                           VerticalAlignment="Top"
+                                           VerticalAlignment="Center"
                                            FontSize="10.5"
                                            FontWeight="Medium"
                                            Foreground="{TemplateBinding Foreground}"
-                                           Text="更新文件" />
+                                           Text="{lang:Loc Key=Toolbar_UpdateFile}" />
                             </Grid>
                         </Border>
                     </ControlTemplate>
@@ -602,18 +620,20 @@
                             </Viewbox>
 
                             <StackPanel Grid.Column="2"
-                                        Width="96"
+                                        MinWidth="0"
                                         Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
-                                <TextBlock Text="极星系统工具"
+                                <TextBlock Text="{lang:Loc Key=Sidebar_ProductName}"
                                            FontSize="15.365"
                                            FontWeight="SemiBold"
                                            Foreground="#333333"
-                                           LineHeight="18.438" />
+                                           LineHeight="18.438"
+                                           TextWrapping="NoWrap" />
                                 <TextBlock Margin="0,2,0,0"
-                                           Text="系统更新维护工具"
+                                           Text="{lang:Loc Key=Sidebar_ProductSubtitle}"
                                            FontSize="12.25"
                                            Foreground="#8A333333"
-                                           LineHeight="15.313" />
+                                           LineHeight="15.313"
+                                           TextWrapping="NoWrap" />
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -638,7 +658,7 @@
                                         </Canvas>
                                     </Viewbox>
                                     <TextBlock Grid.Column="2"
-                                               Text="设备管理"
+                                               Text="{lang:Loc Key=Sidebar_DeviceManage}"
                                                FontSize="12.25"
                                                FontWeight="Medium"
                                                Foreground="#5C82FD"
@@ -665,7 +685,7 @@
                                         </Canvas>
                                     </Viewbox>
                                     <TextBlock Grid.Column="2"
-                                               Text="投屏"
+                                               Text="{lang:Loc Key=Sidebar_CastScreen}"
                                                FontSize="12.25"
                                                FontWeight="Medium"
                                                Foreground="#B3333333"
@@ -751,7 +771,8 @@
                                         Height="35"
                                         Margin="0,0,0,7"
                                         Background="Transparent"
-                                        BorderThickness="0">
+                                        BorderThickness="0"
+                                        Command="{Binding ToggleLanguageCommand}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="14" />
@@ -766,7 +787,7 @@
                                             </Canvas>
                                         </Viewbox>
                                         <TextBlock Grid.Column="2"
-                                                   Text="EN"
+                                                   Text="{lang:Loc Key=Language_Toggle}"
                                                    FontSize="12.25"
                                                    FontWeight="Medium"
                                                    Foreground="#B3333333"
@@ -793,7 +814,7 @@
                                             </Canvas>
                                         </Viewbox>
                                         <TextBlock Grid.Column="2"
-                                                   Text="专业模式"
+                                                   Text="{Binding MaintainerModeEntryText}"
                                                    FontSize="12.25"
                                                    FontWeight="Medium"
                                                    Foreground="#F44336"
@@ -807,11 +828,11 @@
                                         BorderBrush="#E6E6E6"
                                         BorderThickness="0,1,0,0">
                                     <StackPanel>
-                                        <TextBlock Text="版本号：v1.0.0"
+                                        <TextBlock Text="{Binding AppVersionText}"
                                                    FontSize="10.5"
                                                    Foreground="#99333333" />
                                         <TextBlock Margin="0,3.5,0,0"
-                                                   Text="已连接设备：3 台"
+                                                   Text="{Binding SidebarDeviceCountText}"
                                                    FontSize="10.5"
                                                    Foreground="#99333333" />
                                     </StackPanel>
@@ -983,10 +1004,10 @@
 
                     <Grid Grid.Row="0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="42" />
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="维护指令"
+                        <TextBlock Text="{lang:Loc Key=Toolbar_MaintenanceCommand}"
                                    FontSize="10.5"
                                    FontWeight="Medium"
                                    Foreground="{StaticResource MutedTextBrush}"
@@ -1005,7 +1026,7 @@
                         <Border Grid.RowSpan="5"
                                 Background="White"
                                 BorderBrush="#E0E0E0"
-                                BorderThickness="0,0,0,1"
+                                BorderThickness="0"
                                 IsHitTestVisible="False"
                                 Panel.ZIndex="0" />
 
@@ -1018,7 +1039,7 @@
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
                                                 ButtonIcon="{x:Static local:IconResources.MaintenanceRestartIcon}"
-                                                ButtonText="重启设备"
+                                                ButtonText="{lang:Loc Key=Toolbar_RebootDevice}"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="RebootDevice" />
                                 <control:IconButton
@@ -1027,7 +1048,7 @@
                                                 ButtonBackground="#4CAF50"
                                                 ButtonBorderBrush="#4CAF50"
                                                 ButtonIcon="{x:Static local:IconResources.MaintenanceFlashOnIcon}"
-                                                ButtonText="打开手电筒"
+                                                ButtonText="{lang:Loc Key=Toolbar_OpenFlashlight}"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="FlashOn" />
                             <control:IconButton
@@ -1035,12 +1056,12 @@
                                                 Margin="7,0,0,0"
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
-                                                ButtonForeground="White"
-                                                ButtonFontSize="10.5"
-                                                ButtonIconSize="12.25"
-                                                ButtonTextMargin="0,0,0,0"
+                                               ButtonForeground="White"
+                                               ButtonFontSize="10.5"
+                                               ButtonIconSize="12.25"
+                                                ButtonTextMargin="0,-1,0,0"
                                                 ButtonIcon="{x:Static local:IconResources.MaintenanceFlashOffIcon}"
-                                                ButtonText="关闭手电筒"
+                                                ButtonText="{lang:Loc Key=Toolbar_CloseFlashlight}"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="FlashOff" />
                             <control:IconButton
@@ -1049,7 +1070,7 @@
                                                 ButtonBackground="#5C82FD"
                                                 ButtonBorderBrush="#5C82FD"
                                                 ButtonIcon="{x:Static local:IconResources.MaintenanceShellIcon}"
-                                                ButtonText="执行 Shell"
+                                                ButtonText="{lang:Loc Key=Toolbar_ExecuteShell}"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="ShellCommand" />
                                 <control:IconButton
@@ -1058,7 +1079,7 @@
                                                 ButtonBackground="#9C27B0"
                                                 ButtonBorderBrush="#9C27B0"
                                                 ButtonIcon="{x:Static local:IconResources.MaintenanceRootIcon}"
-                                                ButtonText="刷入 ROOT"
+                                                ButtonText="{lang:Loc Key=Toolbar_FlashRoot}"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="RootDevice" />
                                 <control:IconButton
@@ -1067,7 +1088,7 @@
                                                 ButtonBackground="#5C82FD"
                                                 ButtonBorderBrush="#5C82FD"
                                                 ButtonIcon="{x:Static local:IconResources.MaintenanceUpdateIcon}"
-                                                ButtonText="检查系统更新"
+                                                ButtonText="{lang:Loc Key=Toolbar_CheckSystemUpdate}"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="CheckSystemUpdate" />
                         </StackPanel>
@@ -1076,7 +1097,7 @@
                                     Panel.ZIndex="1"
                                     Orientation="Horizontal"
                                     Visibility="{Binding IsProfessionalModeEnabled, Converter={StaticResource VisibilityBoolConverter}}">
-                                <TextBlock Text="专业指令" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" />
+                                <TextBlock Text="{lang:Loc Key=Toolbar_ProfessionalCommand}" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" />
                             </StackPanel>
 
                         <StackPanel Grid.Row="4"
@@ -1089,7 +1110,7 @@
                                           ClickMode="Press"
                                           Background="#5C82FD"
                                           BorderBrush="#5C82FD"
-                                          Content="重启"
+                                          Content="{lang:Loc Key=Toolbar_Reboot}"
                                           Tag="{x:Static local:IconResources.TwrpProRebootSystemIcon}"
                                           Checked="ProfessionalDropDownButton_Checked"
                                           />
@@ -1119,7 +1140,7 @@
                                                         <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProRebootSystemIcon}" Stretch="Uniform" />
                                                     </Rectangle.OpacityMask>
                                                 </Rectangle>
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="系统" Foreground="#333333" />
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{lang:Loc Key=Toolbar_System}" Foreground="#333333" />
                                             </Grid>
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
@@ -1138,7 +1159,7 @@
                                                         <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProUpdateTwrpIcon}" Stretch="Uniform" />
                                                     </Rectangle.OpacityMask>
                                                 </Rectangle>
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="TWRP" Foreground="#333333" />
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{lang:Loc Key=Toolbar_Twrp}" Foreground="#333333" />
                                             </Grid>
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
@@ -1156,7 +1177,7 @@
                                                         <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProFlashFileIcon}" Stretch="Uniform" />
                                                     </Rectangle.OpacityMask>
                                                 </Rectangle>
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="Download" Foreground="#333333" />
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{lang:Loc Key=Toolbar_Download}" Foreground="#333333" />
                                             </Grid>
                                         </Button>
                                     </StackPanel>
@@ -1169,7 +1190,7 @@
                                           ClickMode="Press"
                                           Background="#F44336"
                                           BorderBrush="#F44336"
-                                          Content="清除"
+                                          Content="{lang:Loc Key=Toolbar_Clear}"
                                           Tag="{x:Static local:IconResources.TwrpProClearSystemIcon}"
                                           Checked="ProfessionalDropDownButton_Checked"
                                           />
@@ -1199,7 +1220,7 @@
                                                         <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProWipeIcon}" Stretch="Uniform" />
                                                     </Rectangle.OpacityMask>
                                                 </Rectangle>
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="双清" Foreground="#333333" />
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{lang:Loc Key=Toolbar_Wipe}" Foreground="#333333" />
                                             </Grid>
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
@@ -1218,7 +1239,7 @@
                                                         <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProClearSystemIcon}" Stretch="Uniform" />
                                                     </Rectangle.OpacityMask>
                                                 </Rectangle>
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="清除系统" Foreground="#333333" />
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{lang:Loc Key=Toolbar_ClearSystem}" Foreground="#333333" />
                                             </Grid>
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
@@ -1236,7 +1257,7 @@
                                                         <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProFormatDataIcon}" Stretch="Uniform" />
                                                     </Rectangle.OpacityMask>
                                                 </Rectangle>
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="格式化" Foreground="#333333" />
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{lang:Loc Key=Toolbar_FormatData}" Foreground="#333333" />
                                             </Grid>
                                         </Button>
                                         </StackPanel>
@@ -1249,7 +1270,7 @@
                                           ClickMode="Press"
                                           Background="#5C82FD"
                                           BorderBrush="#5C82FD"
-                                          Content="更新"
+                                          Content="{lang:Loc Key=Toolbar_Update}"
                                           Tag="{x:Static local:IconResources.TwrpProUpdateTwrpIcon}"
                                           Checked="ProfessionalDropDownButton_Checked"
                                           />
@@ -1278,7 +1299,7 @@
                                                         <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProUpdateKernelIcon}" Stretch="Uniform" />
                                                     </Rectangle.OpacityMask>
                                                 </Rectangle>
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="更新内核" Foreground="#333333" />
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{lang:Loc Key=Toolbar_UpdateKernel}" Foreground="#333333" />
                                             </Grid>
                                         </Button>
                                         <Button Style="{StaticResource TwrpDropDownMenuItemStyle}"
@@ -1296,7 +1317,7 @@
                                                         <ImageBrush ImageSource="{x:Static local:IconResources.TwrpProUpdateTwrpIcon}" Stretch="Uniform" />
                                                     </Rectangle.OpacityMask>
                                                 </Rectangle>
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="更新 TWRP" Foreground="#333333" />
+                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{lang:Loc Key=Toolbar_UpdateTwrp}" Foreground="#333333" />
                                             </Grid>
                                         </Button>
                                     </StackPanel>
@@ -1309,7 +1330,7 @@
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
                                                 ButtonIcon="{x:Static local:IconResources.TwrpProFlashFileIcon}"
-                                                ButtonText="刷入文件"
+                                                ButtonText="{lang:Loc Key=Toolbar_FlashFile}"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="FlashFile" />
                             
@@ -1324,7 +1345,7 @@
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
                                                 ButtonIcon="{x:Static local:IconResources.TwrpProDisableDeveloperIcon}"
-                                                ButtonText="关闭开发者"
+                                                ButtonText="{lang:Loc Key=Toolbar_DisableDeveloper}"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="DisableDeveloper" />
                             <control:IconButton
@@ -1333,7 +1354,7 @@
                                                 ButtonBackground="#FF9800"
                                                 ButtonBorderBrush="#FF9800"
                                                 ButtonIcon="{x:Static local:IconResources.TwrpProSkipGuideIcon}"
-                                                ButtonText="跳过向导"
+                                                ButtonText="{lang:Loc Key=Toolbar_SkipGuide}"
                                                 ButtonCommand="{Binding ProfessionalInstructionCommand}"
                                                 ButtonCommandParameter="SkipGuide" />
                         </StackPanel>
@@ -1385,7 +1406,7 @@
                         <TextBlock Margin="31.5,0,0,0"
                                    FontSize="12.25"
                                    Foreground="#80333333"
-                                   Text="搜索设备 (序号/品牌/型号)..."
+                                   Text="{lang:Loc Key=Search_DevicePlaceholder}"
                                    VerticalAlignment="Center"
                                    IsHitTestVisible="False">
                             <TextBlock.Style>
@@ -1431,7 +1452,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="序号" Width="90">
+                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_Index}" Width="90">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding DisplayIndex, StringFormat={}{0:00}}"
@@ -1441,7 +1462,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="ADB 序号" Width="1.9*">
+                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_AdbSerial}" Width="1.9*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Serial}"
@@ -1452,24 +1473,24 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTextColumn Header="品牌"
+                                <DataGridTextColumn Header="{lang:Loc Key=Table_Brand}"
                                                     Width="1.1*"
                                                     ElementStyle="{StaticResource TableCellTextBlockStyle}"
                                                     Binding="{Binding Brand}" />
-                                <DataGridTextColumn Header="型号"
+                                <DataGridTextColumn Header="{lang:Loc Key=Table_Model}"
                                                     Width="1.3*"
                                                     ElementStyle="{StaticResource TableCellTextBlockStyle}"
                                                     Binding="{Binding ModelName}" />
-                                <DataGridTextColumn Header="安卓版本"
+                                <DataGridTextColumn Header="{lang:Loc Key=Table_AndroidVersion}"
                                                       Width="100"
                                                       ElementStyle="{StaticResource TableCellTextBlockStyle}"
                                                       Binding="{Binding AndroidVersion}" />
-                                <DataGridTextColumn Header="系统版本"
+                                <DataGridTextColumn Header="{lang:Loc Key=Table_SystemVersion}"
                                                       Width="100"
                                                       ElementStyle="{StaticResource TableCellTextBlockStyle}"
                                                       Binding="{Binding SystemVersion}" />
 
-                                <DataGridTemplateColumn Header="连接方式" Width="120">
+                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_ConnectionType}" Width="120">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Height="21"
@@ -1488,7 +1509,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="状态" Width="120">
+                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_State}" Width="120">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Height="21"
@@ -1515,7 +1536,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="任务消息" Width="2.5*">
+                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_TaskMessage}" Width="2.5*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding TaskDetailDisplayMessage}"
@@ -1531,13 +1552,13 @@
                                 Visibility="{Binding IsLoading, Converter={StaticResource VisibilityBoolConverter}}">
                             <StackPanel HorizontalAlignment="Center"
                                         VerticalAlignment="Center">
-                                <TextBlock Text="正在初始化设备服务..."
+                                <TextBlock Text="{lang:Loc Key=Loading_DeviceServiceTitle}"
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource TextBrush}"
                                            HorizontalAlignment="Center" />
                                 <TextBlock Margin="0,8,0,0"
-                                           Text="请稍候，设备连接信息加载完成后会自动显示。"
+                                           Text="{lang:Loc Key=Loading_DeviceServiceDescription}"
                                            FontSize="12.25"
                                            Foreground="{StaticResource MutedTextBrush}"
                                            HorizontalAlignment="Center" />
@@ -1548,7 +1569,7 @@
                                 Visibility="{Binding HasLoadError, Converter={StaticResource VisibilityBoolConverter}}">
                             <StackPanel HorizontalAlignment="Center"
                                         VerticalAlignment="Center">
-                                <TextBlock Text="设备列表加载失败"
+                                <TextBlock Text="{lang:Loc Key=Error_DeviceListLoadFailed}"
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Foreground="{StaticResource TextBrush}"
@@ -1561,7 +1582,7 @@
                                 <Button Margin="0,16,0,0"
                                         Command="{Binding RefreshDeviceCommand}"
                                         Style="{StaticResource ToolbarOutlineButtonStyle}"
-                                        Content="刷新视图" />
+                                        Content="{lang:Loc Key=Action_RefreshView}" />
                             </StackPanel>
                         </Border>
 

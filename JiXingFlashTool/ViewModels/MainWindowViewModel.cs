@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Threading;
+using LanguageCore;
 using TaskCore.Scheduling;
 using TaskCore.Sessions;
 using TaskCore.Tasks;
@@ -42,13 +43,13 @@ namespace JiXingFlashTool.ViewModels
         private string _title = string.Empty;
         private bool _isLoading;
         private bool _hasLoadError;
-        private string _loadErrorMessage = "设备列表初始化失败，请检查设备连接状态。";
+        private string _loadErrorMessage;
         private string _searchKeyword = string.Empty;
-        private string _modelFilter = "全部型号";
-        private string _connectionTypeFilter = "全部连接";
-        private string _deviceStateFilter = "全部状态";
-        private string _deviceSummaryText = "共 0 台设备";
-        private string _appVersionText = "版本号：v1.0.0";
+        private string _modelFilter;
+        private string _connectionTypeFilter;
+        private string _deviceStateFilter;
+        private string _deviceSummaryText;
+        private string _appVersionText;
         private bool _isSelectAll;
         private bool _isSidebarExpanded = true;
         private bool _isProfessionalModeEnabled;
@@ -231,13 +232,24 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
-        /// 当前是否已解锁专业模式。
+        /// 当前是否已进入维护者模式。
         /// </summary>
         public bool IsProfessionalModeEnabled
         {
             get => _isProfessionalModeEnabled;
-            set => SetProperty(ref _isProfessionalModeEnabled, value);
+            set
+            {
+                if (SetProperty(ref _isProfessionalModeEnabled, value))
+                {
+                    OnPropertyChanged(nameof(MaintainerModeEntryText));
+                }
+            }
         }
+
+        /// <summary>
+        /// 侧边栏维护者模式入口文案。
+        /// </summary>
+        public string MaintainerModeEntryText => IsProfessionalModeEnabled ? GetLangText("Sidebar_ExitMaintainerMode") : GetLangText("Sidebar_MaintainerMode");
 
         /// <summary>
         /// 侧边栏当前宽度。
@@ -295,7 +307,7 @@ namespace JiXingFlashTool.ViewModels
         /// <summary>
         /// 侧边栏设备统计文案。
         /// </summary>
-        public string SidebarDeviceCountText => $"已连接设备：{ListCount} 台";
+        public string SidebarDeviceCountText => string.Format(GetLangText("Sidebar_DeviceCount"), ListCount);
 
         /// <summary>
         /// 当前是否存在设备数据。
@@ -327,7 +339,7 @@ namespace JiXingFlashTool.ViewModels
         public RelayCommand SystemShowViewCommand => new Lazy<RelayCommand>(() => new RelayCommand(ShowAdbCommandView)).Value;
 
         /// <summary>
-        /// 打开专业模式登录弹窗。
+        /// 打开维护者模式登录弹窗或退出维护者模式。
         /// </summary>
         public RelayCommand ProfessionalModeCommand => new Lazy<RelayCommand>(() => new RelayCommand(OpenProfessionalModeDialog)).Value;
 
@@ -377,13 +389,23 @@ namespace JiXingFlashTool.ViewModels
         public RelayCommand ToggleSidebarCommand => new Lazy<RelayCommand>(() => new RelayCommand(ToggleSidebar)).Value;
 
         /// <summary>
+        /// 切换中文与英文界面语言命令。
+        /// </summary>
+        public RelayCommand ToggleLanguageCommand => new Lazy<RelayCommand>(() => new RelayCommand(ToggleLanguage)).Value;
+
+        /// <summary>
         /// 初始化主页面视图模型。
         /// </summary>
         public MainWindowViewModel()
         {
             Instance = this;
+            WeakEventManager<LocalizationService, EventArgs>.AddHandler(
+                LocalizationService.Instance,
+                nameof(LocalizationService.LanguageChanged),
+                OnLanguageChanged);
             InitializeStaticFilters();
             InitializeTitle();
+            LoadErrorMessage = GetLangText("Message_DeviceListInitFailed");
 
             DeviceCollection.CollectionChanged += OnDeviceCollectionChanged;
             _searchRefreshTimer = new DispatcherTimer
@@ -412,7 +434,7 @@ namespace JiXingFlashTool.ViewModels
         {
             IsLoading = true;
             HasLoadError = false;
-            LoadErrorMessage = "设备列表初始化失败，请检查设备连接状态。";
+            LoadErrorMessage = GetLangText("Message_DeviceListInitFailed");
 
             _ = Task.Run(() =>
             {
@@ -435,7 +457,7 @@ namespace JiXingFlashTool.ViewModels
                     {
                         IsLoading = false;
                         HasLoadError = true;
-                        LoadErrorMessage = "设备服务初始化失败，请检查 ADB 服务或设备连接。";
+                        LoadErrorMessage = GetLangText("Message_DeviceServiceInitFailed");
                         Growl.Error(ex.Message);
                     });
                 }
@@ -450,7 +472,7 @@ namespace JiXingFlashTool.ViewModels
             var selectList = GetSelectedDevices();
             if (selectList.Count == 0)
             {
-                Growl.Warning("请先选择手机");
+                Growl.Warning(GetLangText("Message_SelectPhoneFirst"));
                 return;
             }
 
@@ -493,7 +515,7 @@ namespace JiXingFlashTool.ViewModels
             var selectList = GetSelectedDevices();
             if (selectList.Count == 0)
             {
-                Growl.Warning("请先选择手机");
+                Growl.Warning(GetLangText("Message_SelectPhoneFirst"));
                 return;
             }
 
@@ -507,13 +529,13 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
-        /// 打开专业模式登录弹窗。
+        /// 打开维护者模式登录弹窗或退出维护者模式。
         /// </summary>
         private void OpenProfessionalModeDialog()
         {
             if (IsProfessionalModeEnabled)
             {
-                Growl.Info("专业模式已解锁");
+                ExitProfessionalMode();
                 return;
             }
 
@@ -527,12 +549,21 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
-        /// 解锁专业模式并刷新界面状态。
+        /// 进入维护者模式并刷新界面状态。
         /// </summary>
         private void EnableProfessionalMode()
         {
             IsProfessionalModeEnabled = true;
-            Growl.Success("已进入专业模式");
+            Growl.Success(GetLangText("Message_EnterMaintainerMode"));
+        }
+
+        /// <summary>
+        /// 退出维护者模式并恢复未登录状态。
+        /// </summary>
+        private void ExitProfessionalMode()
+        {
+            IsProfessionalModeEnabled = false;
+            Growl.Info(GetLangText("Message_ExitMaintainerMode"));
         }
 
         /// <summary>
@@ -544,7 +575,7 @@ namespace JiXingFlashTool.ViewModels
             var selectList = GetSelectedDevices().Where(item => item?.Device != null).ToList();
             if (selectList.Count == 0)
             {
-                Growl.Warning("请先选择手机");
+                Growl.Warning(GetLangText("Message_SelectPhoneFirst"));
                 return;
             }
 
@@ -569,13 +600,13 @@ namespace JiXingFlashTool.ViewModels
                     EnqueueSingleCommand(selectList, CommandType.Format);
                     break;
                 case "FlashFile":
-                    ExecuteProfessionalFileCommand(selectList, "刷入文件 (*.zip;*.apk;*.ps)|*.zip;*.apk;*.ps", EnqueueFlashFileTask);
+                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_FlashPackage"), EnqueueFlashFileTask);
                     break;
                 case "FlashKernel":
-                    ExecuteProfessionalFileCommand(selectList, "文件 (*.*)|*.*", EnqueueUpdateBootRecoveryTaskForKernel);
+                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_All"), EnqueueUpdateBootRecoveryTaskForKernel);
                     break;
                 case "UpdateTwrp":
-                    ExecuteProfessionalFileCommand(selectList, "IMG 文件 (*.img)|*.img", EnqueueUpdateBootRecoveryTask);
+                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_Img"), EnqueueUpdateBootRecoveryTask);
                     break;
                 case "Decrypt":
                     Task.Run(() =>
@@ -706,7 +737,7 @@ namespace JiXingFlashTool.ViewModels
                 return;
             }
 
-            var targetMessage = log.Message ?? string.Empty;
+            var targetMessage = TaskLogLocalizationService.NormalizeMessage(log.Message ?? string.Empty);
             var deviceItemViewModel = _deviceList.FirstOrDefault(item =>
                 item?.Device != null &&
                 string.Equals(item.Device.Serial, deviceId, StringComparison.OrdinalIgnoreCase));
@@ -744,7 +775,7 @@ namespace JiXingFlashTool.ViewModels
             var selectList = GetSelectedDevices().Where(item => item?.Device != null).ToList();
             if (selectList.Count == 0)
             {
-                Growl.Warning("请先选择手机");
+                Growl.Warning(GetLangText("Message_SelectPhoneFirst"));
                 return;
             }
 
@@ -784,7 +815,7 @@ namespace JiXingFlashTool.ViewModels
         {
             using (var openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = string.IsNullOrWhiteSpace(fileFilter) ? "文件|*.*" : fileFilter;
+                openFileDialog.Filter = string.IsNullOrWhiteSpace(fileFilter) ? GetLangText("FileFilter_All") : fileFilter;
                 openFileDialog.Multiselect = false;
                 if (openFileDialog.ShowDialog() != DialogResult.OK)
                 {
@@ -812,7 +843,7 @@ namespace JiXingFlashTool.ViewModels
                 var selectList = GetSelectedDevices();
                 if (selectList.Count == 0)
                 {
-                    Growl.Warning("请先选择手机");
+                    Growl.Warning(GetLangText("Message_SelectPhoneFirst"));
                     return;
                 }
 
@@ -843,7 +874,7 @@ namespace JiXingFlashTool.ViewModels
                 var selectList = GetSelectedDevices();
                 if (selectList.Count == 0)
                 {
-                    Growl.Warning("请先选择手机");
+                    Growl.Warning(GetLangText("Message_SelectPhoneFirst"));
                     return;
                 }
 
@@ -883,7 +914,7 @@ namespace JiXingFlashTool.ViewModels
 
             if (devices.Count == 0)
             {
-                Growl.Error("请先选择手机");
+                Growl.Error(GetLangText("Message_SelectPhoneFirst"));
                 return;
             }
 
@@ -956,14 +987,14 @@ namespace JiXingFlashTool.ViewModels
             }
 
             if (!string.IsNullOrWhiteSpace(ConnectionTypeFilter) &&
-                !ConnectionTypeFilter.Equals("全部连接", StringComparison.Ordinal) &&
+                !ConnectionTypeFilter.Equals(GetLangText("Filter_AllConnection"), StringComparison.Ordinal) &&
                 !deviceItemViewModel.ConnectionType.Equals(ConnectionTypeFilter, StringComparison.Ordinal))
             {
                 return false;
             }
 
             if (!string.IsNullOrWhiteSpace(ModelFilter) &&
-                !ModelFilter.Equals("全部型号", StringComparison.Ordinal) &&
+                !ModelFilter.Equals(GetLangText("Filter_AllModel"), StringComparison.Ordinal) &&
                 !deviceItemViewModel.ModelName.Equals(ModelFilter, StringComparison.OrdinalIgnoreCase) &&
                 !deviceItemViewModel.Model.Equals(ModelFilter, StringComparison.OrdinalIgnoreCase))
             {
@@ -971,7 +1002,7 @@ namespace JiXingFlashTool.ViewModels
             }
 
             if (!string.IsNullOrWhiteSpace(DeviceStateFilter) &&
-                !DeviceStateFilter.Equals("全部状态", StringComparison.Ordinal) &&
+                !DeviceStateFilter.Equals(GetLangText("Filter_AllState"), StringComparison.Ordinal) &&
                 !deviceItemViewModel.DeviceState.Equals(DeviceStateFilter, StringComparison.Ordinal))
             {
                 return false;
@@ -1244,7 +1275,7 @@ namespace JiXingFlashTool.ViewModels
             var recoveryCount = _deviceList.Count(item => item.Device.State == DeviceState.Recovery);
             var sideloadCount = _deviceList.Count(item => item.Device.State == DeviceState.Sideload);
             var downloadCount = _deviceList.Count(item => item.Device.State == DeviceState.BootLoader);
-            DeviceSummaryText = $"共 {_deviceList.Count} 台设备 · 系统 {systemCount} 台 · 恢复 {recoveryCount} 台 · 侧载 {sideloadCount} 台 · Download {downloadCount} 台";
+            DeviceSummaryText = string.Format(GetLangText("DeviceSummary_Text"), _deviceList.Count, systemCount, recoveryCount, sideloadCount, downloadCount);
         }
 
         /// <summary>
@@ -1253,7 +1284,7 @@ namespace JiXingFlashTool.ViewModels
         private void RefreshConnectDeviceNameList()
         {
             ConnectDeviceNameList.Clear();
-            ConnectDeviceNameList.Add("全部");
+            ConnectDeviceNameList.Add(GetLangText("Filter_All"));
 
             foreach (var deviceName in _deviceList
                          .Select(item => item.Device.Name)
@@ -1272,7 +1303,7 @@ namespace JiXingFlashTool.ViewModels
         {
             var currentFilter = ModelFilter;
             ModelFilterList.Clear();
-            ModelFilterList.Add("全部型号");
+            ModelFilterList.Add(GetLangText("Filter_AllModel"));
 
             foreach (var modelName in _deviceList
                          .Select(item => string.IsNullOrWhiteSpace(item.ModelName) ? item.Model : item.ModelName)
@@ -1289,7 +1320,7 @@ namespace JiXingFlashTool.ViewModels
                 return;
             }
 
-            ModelFilter = "全部型号";
+            ModelFilter = GetLangText("Filter_AllModel");
         }
 
         /// <summary>
@@ -1297,23 +1328,27 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         private void InitializeStaticFilters()
         {
-            ModelFilterList.Add("全部型号");
+            ModelFilterList.Clear();
+            ConnectionTypeList.Clear();
+            DeviceStateList.Clear();
 
-            ConnectionTypeList.Add("全部连接");
+            ModelFilterList.Add(GetLangText("Filter_AllModel"));
+
+            ConnectionTypeList.Add(GetLangText("Filter_AllConnection"));
             ConnectionTypeList.Add("USB");
-            ConnectionTypeList.Add("以太网");
+            ConnectionTypeList.Add(GetLangText("Connection_Ethernet"));
 
-            DeviceStateList.Add("全部状态");
-            DeviceStateList.Add("系统");
-            DeviceStateList.Add("恢复");
+            DeviceStateList.Add(GetLangText("Filter_AllState"));
+            DeviceStateList.Add(GetLangText("DeviceState_System"));
+            DeviceStateList.Add(GetLangText("DeviceState_Recovery"));
             DeviceStateList.Add("Download");
-            DeviceStateList.Add("侧载");
-            DeviceStateList.Add("离线");
-            DeviceStateList.Add("验证中");
-            DeviceStateList.Add("无权限");
-            DeviceStateList.Add("未验证");
-            DeviceStateList.Add("网络模式");
-            DeviceStateList.Add("未知状态");
+            DeviceStateList.Add(GetLangText("DeviceState_Sideload"));
+            DeviceStateList.Add(GetLangText("DeviceState_Offline"));
+            DeviceStateList.Add(GetLangText("DeviceState_Verifying"));
+            DeviceStateList.Add(GetLangText("DeviceState_NoPermission"));
+            DeviceStateList.Add(GetLangText("DeviceState_Unauthorized"));
+            DeviceStateList.Add(GetLangText("DeviceState_NetworkMode"));
+            DeviceStateList.Add(GetLangText("DeviceState_Unknown"));
         }
 
         /// <summary>
@@ -1325,13 +1360,57 @@ namespace JiXingFlashTool.ViewModels
             {
                 var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0.0";
                 var shortVersion = version.Substring(0, Math.Max(version.Length - 2, 1));
-                Title = "极星刷机工具 " + shortVersion;
-                AppVersionText = "版本号：" + shortVersion;
+                Title = GetLangText("App_Title") + " " + shortVersion;
+                AppVersionText = string.Format(GetLangText("Version_Text"), shortVersion);
             }
             catch
             {
-                Title = "极星刷机工具";
+                Title = GetLangText("App_Title");
             }
+        }
+
+        /// <summary>
+        /// 获取当前语言下的界面文案。
+        /// </summary>
+        /// <param name="key">语言资源键。</param>
+        /// <returns>当前语言对应的文案。</returns>
+        private static string GetLangText(string key)
+        {
+            return LocalizationService.Instance.GetString(string.Empty, key);
+        }
+
+        /// <summary>
+        /// 切换当前界面语言。
+        /// </summary>
+        private void ToggleLanguage()
+        {
+            var currentCultureName = LocalizationService.Instance.CurrentCulture?.Name;
+            var targetCultureName = string.Equals(currentCultureName, "zh-CN", StringComparison.OrdinalIgnoreCase)
+                ? "en"
+                : "zh-CN";
+            LocalizationService.Instance.ChangeCulture(targetCultureName);
+        }
+
+        /// <summary>
+        /// 语言变化后刷新 ViewModel 中由代码生成的展示文案。
+        /// </summary>
+        /// <param name="sender">事件来源。</param>
+        /// <param name="e">事件参数。</param>
+        private void OnLanguageChanged(object sender, EventArgs e)
+        {
+            InitializeStaticFilters();
+            RefreshModelFilterList();
+            RefreshConnectDeviceNameList();
+            RefreshDeviceSummary();
+            InitializeTitle();
+            foreach (var deviceItemViewModel in _deviceList)
+            {
+                deviceItemViewModel?.RefreshLocalizedText();
+            }
+
+            SyncDeviceView();
+            OnPropertyChanged(nameof(MaintainerModeEntryText));
+            OnPropertyChanged(nameof(SidebarDeviceCountText));
         }
 
         /// <summary>
