@@ -5,6 +5,7 @@
         xmlns:control="clr-namespace:JiXingFlashTool.Control"
         xmlns:lang="clr-namespace:LanguageCore;assembly=LanguageCore"
         xmlns:local="clr-namespace:JiXingFlashTool.Utils"
+        xmlns:odin="clr-namespace:JiXingFlashTool.Views.Odin"
         xmlns:viewModel="clr-namespace:JiXingFlashTool.ViewModels"
         Title=""
         Width="1600"
@@ -638,8 +639,9 @@
                                     Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
                             <Button Style="{StaticResource SidebarNavButtonStyle}"
                                     Margin="0,0,0,3.5"
-                                    Background="#EBF0FF"
-                                    BorderThickness="0">
+                                    Background="{Binding DeviceManageNavBackground}"
+                                    BorderThickness="0"
+                                    Command="{Binding ShowDeviceManagePageCommand}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="17.5" />
@@ -648,15 +650,15 @@
                                     </Grid.ColumnDefinitions>
                                     <Viewbox Grid.Column="0" Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Left">
                                         <Canvas Width="17.5" Height="17.5">
-                                            <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M12.3958 1.45833H5.10417C4.29875 1.45833 3.64583 2.11125 3.64583 2.91667V14.5833C3.64583 15.3887 4.29875 16.0417 5.10417 16.0417H12.3958C13.2012 16.0417 13.8542 15.3887 13.8542 14.5833V2.91667C13.8542 2.11125 13.2012 1.45833 12.3958 1.45833Z" />
-                                            <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M8.75 13.125H8.75729" />
+                                            <Path Fill="Transparent" Stroke="{Binding DeviceManageNavForeground}" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M12.3958 1.45833H5.10417C4.29875 1.45833 3.64583 2.11125 3.64583 2.91667V14.5833C3.64583 15.3887 4.29875 16.0417 5.10417 16.0417H12.3958C13.2012 16.0417 13.8542 15.3887 13.8542 14.5833V2.91667C13.8542 2.11125 13.2012 1.45833 12.3958 1.45833Z" />
+                                            <Path Fill="Transparent" Stroke="{Binding DeviceManageNavForeground}" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M8.75 13.125H8.75729" />
                                         </Canvas>
                                     </Viewbox>
                                     <TextBlock Grid.Column="2"
                                                Text="{lang:Loc Key=Sidebar_DeviceManage}"
                                                FontSize="12.25"
                                                FontWeight="Medium"
-                                               Foreground="#5C82FD"
+                                               Foreground="{Binding DeviceManageNavForeground}"
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Left" />
                                 </Grid>
@@ -664,8 +666,8 @@
 
                             <Button Style="{StaticResource SidebarNavButtonStyle}"
                                     Margin="0,0,0,3.5"
-                                    Background="Transparent"
-                                    Command="{Binding SingleScreenCommand}">
+                                    Background="{Binding OdinNavBackground}"
+                                    Command="{Binding ShowOdinFlashPageCommand}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="17.5" />
@@ -674,16 +676,14 @@
                                     </Grid.ColumnDefinitions>
                                     <Viewbox Grid.Column="0" Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Left">
                                         <Canvas Width="17.5" Height="17.5">
-                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M14.5833 2.1875H2.91667C2.11125 2.1875 1.45833 2.84042 1.45833 3.64583V10.9375C1.45833 11.7429 2.11125 12.3958 2.91667 12.3958H14.5833C15.3887 12.3958 16.0417 11.7429 16.0417 10.9375V3.64583C16.0417 2.84042 15.3887 2.1875 14.5833 2.1875Z" />
-                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M5.83333 15.3125H11.6667" />
-                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M8.75 12.3958V15.3125" />
+                                            <Path Fill="Transparent" Stroke="{Binding OdinNavForeground}" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M9.91667 1.45833L3.64583 9.1875H8.75L7.58333 16.0417L13.8542 7.29167H8.75L9.91667 1.45833Z" />
                                         </Canvas>
                                     </Viewbox>
                                     <TextBlock Grid.Column="2"
-                                               Text="{lang:Loc Key=Sidebar_CastScreen}"
+                                               Text="Odin"
                                                FontSize="12.25"
                                                FontWeight="Medium"
-                                               Foreground="#B3333333"
+                                               Foreground="{Binding OdinNavForeground}"
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Left" />
                                 </Grid>
@@ -698,19 +698,20 @@
                                     Width="30"
                                     Height="30"
                                     Margin="0,0,0,3.5"
-                                    Background="#EBF0FF"
-                                    BorderThickness="0">
+                                    Background="{Binding DeviceManageNavBackground}"
+                                    BorderThickness="0"
+                                    Command="{Binding ShowDeviceManagePageCommand}">
                                 <Viewbox Width="17.5" Height="17.5">
                                     <Canvas Width="17.5" Height="17.5">
                                         <Path Fill="Transparent"
-                                              Stroke="#5C82FD"
+                                              Stroke="{Binding DeviceManageNavForeground}"
                                               StrokeThickness="1.45833"
                                               StrokeStartLineCap="Round"
                                               StrokeEndLineCap="Round"
                                               StrokeLineJoin="Round"
                                               Data="M12.3958 1.45833H5.10417C4.29875 1.45833 3.64583 2.11125 3.64583 2.91667V14.5833C3.64583 15.3887 4.29875 16.0417 5.10417 16.0417H12.3958C13.2012 16.0417 13.8542 15.3887 13.8542 14.5833V2.91667C13.8542 2.11125 13.2012 1.45833 12.3958 1.45833Z" />
                                         <Path Fill="Transparent"
-                                              Stroke="#5C82FD"
+                                              Stroke="{Binding DeviceManageNavForeground}"
                                               StrokeThickness="1.45833"
                                               StrokeStartLineCap="Round"
                                               StrokeEndLineCap="Round"
@@ -724,31 +725,17 @@
                                         Width="30"
                                         Height="30"
                                         Margin="0,0,0,3.5"
-                                        Background="Transparent"
-                                        Command="{Binding SingleScreenCommand}">
+                                        Background="{Binding OdinNavBackground}"
+                                        Command="{Binding ShowOdinFlashPageCommand}">
                                     <Viewbox Width="17.5" Height="17.5">
                                         <Canvas Width="17.5" Height="17.5">
                                             <Path Fill="Transparent"
-                                                  Stroke="#B3333333"
+                                                  Stroke="{Binding OdinNavForeground}"
                                                   StrokeThickness="1.45833"
                                                   StrokeStartLineCap="Round"
                                                   StrokeEndLineCap="Round"
                                                   StrokeLineJoin="Round"
-                                                  Data="M14.5833 2.1875H2.91667C2.11125 2.1875 1.45833 2.84042 1.45833 3.64583V10.9375C1.45833 11.7429 2.11125 12.3958 2.91667 12.3958H14.5833C15.3887 12.3958 16.0417 11.7429 16.0417 10.9375V3.64583C16.0417 2.84042 15.3887 2.1875 14.5833 2.1875Z" />
-                                            <Path Fill="Transparent"
-                                                  Stroke="#B3333333"
-                                                  StrokeThickness="1.45833"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Data="M5.83333 15.3125H11.6667" />
-                                            <Path Fill="Transparent"
-                                                  Stroke="#B3333333"
-                                                  StrokeThickness="1.45833"
-                                                  StrokeStartLineCap="Round"
-                                                  StrokeEndLineCap="Round"
-                                                  StrokeLineJoin="Round"
-                                                  Data="M8.75 12.3958V15.3125" />
+                                                  Data="M9.91667 1.45833L3.64583 9.1875H8.75L7.58333 16.0417L13.8542 7.29167H8.75L9.91667 1.45833Z" />
                                         </Canvas>
                                     </Viewbox>
                                 </Button>
@@ -978,7 +965,8 @@
                 </Grid>
             </Border>
             <Grid Grid.Column="1"
-                  Background="{StaticResource PageBackgroundBrush}">
+                  Background="{StaticResource PageBackgroundBrush}"
+                  Visibility="{Binding IsDeviceManagePage, Converter={StaticResource VisibilityBoolConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="53.5" />
@@ -1597,8 +1585,11 @@
                 </Grid>
             </Border>
         </Grid>
+        <odin:OdinFlashView Grid.Column="1"
+                            DataContext="{Binding OdinFlashViewModel}"
+                            Visibility="{Binding DataContext.IsOdinFlashPage, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource VisibilityBoolConverter}}" />
     </Grid>
-    </Border>
+</Border>
 </Window>
 
 

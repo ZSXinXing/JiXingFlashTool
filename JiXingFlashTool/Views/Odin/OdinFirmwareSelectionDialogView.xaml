@@ -1,0 +1,165 @@
+<UserControl x:Class="JiXingFlashTool.Views.Odin.OdinFirmwareSelectionDialogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converter="clr-namespace:JiXingFlashTool.Converters"
+             Width="500"
+             Height="393"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <UserControl.Resources>
+        <converter:VisibilityBoolConverter x:Key="VisibilityBoolConverter" />
+        <converter:InverseVisibilityBoolConverter x:Key="InverseVisibilityBoolConverter" />
+        <SolidColorBrush x:Key="DialogPrimaryBrush" Color="#5C82FD" />
+        <SolidColorBrush x:Key="DialogBorderBrush" Color="#E0E0E0" />
+        <SolidColorBrush x:Key="DialogMutedBrush" Color="#999999" />
+
+        <Style x:Key="DialogFooterButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="26.5" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3.5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="White"
+            BorderBrush="{StaticResource DialogBorderBrush}"
+            BorderThickness="1"
+            CornerRadius="6">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="8" Direction="270" Color="#40000000" />
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="46.5" />
+                <RowDefinition Height="292.5" />
+                <RowDefinition Height="52" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" BorderBrush="{StaticResource DialogBorderBrush}" BorderThickness="0,0,0,1">
+                <Grid Margin="17.5,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="7" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="7" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="21" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="&#xE945;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource DialogPrimaryBrush}" FontSize="14" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="选择固件" FontSize="12.25" FontWeight="Medium" Foreground="#333333" VerticalAlignment="Center" />
+                    <Border Grid.Column="4" Height="17.5" Padding="7,0" Background="#1A5C82FD" CornerRadius="3.5" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SelectedDeviceTagText}" FontSize="10.5" FontWeight="Medium" Foreground="{StaticResource DialogPrimaryBrush}" VerticalAlignment="Center" />
+                    </Border>
+                    <Button Grid.Column="6" Width="21" Height="21" Background="Transparent" BorderThickness="0" Command="{Binding CancelCommand}">
+                        <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="#999999" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="1" Margin="17.5,17.5,17.5,0">
+                <ContentControl Content="{Binding}">
+                    <ContentControl.ContentTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <StackPanel Margin="0,0,0,10.5">
+                                    <StackPanel Orientation="Horizontal" Height="18.5">
+                                        <TextBlock Text="BL" FontSize="10.5" FontWeight="Bold" Foreground="#E91E63" VerticalAlignment="Center" />
+                                        <TextBlock Margin="7,0,0,0" Text="Bootloader" FontSize="10.5" Foreground="{StaticResource DialogMutedBrush}" VerticalAlignment="Center" />
+                                        <Border Margin="7,0,0,0" Height="18.5" Padding="5.25,0" Background="#1AF44336" CornerRadius="3.5">
+                                            <TextBlock Text="必选" FontSize="10" FontWeight="Medium" Foreground="#F44336" VerticalAlignment="Center" />
+                                        </Border>
+                                    </StackPanel>
+                                    <Button Height="35" Margin="0,5.25,0,0" Background="#4DF5F5F5" BorderBrush="{StaticResource DialogBorderBrush}" BorderThickness="1" Command="{Binding SelectBlCommand}">
+                                        <Grid Margin="11.5,0">
+                                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="12.25" Foreground="#999999" VerticalAlignment="Center" />
+                                            <TextBlock Margin="22,0,0,0" Text="点击选择 BL 文件（.tar / .tar.md5）" FontSize="10.5" Foreground="#999999" VerticalAlignment="Center" Visibility="{Binding HasBlFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                            <TextBlock Margin="22,0,24,0" Text="{Binding BlFileName}" FontSize="10.5" Foreground="#333333" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Visibility="{Binding HasBlFile, Converter={StaticResource VisibilityBoolConverter}}" />
+                                            <Button Width="16" Height="16" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Command="{Binding ClearBlCommand}" Visibility="{Binding HasBlFile, Converter={StaticResource VisibilityBoolConverter}}">
+                                                <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="8" Foreground="#999999" />
+                                            </Button>
+                                        </Grid>
+                                    </Button>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,0,10.5">
+                                    <StackPanel Orientation="Horizontal" Height="18.5">
+                                        <TextBlock Text="AP" FontSize="10.5" FontWeight="Bold" Foreground="#2196F3" VerticalAlignment="Center" />
+                                        <TextBlock Margin="7,0,0,0" Text="Android OS 主包" FontSize="10.5" Foreground="{StaticResource DialogMutedBrush}" VerticalAlignment="Center" />
+                                        <Border Margin="7,0,0,0" Height="18.5" Padding="5.25,0" Background="#1AF44336" CornerRadius="3.5">
+                                            <TextBlock Text="必选" FontSize="10" FontWeight="Medium" Foreground="#F44336" VerticalAlignment="Center" />
+                                        </Border>
+                                    </StackPanel>
+                                    <Button Height="35" Margin="0,5.25,0,0" Background="#4DF5F5F5" BorderBrush="{StaticResource DialogBorderBrush}" BorderThickness="1" Command="{Binding SelectApCommand}">
+                                        <Grid Margin="11.5,0">
+                                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="12.25" Foreground="#999999" VerticalAlignment="Center" />
+                                            <TextBlock Margin="22,0,0,0" Text="点击选择 AP 文件（.tar / .tar.md5）" FontSize="10.5" Foreground="#999999" VerticalAlignment="Center" Visibility="{Binding HasApFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                            <TextBlock Margin="22,0,24,0" Text="{Binding ApFileName}" FontSize="10.5" Foreground="#333333" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Visibility="{Binding HasApFile, Converter={StaticResource VisibilityBoolConverter}}" />
+                                            <Button Width="16" Height="16" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Command="{Binding ClearApCommand}" Visibility="{Binding HasApFile, Converter={StaticResource VisibilityBoolConverter}}">
+                                                <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="8" Foreground="#999999" />
+                                            </Button>
+                                        </Grid>
+                                    </Button>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,0,0,10.5">
+                                    <StackPanel Orientation="Horizontal" Height="14">
+                                        <TextBlock Text="CSC" FontSize="10.5" FontWeight="Bold" Foreground="#4CAF50" VerticalAlignment="Center" />
+                                        <TextBlock Margin="7,0,0,0" Text="Country Spec" FontSize="10.5" Foreground="{StaticResource DialogMutedBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <Button Height="35" Margin="0,5.25,0,0" Background="#4DF5F5F5" BorderBrush="{StaticResource DialogBorderBrush}" BorderThickness="1" Command="{Binding SelectCscCommand}">
+                                        <Grid Margin="11.5,0">
+                                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="12.25" Foreground="#999999" VerticalAlignment="Center" />
+                                            <TextBlock Margin="22,0,0,0" Text="点击选择 CSC 文件（.tar / .tar.md5）" FontSize="10.5" Foreground="#999999" VerticalAlignment="Center" Visibility="{Binding HasCscFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                            <TextBlock Margin="22,0,24,0" Text="{Binding CscFileName}" FontSize="10.5" Foreground="#333333" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Visibility="{Binding HasCscFile, Converter={StaticResource VisibilityBoolConverter}}" />
+                                            <Button Width="16" Height="16" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Command="{Binding ClearCscCommand}" Visibility="{Binding HasCscFile, Converter={StaticResource VisibilityBoolConverter}}">
+                                                <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="8" Foreground="#999999" />
+                                            </Button>
+                                        </Grid>
+                                    </Button>
+                                </StackPanel>
+
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Height="14">
+                                        <TextBlock Text="USERDATA" FontSize="10.5" FontWeight="Bold" Foreground="#FF9800" VerticalAlignment="Center" />
+                                        <TextBlock Margin="7,0,0,0" Text="User Data" FontSize="10.5" Foreground="{StaticResource DialogMutedBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <Button Height="35" Margin="0,5.25,0,0" Background="#4DF5F5F5" BorderBrush="{StaticResource DialogBorderBrush}" BorderThickness="1" Command="{Binding SelectUserdataCommand}">
+                                        <Grid Margin="11.5,0">
+                                            <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="12.25" Foreground="#999999" VerticalAlignment="Center" />
+                                            <TextBlock Margin="22,0,0,0" Text="点击选择 USERDATA 文件（.tar / .tar.md5）" FontSize="10.5" Foreground="#999999" VerticalAlignment="Center" Visibility="{Binding HasUserdataFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                            <TextBlock Margin="22,0,24,0" Text="{Binding UserdataFileName}" FontSize="10.5" Foreground="#333333" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Visibility="{Binding HasUserdataFile, Converter={StaticResource VisibilityBoolConverter}}" />
+                                            <Button Width="16" Height="16" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Command="{Binding ClearUserdataCommand}" Visibility="{Binding HasUserdataFile, Converter={StaticResource VisibilityBoolConverter}}">
+                                                <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="8" Foreground="#999999" />
+                                            </Button>
+                                        </Grid>
+                                    </Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ContentControl.ContentTemplate>
+                </ContentControl>
+            </StackPanel>
+
+            <Border Grid.Row="2" BorderBrush="{StaticResource DialogBorderBrush}" BorderThickness="0,1,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,13.25,17.5,0">
+                    <Button Width="51" Style="{StaticResource DialogFooterButtonStyle}" Background="White" BorderBrush="{StaticResource DialogBorderBrush}" BorderThickness="1" Foreground="#333333" Command="{Binding CancelCommand}" Content="取消" />
+                    <Button Width="98" Margin="7,0,0,0" Style="{StaticResource DialogFooterButtonStyle}" Background="{StaticResource DialogPrimaryBrush}" BorderThickness="0" Foreground="White" Command="{Binding ConfirmCommand}" Content="确认分配固件" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

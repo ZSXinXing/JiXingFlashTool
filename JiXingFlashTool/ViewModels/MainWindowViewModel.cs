@@ -7,6 +7,7 @@ using JiXingFlashTool.Models;
 using JiXingFlashTool.ItemViewModel;
 using JiXingFlashTool.Services;
 using JiXingFlashTool.ViewModels.AllScreen;
+using JiXingFlashTool.ViewModels.Odin;
 using JiXingFlashTool.Views;
 using JiXingFlashTool.Enums;
 using JiXingFlashTool.Model.Payload;
@@ -53,7 +54,10 @@ namespace JiXingFlashTool.ViewModels
         private bool _isSelectAll;
         private bool _isSidebarExpanded = true;
         private bool _isProfessionalModeEnabled;
+        private bool _isOdinFlashPage;
         private int _listCount;
+        private readonly RelayCommand _showDeviceManagePageCommand;
+        private readonly AsyncRelayCommand _showOdinFlashPageCommand;
         private const double SidebarWidthScale = 1D;
         private const double SidebarCollapsedWidth = 60D;
 
@@ -86,6 +90,11 @@ namespace JiXingFlashTool.ViewModels
         /// 设备状态筛选集合。
         /// </summary>
         public ObservableCollection<string> DeviceStateList { get; } = new ObservableCollection<string>();
+
+        /// <summary>
+        /// Odin 刷机页面视图模型，负责右侧 Odin 刷机内容区的数据和命令。
+        /// </summary>
+        public OdinFlashViewModel OdinFlashViewModel { get; } = new OdinFlashViewModel();
 
         /// <summary>
         /// 当前窗口标题。
@@ -247,6 +256,50 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
+        /// 当前右侧内容区是否显示设备管理页面。
+        /// </summary>
+        public bool IsDeviceManagePage => !IsOdinFlashPage;
+
+        /// <summary>
+        /// 当前右侧内容区是否显示 Odin 刷机页面。
+        /// </summary>
+        public bool IsOdinFlashPage
+        {
+            get => _isOdinFlashPage;
+            set
+            {
+                if (SetProperty(ref _isOdinFlashPage, value))
+                {
+                    OnPropertyChanged(nameof(IsDeviceManagePage));
+                    OnPropertyChanged(nameof(DeviceManageNavBackground));
+                    OnPropertyChanged(nameof(DeviceManageNavForeground));
+                    OnPropertyChanged(nameof(OdinNavBackground));
+                    OnPropertyChanged(nameof(OdinNavForeground));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 设备管理菜单背景色。
+        /// </summary>
+        public string DeviceManageNavBackground => IsDeviceManagePage ? "#EBF0FF" : "Transparent";
+
+        /// <summary>
+        /// 设备管理菜单前景色。
+        /// </summary>
+        public string DeviceManageNavForeground => IsDeviceManagePage ? "#5C82FD" : "#B3333333";
+
+        /// <summary>
+        /// Odin 刷机菜单背景色。
+        /// </summary>
+        public string OdinNavBackground => IsOdinFlashPage ? "#EBF0FF" : "Transparent";
+
+        /// <summary>
+        /// Odin 刷机菜单前景色。
+        /// </summary>
+        public string OdinNavForeground => IsOdinFlashPage ? "#5C82FD" : "#B3333333";
+
+        /// <summary>
         /// 侧边栏维护者模式入口文案。
         /// </summary>
         public string MaintainerModeEntryText => IsProfessionalModeEnabled ? GetLangText("Sidebar_ExitMaintainerMode") : GetLangText("Sidebar_MaintainerMode");
@@ -394,11 +447,23 @@ namespace JiXingFlashTool.ViewModels
         public RelayCommand ToggleLanguageCommand => new Lazy<RelayCommand>(() => new RelayCommand(ToggleLanguage)).Value;
 
         /// <summary>
+        /// 显示设备管理页面命令。
+        /// </summary>
+        public RelayCommand ShowDeviceManagePageCommand => _showDeviceManagePageCommand;
+
+        /// <summary>
+        /// 显示 Odin 刷机页面命令。
+        /// </summary>
+        public AsyncRelayCommand ShowOdinFlashPageCommand => _showOdinFlashPageCommand;
+
+        /// <summary>
         /// 初始化主页面视图模型。
         /// </summary>
         public MainWindowViewModel()
         {
             Instance = this;
+            _showDeviceManagePageCommand = new RelayCommand(ShowDeviceManagePage);
+            _showOdinFlashPageCommand = new AsyncRelayCommand(ShowOdinFlashPageAsync);
             WeakEventManager<LocalizationService, EventArgs>.AddHandler(
                 LocalizationService.Instance,
                 nameof(LocalizationService.LanguageChanged),
@@ -1238,6 +1303,24 @@ namespace JiXingFlashTool.ViewModels
         private void ToggleSidebar()
         {
             IsSidebarExpanded = !IsSidebarExpanded;
+        }
+
+        /// <summary>
+        /// 关闭 Odin 页面覆盖层，恢复显示原设备管理内容。
+        /// </summary>
+        private void ShowDeviceManagePage()
+        {
+            IsOdinFlashPage = false;
+        }
+
+        /// <summary>
+        /// 将右侧内容区切换到 Odin 刷机页面，并刷新 Download 模式设备列表。
+        /// </summary>
+        /// <returns>异步刷新任务。</returns>
+        private async Task ShowOdinFlashPageAsync()
+        {
+            IsOdinFlashPage = true;
+            await OdinFlashViewModel.RefreshDevicesAsync();
         }
 
         /// <summary>
