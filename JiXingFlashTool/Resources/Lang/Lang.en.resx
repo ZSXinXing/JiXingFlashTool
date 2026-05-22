@@ -4,8 +4,8 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="App_Title" xml:space="preserve"><value>JiXing Flash Tool</value></data>
-  <data name="Sidebar_ProductName" xml:space="preserve"><value>JiXing System Tool</value></data>
+  <data name="App_Title" xml:space="preserve"><value>Polestar System Tool</value></data>
+  <data name="Sidebar_ProductName" xml:space="preserve"><value>Polestar System Tool</value></data>
   <data name="Sidebar_ProductSubtitle" xml:space="preserve"><value>System Update Maintenance</value></data>
   <data name="Sidebar_DeviceManage" xml:space="preserve"><value>Devices</value></data>
   <data name="Sidebar_CastScreen" xml:space="preserve"><value>Cast Screen</value></data>

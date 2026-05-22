@@ -96,7 +96,7 @@
         <Style x:Key="TwrpDropDownToggleButtonStyle" TargetType="ToggleButton">
             <Setter Property="MinWidth" Value="75.25" />
             <Setter Property="Height" Value="24.5" />
-            <Setter Property="Padding" Value="10.5,0,24,0" />
+            <Setter Property="Padding" Value="10.5,0" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="FontSize" Value="10.5" />
             <Setter Property="FontWeight" Value="Medium" />
@@ -113,11 +113,13 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="3.5"
                                 SnapsToDevicePixels="True">
-                            <Grid UseLayoutRounding="True">
+                            <Grid Margin="{TemplateBinding Padding}"
+                                  UseLayoutRounding="True">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="12.25" />
                                     <ColumnDefinition Width="10.5" />
                                     <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="7" />
                                     <ColumnDefinition Width="10.5" />
                                 </Grid.ColumnDefinitions>
                                 <Image Width="12.25"
@@ -137,7 +139,7 @@
                                            FontWeight="{TemplateBinding FontWeight}"
                                            TextWrapping="NoWrap"
                                            Margin="0,-1,0,0" />
-                                <Border Grid.Column="3"
+                                <Border Grid.Column="4"
                                         Width="10.5"
                                         Height="10.5"
                                         HorizontalAlignment="Center"
@@ -161,8 +163,8 @@
         </Style>
 
         <Style x:Key="UpdateSystemActionButtonStyle" TargetType="Button">
-            <Setter Property="MinWidth" Value="96" />
-            <Setter Property="Height" Value="31" />
+            <Setter Property="MinWidth" Value="75.25" />
+            <Setter Property="Height" Value="24.5" />
             <Setter Property="Padding" Value="10.5,0" />
             <Setter Property="Background" Value="#5C82FD" />
             <Setter Property="BorderBrush" Value="#5C82FD" />
@@ -176,14 +178,7 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="3.5">
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="1.5"
-                                                  ShadowDepth="1"
-                                                  Direction="270"
-                                                  Color="#1A000000"
-                                                  Opacity="1" />
-                            </Border.Effect>
-                            <Grid>
+                            <Grid Margin="{TemplateBinding Padding}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="12.25" />
                                     <ColumnDefinition Width="10.5" />

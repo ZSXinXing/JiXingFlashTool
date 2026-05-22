@@ -54,7 +54,7 @@ namespace JiXingFlashTool.ViewModels
         private bool _isSidebarExpanded = true;
         private bool _isProfessionalModeEnabled;
         private int _listCount;
-        private const double SidebarWidthScale = 0.8D;
+        private const double SidebarWidthScale = 1D;
         private const double SidebarCollapsedWidth = 60D;
 
         /// <summary>
