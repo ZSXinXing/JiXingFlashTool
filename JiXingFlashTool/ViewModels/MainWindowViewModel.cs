@@ -251,9 +251,15 @@ namespace JiXingFlashTool.ViewModels
                 if (SetProperty(ref _isProfessionalModeEnabled, value))
                 {
                     OnPropertyChanged(nameof(MaintainerModeEntryText));
+                    OnPropertyChanged(nameof(IsOdinNavigationVisible));
                 }
             }
         }
+
+        /// <summary>
+        /// Odin 刷机入口是否可见，仅维护者模式登录后显示。
+        /// </summary>
+        public bool IsOdinNavigationVisible => IsProfessionalModeEnabled;
 
         /// <summary>
         /// 当前右侧内容区是否显示设备管理页面。
@@ -628,6 +634,11 @@ namespace JiXingFlashTool.ViewModels
         private void ExitProfessionalMode()
         {
             IsProfessionalModeEnabled = false;
+            if (IsOdinFlashPage)
+            {
+                ShowDeviceManagePage();
+            }
+
             Growl.Info(GetLangText("Message_ExitMaintainerMode"));
         }
 
@@ -1319,6 +1330,11 @@ namespace JiXingFlashTool.ViewModels
         /// <returns>异步刷新任务。</returns>
         private async Task ShowOdinFlashPageAsync()
         {
+            if (!IsProfessionalModeEnabled)
+            {
+                return;
+            }
+
             IsOdinFlashPage = true;
             await OdinFlashViewModel.RefreshDevicesAsync();
         }

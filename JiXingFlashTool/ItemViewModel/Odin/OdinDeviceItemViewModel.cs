@@ -13,6 +13,10 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         private string _blFilePath = string.Empty;
         private string _apFilePath = string.Empty;
         private string _twrpFilePath = string.Empty;
+        private string _systemPackageFilePath = string.Empty;
+        private bool _wipeDataBeforeSystemFlash;
+        private bool _wipeSystemBeforeSystemFlash;
+        private bool _formatDataBeforeSystemFlash;
         private string _cpFilePath = string.Empty;
         private string _cscFilePath = string.Empty;
         private string _userdataFilePath = string.Empty;
@@ -112,6 +116,48 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         }
 
         /// <summary>
+        /// 已分配的 TWRP 侧载系统包路径。
+        /// </summary>
+        public string SystemPackageFilePath
+        {
+            get => _systemPackageFilePath;
+            set
+            {
+                if (SetProperty(ref _systemPackageFilePath, value))
+                {
+                    OnPropertyChanged(nameof(SystemPackageFileName));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 刷入系统包前是否执行双清。
+        /// </summary>
+        public bool WipeDataBeforeSystemFlash
+        {
+            get => _wipeDataBeforeSystemFlash;
+            set => SetProperty(ref _wipeDataBeforeSystemFlash, value);
+        }
+
+        /// <summary>
+        /// 刷入系统包前是否清除 system 分区。
+        /// </summary>
+        public bool WipeSystemBeforeSystemFlash
+        {
+            get => _wipeSystemBeforeSystemFlash;
+            set => SetProperty(ref _wipeSystemBeforeSystemFlash, value);
+        }
+
+        /// <summary>
+        /// 刷入系统包前是否格式化 data 分区。
+        /// </summary>
+        public bool FormatDataBeforeSystemFlash
+        {
+            get => _formatDataBeforeSystemFlash;
+            set => SetProperty(ref _formatDataBeforeSystemFlash, value);
+        }
+
+        /// <summary>
         /// 已分配 CP 固件路径。
         /// </summary>
         public string CpFilePath
@@ -181,6 +227,11 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string TwrpFileName => GetDisplayFileName(TwrpFilePath);
 
         /// <summary>
+        /// TWRP 侧载系统包文件名，未选择时显示占位横线。
+        /// </summary>
+        public string SystemPackageFileName => GetDisplayFileName(SystemPackageFilePath);
+
+        /// <summary>
         /// CP 文件名，未选择时显示占位横线。
         /// </summary>
         public string CpFileName => GetDisplayFileName(CpFilePath);
@@ -200,14 +251,33 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         /// </summary>
         /// <param name="blFilePath">BL 文件路径。</param>
         /// <param name="apFilePath">AP 文件路径。</param>
+        /// <param name="twrpFilePath">TWRP 镜像路径。</param>
+        /// <param name="systemPackageFilePath">TWRP 侧载系统包路径。</param>
+        /// <param name="wipeDataBeforeSystemFlash">是否在刷系统前双清。</param>
+        /// <param name="wipeSystemBeforeSystemFlash">是否在刷系统前清除 system。</param>
+        /// <param name="formatDataBeforeSystemFlash">是否在刷系统前格式化 data。</param>
         /// <param name="cpFilePath">CP 文件路径。</param>
         /// <param name="cscFilePath">CSC 文件路径。</param>
         /// <param name="userdataFilePath">USERDATA 文件路径。</param>
-        public void AssignFirmware(string blFilePath, string apFilePath, string twrpFilePath, string cpFilePath, string cscFilePath, string userdataFilePath)
+        public void AssignFirmware(
+            string blFilePath,
+            string apFilePath,
+            string twrpFilePath,
+            string systemPackageFilePath,
+            bool wipeDataBeforeSystemFlash,
+            bool wipeSystemBeforeSystemFlash,
+            bool formatDataBeforeSystemFlash,
+            string cpFilePath,
+            string cscFilePath,
+            string userdataFilePath)
         {
             BlFilePath = blFilePath;
             ApFilePath = apFilePath;
             TwrpFilePath = twrpFilePath;
+            SystemPackageFilePath = systemPackageFilePath;
+            WipeDataBeforeSystemFlash = wipeDataBeforeSystemFlash;
+            WipeSystemBeforeSystemFlash = wipeSystemBeforeSystemFlash;
+            FormatDataBeforeSystemFlash = formatDataBeforeSystemFlash;
             CpFilePath = cpFilePath;
             CscFilePath = cscFilePath;
             UserdataFilePath = userdataFilePath;

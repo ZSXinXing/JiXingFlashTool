@@ -133,7 +133,9 @@ namespace JXHeimdall.Services
                     }
                     else
                     {
+                        log?.Invoke("Odin 固件刷入完成，正在重启设备。");
                         protocol.Reboot(cancellationToken);
+                        log?.Invoke("已发送自动重启命令。");
                     }
                 }
 

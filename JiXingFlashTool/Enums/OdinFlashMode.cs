@@ -13,6 +13,11 @@ namespace JiXingFlashTool.Enums
         /// <summary>
         /// 仅刷入 AP 槽位中的 TWRP 包，并执行进入 Recovery 的刷入流程。
         /// </summary>
-        TwrpRebootRecovery
+        TwrpRebootRecovery,
+
+        /// <summary>
+        /// 刷入 TWRP 后进入 Recovery，执行清理选项并侧载安装系统包。
+        /// </summary>
+        TwrpInstallSystem
     }
 }

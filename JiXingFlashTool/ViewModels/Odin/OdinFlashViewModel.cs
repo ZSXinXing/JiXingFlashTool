@@ -264,6 +264,10 @@ namespace JiXingFlashTool.ViewModels.Odin
                         dialogViewModel.BlFilePath,
                         dialogViewModel.ApFilePath,
                         dialogViewModel.TwrpFilePath,
+                        dialogViewModel.SystemPackageFilePath,
+                        dialogViewModel.WipeDataBeforeSystemFlash,
+                        dialogViewModel.WipeSystemBeforeSystemFlash,
+                        dialogViewModel.FormatDataBeforeSystemFlash,
                         dialogViewModel.CpFilePath,
                         dialogViewModel.CscFilePath,
                         dialogViewModel.UserdataFilePath);
@@ -340,7 +344,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// <returns>异步入队任务。</returns>
         private async Task StartFlashAsync()
         {
-            await EnqueueSelectedDevicesAsync(OdinFlashMode.FirmwareReboot);
+            await EnqueueSelectedDevicesAsync();
         }
 
         /// <summary>
@@ -357,7 +361,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// </summary>
         /// <param name="flashMode">刷机模式。</param>
         /// <returns>异步入队任务。</returns>
-        private async Task EnqueueSelectedDevicesAsync(OdinFlashMode flashMode)
+        private async Task EnqueueSelectedDevicesAsync(OdinFlashMode? forcedFlashMode = null)
         {
             var selectedDevices = Devices.Where(item => item.IsSelected).ToList();
             if (selectedDevices.Count == 0)
@@ -372,11 +376,12 @@ namespace JiXingFlashTool.ViewModels.Odin
                 foreach (var device in selectedDevices)
                 {
                     device.StatusText = "等待刷机";
+                    var flashMode = forcedFlashMode ?? ResolveFlashMode(device);
                     await _taskScheduler.EnqueueAsync(
                         GetTaskDeviceId(device),
                         new OdinFlashTask(),
                         BuildPayload(device, flashMode),
-                        detail: flashMode == OdinFlashMode.TwrpRebootRecovery ? "TWRP-Recovery" : "Firmware-Reboot");
+                        detail: GetTaskDetailText(flashMode));
                 }
 
                 RefreshSummary();
@@ -414,6 +419,11 @@ namespace JiXingFlashTool.ViewModels.Odin
                 return OdinFlashMode.TwrpRebootRecovery;
             }
 
+            if (dialogViewModel.HasTwrpFile && dialogViewModel.HasSystemPackageFile)
+            {
+                return OdinFlashMode.TwrpInstallSystem;
+            }
+
             return OdinFlashMode.FirmwareReboot;
         }
 
@@ -423,6 +433,56 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// <param name="device">待刷入设备。</param>
         /// <param name="flashMode">刷机模式。</param>
         /// <returns>Odin 刷机任务参数。</returns>
+        /// <summary>
+        /// 根据设备已经分配的固件内容判断刷入模式，确保开始刷入按钮不会丢失 TWRP 安装系统流程。
+        /// </summary>
+        /// <param name="device">已分配固件的 Odin 设备项。</param>
+        /// <returns>当前设备应执行的 Odin 刷机模式。</returns>
+        private static OdinFlashMode ResolveFlashMode(OdinDeviceItemViewModel device)
+        {
+            var hasBlFile = !string.IsNullOrWhiteSpace(device.BlFilePath);
+            var hasApFile = !string.IsNullOrWhiteSpace(device.ApFilePath);
+            var hasTwrpFile = !string.IsNullOrWhiteSpace(device.TwrpFilePath);
+            var hasSystemPackageFile = !string.IsNullOrWhiteSpace(device.SystemPackageFilePath);
+            var hasCpFile = !string.IsNullOrWhiteSpace(device.CpFilePath);
+            var hasCscFile = !string.IsNullOrWhiteSpace(device.CscFilePath);
+            var hasUserdataFile = !string.IsNullOrWhiteSpace(device.UserdataFilePath);
+            var isOnlyApSelected = !hasBlFile && hasApFile && !hasTwrpFile && !hasCpFile && !hasCscFile && !hasUserdataFile;
+            var apFileName = device.ApFileName ?? string.Empty;
+
+            if (isOnlyApSelected &&
+                (apFileName.IndexOf("twrp", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                 apFileName.EndsWith(".img", StringComparison.OrdinalIgnoreCase)))
+            {
+                return OdinFlashMode.TwrpRebootRecovery;
+            }
+
+            if (hasTwrpFile && hasSystemPackageFile)
+            {
+                return OdinFlashMode.TwrpInstallSystem;
+            }
+
+            return OdinFlashMode.FirmwareReboot;
+        }
+
+        /// <summary>
+        /// 获取 TaskCore 任务详情文本，方便区分普通刷机、TWRP 刷入和 TWRP 安装系统流程。
+        /// </summary>
+        /// <param name="flashMode">Odin 刷入模式。</param>
+        /// <returns>任务详情文本。</returns>
+        private static string GetTaskDetailText(OdinFlashMode flashMode)
+        {
+            switch (flashMode)
+            {
+                case OdinFlashMode.TwrpRebootRecovery:
+                    return "TWRP-Recovery";
+                case OdinFlashMode.TwrpInstallSystem:
+                    return "TWRP-Install-System";
+                default:
+                    return "Firmware-Reboot";
+            }
+        }
+
         private static OdinFlashPayload BuildPayload(OdinDeviceItemViewModel device, OdinFlashMode flashMode)
         {
             return new OdinFlashPayload(
@@ -430,6 +490,10 @@ namespace JiXingFlashTool.ViewModels.Odin
                 device.BlFilePath,
                 device.ApFilePath,
                 device.TwrpFilePath,
+                device.SystemPackageFilePath,
+                device.WipeDataBeforeSystemFlash,
+                device.WipeSystemBeforeSystemFlash,
+                device.FormatDataBeforeSystemFlash,
                 device.CpFilePath,
                 device.CscFilePath,
                 device.UserdataFilePath,

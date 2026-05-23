@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converter="clr-namespace:JiXingFlashTool.Converters"
              Width="500"
-             Height="520"
+             MaxHeight="650"
              UseLayoutRounding="True"
              SnapsToDevicePixels="True">
     <UserControl.Resources>
@@ -66,7 +66,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="46.5" />
-                <RowDefinition Height="419.5" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="52" />
             </Grid.RowDefinitions>
 
@@ -121,7 +121,12 @@
                 </Grid>
             </Border>
 
-            <StackPanel Grid.Row="1" Margin="17.5,17.5,17.5,0">
+            <ScrollViewer Grid.Row="1"
+                          Margin="17.5,17.5,17.5,0"
+                          MaxHeight="520"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
                 <StackPanel Margin="0,0,0,10.5">
                     <StackPanel Orientation="Horizontal" Height="18.5">
                         <TextBlock Text="BL" FontSize="10.5" FontWeight="Bold" Foreground="#E91E63" VerticalAlignment="Center" />
@@ -280,7 +285,7 @@
                     </Grid>
                 </StackPanel>
 
-                <StackPanel>
+                <StackPanel Margin="0,0,0,10.5">
                     <StackPanel Orientation="Horizontal" Height="14">
                         <TextBlock Text="TWRP" FontSize="10.5" FontWeight="Bold" Foreground="#607D8B" VerticalAlignment="Center" />
                         <TextBlock Margin="7,0,0,0" Text=".img 文件，替换 AP 内置 recovery，并自动重启到 recovery" FontSize="10.5" Foreground="{StaticResource DialogMutedBrush}" VerticalAlignment="Center" />
@@ -310,7 +315,46 @@
                         </Button>
                     </Grid>
                 </StackPanel>
+
+                <StackPanel Margin="0,0,0,20"
+                            Visibility="{Binding IsSystemPackageSectionVisible, Converter={StaticResource VisibilityBoolConverter}}">
+                    <StackPanel Orientation="Horizontal" Height="14">
+                        <TextBlock Text="系统包" FontSize="10.5" FontWeight="Bold" Foreground="#009688" VerticalAlignment="Center" />
+                        <TextBlock Margin="7,0,0,0" Text=".zip / .ps，TWRP 侧载刷入 LineageOS 后自动重启系统" FontSize="10.5" Foreground="{StaticResource DialogMutedBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid Height="35" Margin="0,5.25,0,0">
+                        <Button Style="{StaticResource TransparentIconButtonStyle}" Command="{Binding SelectSystemPackageCommand}">
+                            <Grid>
+                                <Rectangle RadiusX="3.5" RadiusY="3.5" Fill="#4DF5F5F5" Stroke="{StaticResource DialogBorderBrush}" StrokeDashArray="2 2" Visibility="{Binding HasSystemPackageFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                <Rectangle RadiusX="3.5" RadiusY="3.5" Fill="#1A009688" Stroke="#333333" StrokeDashArray="2 2" Visibility="{Binding HasSystemPackageFile, Converter={StaticResource VisibilityBoolConverter}}" />
+                                <Grid Margin="11.5,0">
+                                    <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="12.25" Foreground="#999999" VerticalAlignment="Center" Visibility="{Binding HasSystemPackageFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                    <TextBlock Margin="22,0,0,0" Text="点击选择系统包（.zip / .ps，TWRP 侧载刷入）" FontSize="10.5" Foreground="#999999" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Visibility="{Binding HasSystemPackageFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                    <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="12.25" Foreground="#009688" VerticalAlignment="Center" Visibility="{Binding HasSystemPackageFile, Converter={StaticResource VisibilityBoolConverter}}" />
+                                    <Grid Margin="22,0,54,0" Visibility="{Binding HasSystemPackageFile, Converter={StaticResource VisibilityBoolConverter}}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding SystemPackageFileName}" FontSize="10.5" Foreground="#333333" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Margin="7,0,0,0" Text="{Binding SystemPackageFileSizeText}" FontSize="10.5" Foreground="#999999" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Button>
+                        <Button Width="15.75" Height="15.75" HorizontalAlignment="Right" Margin="0,0,11.5,0" Style="{StaticResource TransparentIconButtonStyle}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding ClearSystemPackageCommand}" Visibility="{Binding HasSystemPackageFile, Converter={StaticResource VisibilityBoolConverter}}">
+                            <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="8.5" Foreground="#999999" />
+                        </Button>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                        <CheckBox Content="双清" FontSize="10.5" Foreground="#333333" IsChecked="{Binding WipeDataBeforeSystemFlash}" />
+                        <CheckBox Margin="16,0,0,0" Content="清除系统" FontSize="10.5" Foreground="#333333" IsChecked="{Binding WipeSystemBeforeSystemFlash}" />
+                        <CheckBox Margin="16,0,0,0" Content="格式化" FontSize="10.5" Foreground="#333333" IsChecked="{Binding FormatDataBeforeSystemFlash}" />
+                    </StackPanel>
+                </StackPanel>
             </StackPanel>
+            </ScrollViewer>
 
             <Border Grid.Row="2" BorderBrush="{StaticResource DialogBorderBrush}" BorderThickness="0,1,0,0">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,13.25,17.5,0">

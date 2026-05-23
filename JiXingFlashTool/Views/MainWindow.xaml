@@ -667,7 +667,8 @@
                             <Button Style="{StaticResource SidebarNavButtonStyle}"
                                     Margin="0,0,0,3.5"
                                     Background="{Binding OdinNavBackground}"
-                                    Command="{Binding ShowOdinFlashPageCommand}">
+                                    Command="{Binding ShowOdinFlashPageCommand}"
+                                    Visibility="{Binding IsOdinNavigationVisible, Converter={StaticResource VisibilityBoolConverter}}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="17.5" />
@@ -726,7 +727,8 @@
                                         Height="30"
                                         Margin="0,0,0,3.5"
                                         Background="{Binding OdinNavBackground}"
-                                        Command="{Binding ShowOdinFlashPageCommand}">
+                                        Command="{Binding ShowOdinFlashPageCommand}"
+                                        Visibility="{Binding IsOdinNavigationVisible, Converter={StaticResource VisibilityBoolConverter}}">
                                     <Viewbox Width="17.5" Height="17.5">
                                         <Canvas Width="17.5" Height="17.5">
                                             <Path Fill="Transparent"

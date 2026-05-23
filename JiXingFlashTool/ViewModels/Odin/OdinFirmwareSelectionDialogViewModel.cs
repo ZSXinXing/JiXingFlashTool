@@ -17,6 +17,10 @@ namespace JiXingFlashTool.ViewModels.Odin
         private string _blFilePath = string.Empty;
         private string _apFilePath = string.Empty;
         private string _twrpFilePath = string.Empty;
+        private string _systemPackageFilePath = string.Empty;
+        private bool _wipeDataBeforeSystemFlash = true;
+        private bool _wipeSystemBeforeSystemFlash = true;
+        private bool _formatDataBeforeSystemFlash = true;
         private string _cpFilePath = string.Empty;
         private string _cscFilePath = string.Empty;
         private string _userdataFilePath = string.Empty;
@@ -33,6 +37,7 @@ namespace JiXingFlashTool.ViewModels.Odin
             SelectBlCommand = new RelayCommand(() => SelectFirmwareFile(value => BlFilePath = value, false));
             SelectApCommand = new RelayCommand(() => SelectFirmwareFile(value => ApFilePath = value, true));
             SelectTwrpCommand = new RelayCommand(() => SelectImageFile(value => TwrpFilePath = value));
+            SelectSystemPackageCommand = new RelayCommand(() => SelectSystemPackageFile(value => SystemPackageFilePath = value));
             SelectCpCommand = new RelayCommand(() => SelectFirmwareFile(value => CpFilePath = value, false));
             SelectCscCommand = new RelayCommand(() => SelectFirmwareFile(value => CscFilePath = value, false));
             SelectUserdataCommand = new RelayCommand(() => SelectFirmwareFile(value => UserdataFilePath = value, false));
@@ -41,6 +46,7 @@ namespace JiXingFlashTool.ViewModels.Odin
             ClearBlCommand = new RelayCommand(() => BlFilePath = string.Empty);
             ClearApCommand = new RelayCommand(() => ApFilePath = string.Empty);
             ClearTwrpCommand = new RelayCommand(() => TwrpFilePath = string.Empty);
+            ClearSystemPackageCommand = new RelayCommand(() => SystemPackageFilePath = string.Empty);
             ClearCpCommand = new RelayCommand(() => CpFilePath = string.Empty);
             ClearCscCommand = new RelayCommand(() => CscFilePath = string.Empty);
             ClearUserdataCommand = new RelayCommand(() => UserdataFilePath = string.Empty);
@@ -85,7 +91,61 @@ namespace JiXingFlashTool.ViewModels.Odin
         public string TwrpFilePath
         {
             get => _twrpFilePath;
-            set => SetFirmwarePath(ref _twrpFilePath, value, nameof(TwrpFilePath), nameof(TwrpFileName), nameof(TwrpFileSizeText), nameof(HasTwrpFile));
+            set
+            {
+                if (SetFirmwarePath(ref _twrpFilePath, value, nameof(TwrpFilePath), nameof(TwrpFileName), nameof(TwrpFileSizeText), nameof(HasTwrpFile)))
+                {
+                    OnPropertyChanged(nameof(IsSystemPackageSectionVisible));
+                    if (!HasTwrpFile)
+                    {
+                        SystemPackageFilePath = string.Empty;
+                        WipeDataBeforeSystemFlash = false;
+                        WipeSystemBeforeSystemFlash = false;
+                        FormatDataBeforeSystemFlash = false;
+                        return;
+                    }
+
+                    WipeDataBeforeSystemFlash = true;
+                    WipeSystemBeforeSystemFlash = true;
+                    FormatDataBeforeSystemFlash = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// TWRP 刷入后需要侧载安装的系统包路径，未选择时为空。
+        /// </summary>
+        public string SystemPackageFilePath
+        {
+            get => _systemPackageFilePath;
+            set => SetFirmwarePath(ref _systemPackageFilePath, value, nameof(SystemPackageFilePath), nameof(SystemPackageFileName), nameof(SystemPackageFileSizeText), nameof(HasSystemPackageFile));
+        }
+
+        /// <summary>
+        /// 刷入系统包前是否执行双清。
+        /// </summary>
+        public bool WipeDataBeforeSystemFlash
+        {
+            get => _wipeDataBeforeSystemFlash;
+            set => SetProperty(ref _wipeDataBeforeSystemFlash, value);
+        }
+
+        /// <summary>
+        /// 刷入系统包前是否清除 system 分区。
+        /// </summary>
+        public bool WipeSystemBeforeSystemFlash
+        {
+            get => _wipeSystemBeforeSystemFlash;
+            set => SetProperty(ref _wipeSystemBeforeSystemFlash, value);
+        }
+
+        /// <summary>
+        /// 刷入系统包前是否格式化 data 分区。
+        /// </summary>
+        public bool FormatDataBeforeSystemFlash
+        {
+            get => _formatDataBeforeSystemFlash;
+            set => SetProperty(ref _formatDataBeforeSystemFlash, value);
         }
 
         /// <summary>
@@ -131,6 +191,11 @@ namespace JiXingFlashTool.ViewModels.Odin
         public string TwrpFileName => Path.GetFileName(TwrpFilePath);
 
         /// <summary>
+        /// 系统包文件名。
+        /// </summary>
+        public string SystemPackageFileName => Path.GetFileName(SystemPackageFilePath);
+
+        /// <summary>
         /// CP 固件文件名。
         /// </summary>
         public string CpFileName => Path.GetFileName(CpFilePath);
@@ -159,6 +224,11 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// TWRP 镜像文件大小显示文本。
         /// </summary>
         public string TwrpFileSizeText => GetFileSizeText(TwrpFilePath);
+
+        /// <summary>
+        /// 系统包文件大小显示文本。
+        /// </summary>
+        public string SystemPackageFileSizeText => GetFileSizeText(SystemPackageFilePath);
 
         /// <summary>
         /// CP 固件文件大小显示文本。
@@ -191,6 +261,16 @@ namespace JiXingFlashTool.ViewModels.Odin
         public bool HasTwrpFile => !string.IsNullOrWhiteSpace(TwrpFilePath);
 
         /// <summary>
+        /// 是否显示系统包选择区域。
+        /// </summary>
+        public bool IsSystemPackageSectionVisible => HasTwrpFile;
+
+        /// <summary>
+        /// 是否已经选择 TWRP 侧载系统包。
+        /// </summary>
+        public bool HasSystemPackageFile => !string.IsNullOrWhiteSpace(SystemPackageFilePath);
+
+        /// <summary>
         /// 是否已经选择 CP 固件。
         /// </summary>
         public bool HasCpFile => !string.IsNullOrWhiteSpace(CpFilePath);
@@ -221,6 +301,11 @@ namespace JiXingFlashTool.ViewModels.Odin
         public RelayCommand SelectTwrpCommand { get; }
 
         /// <summary>
+        /// 选择 TWRP 侧载系统包命令。
+        /// </summary>
+        public RelayCommand SelectSystemPackageCommand { get; }
+
+        /// <summary>
         /// 选择 CP 固件文件命令。
         /// </summary>
         public RelayCommand SelectCpCommand { get; }
@@ -249,6 +334,11 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// 清除 TWRP 镜像文件命令。
         /// </summary>
         public RelayCommand ClearTwrpCommand { get; }
+
+        /// <summary>
+        /// 清除 TWRP 侧载系统包命令。
+        /// </summary>
+        public RelayCommand ClearSystemPackageCommand { get; }
 
         /// <summary>
         /// 清除 CP 固件文件命令。
@@ -347,6 +437,25 @@ namespace JiXingFlashTool.ViewModels.Odin
         }
 
         /// <summary>
+        /// 打开 TWRP 侧载系统包选择器。
+        /// </summary>
+        /// <param name="assignAction">接收文件路径的赋值回调。</param>
+        private void SelectSystemPackageFile(Action<string> assignAction)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "TWRP 系统包 (*.zip;*.ps)|*.zip;*.ps|所有文件 (*.*)|*.*",
+                CheckFileExists = true,
+                Multiselect = false
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                assignAction(dialog.FileName);
+            }
+        }
+
+        /// <summary>
         /// 更新固件路径，并同步刷新文件名、文件大小和命令状态。
         /// </summary>
         /// <param name="field">待更新的路径字段。</param>
@@ -355,7 +464,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// <param name="fileNamePropertyName">文件名属性名称。</param>
         /// <param name="fileSizePropertyName">文件大小属性名称。</param>
         /// <param name="hasFilePropertyName">是否已选择属性名称。</param>
-        private void SetFirmwarePath(ref string field, string value, string propertyName, string fileNamePropertyName, string fileSizePropertyName, string hasFilePropertyName)
+        private bool SetFirmwarePath(ref string field, string value, string propertyName, string fileNamePropertyName, string fileSizePropertyName, string hasFilePropertyName)
         {
             if (SetProperty(ref field, value, propertyName))
             {
@@ -363,7 +472,10 @@ namespace JiXingFlashTool.ViewModels.Odin
                 OnPropertyChanged(fileSizePropertyName);
                 OnPropertyChanged(hasFilePropertyName);
                 ConfirmCommand.NotifyCanExecuteChanged();
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>
