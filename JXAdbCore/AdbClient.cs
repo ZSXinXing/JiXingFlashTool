@@ -52,6 +52,10 @@ namespace JXAdbCore
             socket.SendAdbRequest("host:devices-l");
             socket.ReadAdbResponse();
             string reply = socket.ReadString();
+            if (string.IsNullOrWhiteSpace(reply))
+            {
+                return new List<DeviceData>();
+            }
 
             string[] data = reply.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 

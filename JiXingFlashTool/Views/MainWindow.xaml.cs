@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace JiXingFlashTool.Views
 {
@@ -14,7 +15,9 @@ namespace JiXingFlashTool.Views
     public partial class MainWindow : Window
     {
         private const int WmSetIcon = 0x0080;
+        private const int IconSmall = 0;
         private const int GwlExStyle = -20;
+        private const int GclpHIconSm = -34;
         private const int WsExDlgModalFrame = 0x0001;
         private const int DwmwaBorderColor = 34;
         private const int DwmwaCaptionColor = 35;
@@ -25,8 +28,9 @@ namespace JiXingFlashTool.Views
         private const uint SwpNoActivate = 0x0010;
         private const uint SwpFrameChanged = 0x0020;
         private static readonly Color FixedCaptionBackgroundColor = Color.FromRgb(255, 255, 255);
-        private static readonly Color FixedCaptionTextColor = Color.FromRgb(31, 35, 40);
+        private static readonly Color FixedCaptionTextColor = Color.FromRgb(255, 255, 255);
         private static readonly Color FixedCaptionBorderColor = Color.FromRgb(229, 231, 235);
+        private bool _hasAppliedDeferredCaptionIconRemoval;
 
         /// <summary>
         /// 初始化主窗口。
@@ -35,6 +39,7 @@ namespace JiXingFlashTool.Views
         {
             InitializeComponent();
             SourceInitialized += Window_SourceInitialized;
+            Activated += Window_Activated;
             Closing += Window_Closing;
         }
 
@@ -43,6 +48,7 @@ namespace JiXingFlashTool.Views
         /// </summary>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            ApplyDeferredCaptionIconRemoval();
             var viewModel = (MainWindowViewModel)DataContext;
             viewModel.ViewLoad();
         }
@@ -92,6 +98,15 @@ namespace JiXingFlashTool.Views
         {
             RemoveWindowCaptionIcon();
             ApplyFixedWindowCaptionColors();
+            ApplyDeferredCaptionIconRemoval();
+        }
+
+        /// <summary>
+        /// 窗口激活后再次清理标题栏小图标，避免 WPF 在显示阶段重新写回系统图标。
+        /// </summary>
+        private void Window_Activated(object? sender, EventArgs e)
+        {
+            ApplyDeferredCaptionIconRemoval();
         }
 
         /// <summary>
@@ -114,15 +129,16 @@ namespace JiXingFlashTool.Views
                 return;
             }
 
-            SendMessage(windowHandle, WmSetIcon, IntPtr.Zero, IntPtr.Zero);
-            SendMessage(windowHandle, WmSetIcon, new IntPtr(1), IntPtr.Zero);
-
             var currentExStyle = GetWindowLongPtr(windowHandle, GwlExStyle);
             var updatedExStyle = new IntPtr(currentExStyle.ToInt64() | WsExDlgModalFrame);
             if (updatedExStyle != currentExStyle)
             {
                 SetWindowLongPtr(windowHandle, GwlExStyle, updatedExStyle);
             }
+
+            // 仅移除标题栏左上角使用的小图标，保留任务栏和 Alt+Tab 依赖的大图标。
+            SendMessage(windowHandle, WmSetIcon, new IntPtr(IconSmall), IntPtr.Zero);
+            SetClassLongPtr(windowHandle, GclpHIconSm, IntPtr.Zero);
 
             SetWindowPos(
                 windowHandle,
@@ -132,6 +148,24 @@ namespace JiXingFlashTool.Views
                 0,
                 0,
                 SwpNoMove | SwpNoSize | SwpNoZOrder | SwpNoActivate | SwpFrameChanged);
+        }
+
+        /// <summary>
+        /// 在窗口真正显示后再次执行标题栏小图标清理，确保不影响任务栏大图标。
+        /// </summary>
+        private void ApplyDeferredCaptionIconRemoval()
+        {
+            if (_hasAppliedDeferredCaptionIconRemoval)
+            {
+                return;
+            }
+
+            _hasAppliedDeferredCaptionIconRemoval = true;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                RemoveWindowCaptionIcon();
+                Dispatcher.BeginInvoke(new Action(RemoveWindowCaptionIcon), DispatcherPriority.ContextIdle);
+            }), DispatcherPriority.Loaded);
         }
 
         /// <summary>
@@ -165,9 +199,6 @@ namespace JiXingFlashTool.Views
             }
         }
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
-
         [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", SetLastError = true)]
         private static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
 
@@ -183,6 +214,12 @@ namespace JiXingFlashTool.Views
             int cx,
             int cy,
             uint uFlags);
+
+        [DllImport("user32.dll", EntryPoint = "SendMessage", SetLastError = true)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", EntryPoint = "SetClassLongPtr", SetLastError = true)]
+        private static extern IntPtr SetClassLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         [DllImport("dwmapi.dll", PreserveSig = true)]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);

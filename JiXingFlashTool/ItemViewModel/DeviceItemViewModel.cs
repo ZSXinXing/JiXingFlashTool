@@ -2,38 +2,19 @@
 using JiXingFlashTool.Model;
 using JiXingFlashTool.Models;
 using JiXingFlashTool.Services;
+using JiXingFlashTool.Utils;
 using LanguageCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+using TaskCore.Abstractions;
+using TaskCore.Tasks;
 
 namespace JiXingFlashTool.ItemViewModel
 {
     /// <summary>
     /// 设备列表中的单个设备展示模型，负责承载主页面表格展示所需的状态与样式数据。
     /// </summary>
-    public class DeviceItemViewModel : ObservableObject
+    public partial class DeviceItemViewModel : ObservableObject
     {
-        private static readonly SolidColorBrush UsbTagBackgroundBrush = CreateBrush("#E3F2FD");
-        private static readonly SolidColorBrush UsbTagForegroundBrush = CreateBrush("#2196F3");
-        private static readonly SolidColorBrush EthernetTagBackgroundBrush = CreateBrush("#E0F7FA");
-        private static readonly SolidColorBrush EthernetTagForegroundBrush = CreateBrush("#00BCD4");
-        private static readonly SolidColorBrush SystemTagBackgroundBrush = CreateBrush("#E8F5E9");
-        private static readonly SolidColorBrush SystemTagForegroundBrush = CreateBrush("#4CAF50");
-        private static readonly SolidColorBrush RecoveryTagBackgroundBrush = CreateBrush("#FFF3E0");
-        private static readonly SolidColorBrush RecoveryTagForegroundBrush = CreateBrush("#FF9800");
-        private static readonly SolidColorBrush DownloadTagBackgroundBrush = CreateBrush("#F3E5F5");
-        private static readonly SolidColorBrush DownloadTagForegroundBrush = CreateBrush("#9C27B0");
-        private static readonly SolidColorBrush SideloadTagBackgroundBrush = CreateBrush("#FCE4EC");
-        private static readonly SolidColorBrush SideloadTagForegroundBrush = CreateBrush("#E91E63");
-        private static readonly SolidColorBrush OfflineTagBackgroundBrush = CreateBrush("#FFEBEE");
-        private static readonly SolidColorBrush OfflineTagForegroundBrush = CreateBrush("#F44336");
-        private static readonly SolidColorBrush DefaultTagBackgroundBrush = CreateBrush("#ECEFF1");
-        private static readonly SolidColorBrush DefaultTagForegroundBrush = CreateBrush("#607D8B");
-
         protected DeviceModel device;
         /// <summary>
         /// 当前项对应的设备模型。
@@ -51,48 +32,31 @@ namespace JiXingFlashTool.ItemViewModel
             }
         }
 
-        private int displayIndex;
-
         /// <summary>
         /// 列表序号，供主页面表格展示。
         /// </summary>
-        public int DisplayIndex
-        {
-            get => displayIndex;
-            set => SetProperty(ref displayIndex, value);
-        }
+        [ObservableProperty]
+        private int displayIndex;
 
         /// <summary>
         /// 设备序列号，网络连接时仅展示主机地址部分。
         /// </summary>
-        public string Serial
-        {
-            get => Device.Serial;
-        }
+        public string Serial => Device.Serial;
 
         /// <summary>
         /// 设备型号。
         /// </summary>
-        public string Model
-        {
-            get => Device.Model;
-        }
+        public string Model => Device.Model;
 
         /// <summary>
         /// 设备展示名称。
         /// </summary>
-        public string ModelName
-        {
-            get => Device.Name;
-        }
+        public string ModelName => Device.Name;
 
         /// <summary>
         /// 设备品牌，对应 ro.product.brand。
         /// </summary>
-        public string Brand
-        {
-            get => Device.Brand;
-        }
+        public string Brand => Device.Brand;
 
         /// <summary>
         /// 安卓或 Recovery 版本信息。
@@ -109,22 +73,12 @@ namespace JiXingFlashTool.ItemViewModel
         /// <summary>
         /// 系统版本号。
         /// </summary>
-        public string SystemVersion {
-            get {
-                return Device.PolestarVersion;
-            }
-        }
+        public string SystemVersion => Device.PolestarVersion;
 
         /// <summary>
         /// 设备名称。
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return Device.Name;
-            }
-        }
+        public string Name => Device.Name;
 
         /// <summary>
         /// 列表中的显示名称。
@@ -146,7 +100,12 @@ namespace JiXingFlashTool.ItemViewModel
         /// <summary>
         /// 当前设备是否通过以太网连接。
         /// </summary>
-        private bool IsEthernetConnection => Device.Serial != null && Device.Serial.Contains(":");
+        public bool IsEthernetConnection => Device.Serial != null && Device.Serial.Contains(":");
+
+        /// <summary>
+        /// 当前设备状态，供界面根据状态切换展示样式。
+        /// </summary>
+        public JXAdbCore.Enums.DeviceState CurrentDeviceState => Device.State;
 
         /// <summary>
         /// 编译日期。
@@ -157,52 +116,24 @@ namespace JiXingFlashTool.ItemViewModel
             }
         }
 
-        private bool isSelect;
-
         /// <summary>
         /// 当前设备是否被选中。
         /// </summary>
-        public bool IsSelect
-        {
-            get => isSelect;
-            set
-            {
-                if (SetProperty(ref isSelect, value))
-                {
-                    RefreshItemBackgroundColor();
-                    RefreshItemForegroundColor();
-                    RefreshItemBorderThickness();
-                }
-            }
-        }
-
-        private bool isKeepWhenDisconnected;
+        [ObservableProperty]
+        private bool isSelect;
 
         /// <summary>
         /// 断开连接时是否保留该设备项，不立即从列表移除。
         /// </summary>
-        public bool IsKeepWhenDisconnected
-        {
-            get => isKeepWhenDisconnected;
-            set => SetProperty(ref isKeepWhenDisconnected, value);
-        }
-
-        private string taskDetailMessage;
+        [ObservableProperty]
+        private bool isKeepWhenDisconnected;
 
         /// <summary>
         /// 当前任务详情文案。
         /// </summary>
-        public string TaskDetailMessage
-        {
-            get => taskDetailMessage;
-            set
-            {
-                if (SetProperty(ref taskDetailMessage, value))
-                {
-                    OnPropertyChanged(nameof(TaskDetailDisplayMessage));
-                }
-            }
-        }
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(TaskDetailDisplayMessage))]
+        private string taskDetailMessage;
 
         /// <summary>
         /// 任务详情展示文案，空值时直接保持为空，避免显示默认占位提示。
@@ -213,86 +144,6 @@ namespace JiXingFlashTool.ItemViewModel
                 ? string.Empty
                 : TaskLogLocalizationService.ResolveMessage(TaskDetailMessage);
         }
-
-        /// <summary>
-        /// 连接方式标签背景色。
-        /// </summary>
-        public SolidColorBrush ConnectionTagBackground
-        {
-            get => IsEthernetConnection ? EthernetTagBackgroundBrush : UsbTagBackgroundBrush;
-        }
-
-        /// <summary>
-        /// 连接方式标签前景色。
-        /// </summary>
-        public SolidColorBrush ConnectionTagForeground
-        {
-            get => IsEthernetConnection ? EthernetTagForegroundBrush : UsbTagForegroundBrush;
-        }
-
-        /// <summary>
-        /// 状态标签背景色。
-        /// </summary>
-        public SolidColorBrush DeviceStateTagBackground
-        {
-            get
-            {
-                switch (Device.State)
-                {
-                    case JXAdbCore.Enums.DeviceState.Online:
-                        return SystemTagBackgroundBrush;
-                    case JXAdbCore.Enums.DeviceState.Recovery:
-                        return RecoveryTagBackgroundBrush;
-                    case JXAdbCore.Enums.DeviceState.BootLoader:
-                        return DownloadTagBackgroundBrush;
-                    case JXAdbCore.Enums.DeviceState.Sideload:
-                        return SideloadTagBackgroundBrush;
-                    case JXAdbCore.Enums.DeviceState.Offline:
-                    case JXAdbCore.Enums.DeviceState.Unauthorized:
-                    case JXAdbCore.Enums.DeviceState.NoPermissions:
-                        return OfflineTagBackgroundBrush;
-                    default:
-                        return DefaultTagBackgroundBrush;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 状态标签前景色。
-        /// </summary>
-        public SolidColorBrush DeviceStateTagForeground
-        {
-            get
-            {
-                switch (Device.State)
-                {
-                    case JXAdbCore.Enums.DeviceState.Online:
-                        return SystemTagForegroundBrush;
-                    case JXAdbCore.Enums.DeviceState.Recovery:
-                        return RecoveryTagForegroundBrush;
-                    case JXAdbCore.Enums.DeviceState.BootLoader:
-                        return DownloadTagForegroundBrush;
-                    case JXAdbCore.Enums.DeviceState.Sideload:
-                        return SideloadTagForegroundBrush;
-                    case JXAdbCore.Enums.DeviceState.Offline:
-                    case JXAdbCore.Enums.DeviceState.Unauthorized:
-                    case JXAdbCore.Enums.DeviceState.NoPermissions:
-                        return OfflineTagForegroundBrush;
-                    default:
-                        return DefaultTagForegroundBrush;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 状态标签圆点颜色。
-        /// </summary>
-        public SolidColorBrush DeviceStateIndicatorBrush => DeviceStateTagForeground;
-
-        /// <summary>
-        /// 是否展示状态圆点。
-        /// </summary>
-        public bool ShowDeviceStateIndicator => true;
 
         /// <summary>
         /// 使用设备模型初始化展示模型。
@@ -306,9 +157,18 @@ namespace JiXingFlashTool.ItemViewModel
         {
             OnPropertyChanged(nameof(DeviceState));
             OnPropertyChanged(nameof(ConnectionType));
-            OnPropertyChanged(nameof(ConnectionTagBackground));
-            OnPropertyChanged(nameof(ConnectionTagForeground));
+            OnPropertyChanged(nameof(CurrentDeviceState));
+            OnPropertyChanged(nameof(IsEthernetConnection));
             OnPropertyChanged(nameof(TaskDetailDisplayMessage));
+        }
+
+        /// <summary>
+        /// 创建当前设备行的任务观察者，使任务日志直接回写到当前行。
+        /// </summary>
+        /// <returns>当前设备行专用的任务观察者。</returns>
+        public ITaskObserver CreateTaskObserver()
+        {
+            return new DeviceTaskObserver(this);
         }
 
         /// <summary>
@@ -380,78 +240,98 @@ namespace JiXingFlashTool.ItemViewModel
         /// </summary>
         public void RestoreFactory() => Service.RestoreFactory();
         #endregion
-
-        #region 样式
-        private SolidColorBrush itemBackgroundColor;
         /// <summary>
-        /// 旧列表项背景色，保留给现有其它页面兼容使用。
+        /// 刷新设备模型更新后的展示属性。
         /// </summary>
-        public SolidColorBrush ItemBackgroundColor
-        {
-            get
-            {
+        public void RefreshDeviceProperties() {
+            CommonTool.RunOnUiThread(() => {
+                OnPropertyChanged(nameof(AndroidVersion));
+                OnPropertyChanged(nameof(SystemVersion));
+                OnPropertyChanged(nameof(BuildDate));
+                OnPropertyChanged(nameof(Brand));
+                OnPropertyChanged(nameof(Model));
+                OnPropertyChanged(nameof(ModelName));
+                OnPropertyChanged(nameof(Name));
+                OnPropertyChanged(nameof(DeviceState));
+                OnPropertyChanged(nameof(CurrentDeviceState));
+                OnPropertyChanged(nameof(ConnectionType));
+                OnPropertyChanged(nameof(IsEthernetConnection));
+            });
+        }
 
-                return IsSelect ?
-                    (SolidColorBrush)new BrushConverter().ConvertFrom("#2D77FC")
-                  : new SolidColorBrush(System.Windows.Media.Color.FromArgb(0, 0, 0, 0));
+        /// <summary>
+        /// 接收当前设备任务的日志，并在 UI 线程更新任务消息。
+        /// </summary>
+        /// <param name="log">任务日志。</param>
+        private void UpdateTaskDetailMessage(TaskLog log)
+        {
+            if (log == null)
+            {
+                return;
+            }
+
+            CommonTool.RunOnUiThread(() => TaskDetailMessage = TaskLogLocalizationService.NormalizeMessage(log.Message ?? string.Empty));
+        }
+
+        /// <summary>
+        /// 当前设备行的任务观察者，只接收入队时绑定到本行的任务回调。
+        /// </summary>
+        private sealed class DeviceTaskObserver : ITaskObserver
+        {
+            private readonly DeviceItemViewModel _owner;
+
+            /// <summary>
+            /// 使用目标设备行初始化任务观察者。
+            /// </summary>
+            /// <param name="owner">目标设备行。</param>
+            public DeviceTaskObserver(DeviceItemViewModel owner)
+            {
+                _owner = owner;
+            }
+
+            /// <summary>
+            /// 接收任务开始通知。
+            /// </summary>
+            public void OnStarted(string deviceId, Guid taskId, string taskType)
+            {
+            }
+
+            /// <summary>
+            /// 接收任务进度通知。
+            /// </summary>
+            public void OnProgress(string deviceId, Guid taskId, TaskProgress progress)
+            {
+            }
+
+            /// <summary>
+            /// 接收任务日志通知。
+            /// </summary>
+            public void OnLog(string deviceId, Guid taskId, TaskLog log)
+            {
+                _owner.UpdateTaskDetailMessage(log);
+            }
+
+            /// <summary>
+            /// 接收任务完成通知。
+            /// </summary>
+            public void OnCompleted(string deviceId, Guid taskId, string taskType)
+            {
+            }
+
+            /// <summary>
+            /// 接收任务取消通知。
+            /// </summary>
+            public void OnCanceled(string deviceId, Guid taskId, string taskType)
+            {
+            }
+
+            /// <summary>
+            /// 接收任务失败通知。
+            /// </summary>
+            public void OnFailed(string deviceId, Guid taskId, string taskType, Exception ex)
+            {
             }
         }
 
-        private SolidColorBrush itemForegroundColor;
-        /// <summary>
-        /// 旧列表项前景色，保留给现有其它页面兼容使用。
-        /// </summary>
-        public SolidColorBrush ItemForegroundColor
-        {
-            get
-            {
-                return IsSelect ?
-                    (SolidColorBrush)new BrushConverter().ConvertFrom("#FFFFFF")
-                  : (SolidColorBrush)new BrushConverter().ConvertFrom("#252525");
-            }
-        }
-
-        /// <summary>
-        /// 旧列表项边框厚度，保留给现有其它页面兼容使用。
-        /// </summary>
-        public int BorderThickness
-        {
-            get
-            {
-                return IsSelect ? 2 : 0;
-            }
-        }
-
-        /// <summary>
-        /// 刷新旧列表项背景色。
-        /// </summary>
-        public void RefreshItemBackgroundColor()
-        {
-            OnPropertyChanged(nameof(ItemBackgroundColor));
-        }
-
-        /// <summary>
-        /// 刷新旧列表项前景色。
-        /// </summary>
-        public void RefreshItemForegroundColor()
-        {
-            OnPropertyChanged(nameof(ItemForegroundColor));
-        }
-
-        /// <summary>
-        /// 刷新旧列表项边框厚度。
-        /// </summary>
-        public void RefreshItemBorderThickness()
-        {
-            OnPropertyChanged(nameof(BorderThickness));
-        }
-
-        private static SolidColorBrush CreateBrush(string colorHex)
-        {
-            var brush = (SolidColorBrush)new BrushConverter().ConvertFrom(colorHex);
-            brush.Freeze();
-            return brush;
-        }
-        #endregion
     }
 }

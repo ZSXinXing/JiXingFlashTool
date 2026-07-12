@@ -59,26 +59,51 @@ namespace JiXingFlashTool.Services
         }
 
         /// <summary>
-        /// 因为ADB机制问题，如果是offline执行一次断开
+        /// 断开网络 ADB 设备，用于清理 adb devices 中残留的 offline 网络连接。
         /// </summary>
-        /// <param name="ip"></param>
-        private void DisconnectDevice(string ip)
+        /// <param name="serial">网络 ADB 序列号，格式为 ip:port。</param>
+        /// <returns>成功发起断开返回 true。</returns>
+        public bool DisconnectDevice(string serial)
         {
-            ThreadPool.QueueUserWorkItem((x) =>
+            if (!TryCreateNetworkEndpoint(serial, out DnsEndPoint endpoint))
             {
-                try
-                {
-                    string[] ips = ip.Split(':');
-                    if (ips.Length > 2)
-                    {
-                        DnsEndPoint dnsEndPoint = new DnsEndPoint(ips[0], int.Parse(ips[1]));
-                        Disconnect(dnsEndPoint);
-                    }
-                }
-                catch
-                {
-                }
-            });
+                return false;
+            }
+
+            try
+            {
+                return Disconnect(endpoint);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 根据网络 ADB 序列号创建网络终结点。
+        /// </summary>
+        /// <param name="serial">网络 ADB 序列号。</param>
+        /// <param name="endpoint">解析出的网络终结点。</param>
+        /// <returns>解析成功返回 true。</returns>
+        private static bool TryCreateNetworkEndpoint(string serial, out DnsEndPoint endpoint)
+        {
+            endpoint = null;
+            if (string.IsNullOrWhiteSpace(serial))
+            {
+                return false;
+            }
+
+            string[] parts = serial.Split(':');
+            if (parts.Length != 2 ||
+                !IPAddress.TryParse(parts[0], out _) ||
+                !int.TryParse(parts[1], out int port))
+            {
+                return false;
+            }
+
+            endpoint = new DnsEndPoint(parts[0], port);
+            return true;
         }
 
         public void StartServiceAsync()
@@ -147,18 +172,31 @@ namespace JiXingFlashTool.Services
         }
 
         public string GetAndroidVersion(DeviceModel device) => GetProp(device,"ro.build.version.release");
-        public string GetBuildDate(DeviceModel device) {
-            string buildString = GetProp(device, "ro.odm.build.date.utc");
-            if (buildString.IsNull()) return "";
-            buildString.ConvertStringToDateTimeString("yyyy-MM-dd");
-            if (buildString.IsNull()) return string.Empty;
-            try
+
+        /// <summary>
+        /// 获取系统编译日期，优先使用标准 Unix 时间戳属性并格式化为年月日。
+        /// </summary>
+        /// <param name="device">目标设备。</param>
+        /// <returns>格式为 yyyy-MM-dd 的编译日期；无法获取时返回空字符串。</returns>
+        public string GetBuildDate(DeviceModel device)
+        {
+            string buildTimestamp = GetProp(device, "ro.build.date.utc")?.Trim();
+            if (long.TryParse(buildTimestamp, out long unixTimestamp))
             {
-                return buildString.ConvertStringToDateTimeString("yyyy-MM-dd");
+                try
+                {
+                    return DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).LocalDateTime.ToString("yyyy-MM-dd");
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    return string.Empty;
+                }
             }
-            catch(Exception ex) {
-                return string.Empty;
-            }
+
+            string buildDate = GetProp(device, "ro.build.date")?.Trim();
+            return DateTime.TryParse(buildDate, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out DateTime date)
+                ? date.ToString("yyyy-MM-dd")
+                : string.Empty;
         }
 
 

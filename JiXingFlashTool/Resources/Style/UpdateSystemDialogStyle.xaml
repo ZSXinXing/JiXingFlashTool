@@ -1,0 +1,243 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:converter="clr-namespace:JiXingFlashTool.Converters" xmlns:lang="clr-namespace:LanguageCore;assembly=LanguageCore">
+<SolidColorBrush x:Key="UpdateDialogTextBrush" Color="#333333" />
+        <SolidColorBrush x:Key="UpdateDialogMutedTextBrush" Color="#999999" />
+        <SolidColorBrush x:Key="UpdateDialogBorderBrush" Color="#E0E0E0" />
+        <SolidColorBrush x:Key="UpdateDialogPrimaryBrush" Color="#5C82FD" />
+        <SolidColorBrush x:Key="UpdateDialogDangerBrush" Color="#F44336" />
+        <converter:VisibilityBoolConverter x:Key="VisibilityBoolConverter" />
+        <converter:InverseVisibilityBoolConverter x:Key="InverseVisibilityBoolConverter" />
+        <converter:BooleanToGridLengthConverter x:Key="BooleanToGridLengthConverter" />
+
+        <DrawingImage x:Key="UpdateDialogTitleIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="{x:Null}"
+                                     Geometry="M8.75 1.16667H3.5C3.19058 1.16667 2.89383 1.28958 2.67504 1.50838C2.45625 1.72717 2.33333 2.02391 2.33333 2.33333V11.6667C2.33333 11.9761 2.45625 12.2728 2.67504 12.4916C2.89383 12.7104 3.19058 12.8333 3.5 12.8333H10.5C10.8094 12.8333 11.1062 12.7104 11.325 12.4916C11.5437 12.2728 11.6667 11.9761 11.6667 11.6667V4.08333L8.75 1.16667Z">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="{StaticResource UpdateDialogPrimaryBrush}"
+                                 Thickness="1.16667"
+                                 StartLineCap="Round"
+                                 EndLineCap="Round"
+                                 LineJoin="Round" />
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="{x:Null}"
+                                     Geometry="M8.16667 1.16667V3.5C8.16667 3.80942 8.28958 4.10617 8.50838 4.32496C8.72717 4.54375 9.02391 4.66667 9.33333 4.66667H11.6667">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="{StaticResource UpdateDialogPrimaryBrush}"
+                                 Thickness="1.16667"
+                                 StartLineCap="Round"
+                                 EndLineCap="Round"
+                                 LineJoin="Round" />
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="{x:Null}" Geometry="M7 7V10.5">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="{StaticResource UpdateDialogPrimaryBrush}"
+                                 Thickness="1.16667"
+                                 StartLineCap="Round"
+                                 EndLineCap="Round"
+                                 LineJoin="Round" />
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="{x:Null}" Geometry="M8.75 8.75L7 7L5.25 8.75">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="{StaticResource UpdateDialogPrimaryBrush}"
+                                 Thickness="1.16667"
+                                 StartLineCap="Round"
+                                 EndLineCap="Round"
+                                 LineJoin="Round" />
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="UpdateDialogFileIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="{x:Null}"
+                                     Geometry="M1.16667 11.0833V2.91667C1.16667 2.60725 1.28958 2.3105 1.50838 2.09171C1.72717 1.87292 2.02391 1.75 2.33333 1.75H5.25L6.41667 3.5H11.6667C11.9761 3.5 12.2728 3.62292 12.4916 3.84171C12.7104 4.0605 12.8333 4.35725 12.8333 4.66667V11.0833C12.8333 11.3928 12.7104 11.6895 12.4916 11.9083C12.2728 12.1271 11.9761 12.25 11.6667 12.25H2.33333C2.02391 12.25 1.72717 12.1271 1.50838 11.9083C1.28958 11.6895 1.16667 11.3928 1.16667 11.0833Z">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="{StaticResource UpdateDialogMutedTextBrush}"
+                                 Thickness="1.16667"
+                                 StartLineCap="Round"
+                                 EndLineCap="Round"
+                                 LineJoin="Round" />
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <DrawingImage x:Key="UpdateDialogSelectedFileIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="{x:Null}"
+                                     Geometry="M7.65 1.53125H3.0625C2.79176 1.53125 2.53294 1.6388 2.3415 1.83025C2.15005 2.02169 2.0425 2.28051 2.0425 2.55125V10.7188C2.0425 10.9895 2.15005 11.2483 2.3415 11.4398C2.53294 11.6312 2.79176 11.7388 3.0625 11.7388H9.1875C9.45824 11.7388 9.71706 11.6312 9.9085 11.4398C10.1 11.2483 10.2075 10.9895 10.2075 10.7188V4.08375L7.65 1.53125Z">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="{StaticResource UpdateDialogPrimaryBrush}"
+                                 Thickness="1.02"
+                                 StartLineCap="Round"
+                                 EndLineCap="Round"
+                                 LineJoin="Round" />
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="{x:Null}" Geometry="M7.14583 1.53125V3.5725C7.14583 3.84324 7.25339 4.10206 7.44483 4.2935C7.63627 4.48495 7.89509 4.5925 8.16583 4.5925H10.2071">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="{StaticResource UpdateDialogPrimaryBrush}"
+                                 Thickness="1.02"
+                                 StartLineCap="Round"
+                                 EndLineCap="Round"
+                                 LineJoin="Round" />
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <Style x:Key="UpdateDialogTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Noto Sans SC, Microsoft YaHei UI" />
+            <Setter Property="LineHeight" Value="14" />
+            <Setter Property="LineStackingStrategy" Value="BlockLineHeight" />
+            <Setter Property="TextWrapping" Value="NoWrap" />
+        </Style>
+
+        <Style x:Key="UpdateDialogIconButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="21" />
+            <Setter Property="Height" Value="21" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="3.5">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogFooterButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="26.5" />
+            <Setter Property="FontFamily" Value="Noto Sans SC, Microsoft YaHei UI" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3.5"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogPrimaryButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource UpdateDialogFooterButtonStyle}">
+            <Setter Property="Background" Value="{StaticResource UpdateDialogPrimaryBrush}" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Opacity" Value="0.4" />
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="1.5"
+                                      ShadowDepth="1"
+                                      Direction="270"
+                                      Color="#1A000000"
+                                      Opacity="1" />
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="True">
+                    <Setter Property="Opacity" Value="1" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="UpdateDialogCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Width" Value="14" />
+            <Setter Property="Height" Value="14" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="CheckBoxBorder"
+                                Width="14"
+                                Height="14"
+                                Background="#FAFAFA"
+                                BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3.5">
+                            <Path x:Name="CheckMark"
+                                  Data="M3.2 7.1L5.8 9.7L10.8 4.6"
+                                  Stroke="#FFFFFF"
+                                  StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeLineJoin="Round"
+                                  Visibility="Collapsed" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBoxBorder" Property="Background" Value="{StaticResource UpdateDialogPrimaryBrush}" />
+                                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{StaticResource UpdateDialogPrimaryBrush}" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogDangerCheckBoxStyle"
+               TargetType="CheckBox"
+               BasedOn="{StaticResource UpdateDialogCheckBoxStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="CheckBoxBorder"
+                                Width="14"
+                                Height="14"
+                                Background="#FAFAFA"
+                                BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3.5">
+                            <Path x:Name="CheckMark"
+                                  Data="M3.2 7.1L5.8 9.7L10.8 4.6"
+                                  Stroke="#FFFFFF"
+                                  StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeLineJoin="Round"
+                                  Visibility="Collapsed" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBoxBorder" Property="Background" Value="{StaticResource UpdateDialogDangerBrush}" />
+                                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{StaticResource UpdateDialogDangerBrush}" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+</ResourceDictionary>

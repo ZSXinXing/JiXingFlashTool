@@ -149,5 +149,23 @@ namespace JiXingFlashTool.Utils
 
             }
         }
+
+        public static void RunOnUiThread(Action action)
+        {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher == null)
+            {
+                action();
+                return;
+            }
+
+            if (dispatcher.CheckAccess())
+            {
+                action();
+                return;
+            }
+
+            dispatcher.BeginInvoke(action);
+        }
     }
 }

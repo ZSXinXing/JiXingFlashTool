@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
 using JiXingFlashTool.ItemViewModel;
+using LanguageCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,11 +17,14 @@ namespace JiXingFlashTool.ViewModels
     public class UpdateSystemDialogViewModel : ObservableObject
     {
         private readonly IReadOnlyList<DeviceItemViewModel> _selectedDevices;
-        private readonly Action<DeviceItemViewModel, string, bool> _startUpdateTask;
+        private readonly Action<DeviceItemViewModel, string, bool, string> _startUpdateTask;
         private readonly RelayCommand _selectFileCommand;
+        private readonly RelayCommand _selectTwrpFileCommand;
+        private readonly RelayCommand _clearTwrpFileCommand;
         private readonly RelayCommand _cancelCommand;
         private readonly RelayCommand _startTaskCommand;
         private string _selectedFilePath = string.Empty;
+        private string _selectedTwrpFilePath = string.Empty;
         private bool _wipeData;
 
         /// <summary>
@@ -47,6 +51,23 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
+        /// 已选择的 TWRP 镜像绝对路径。
+        /// </summary>
+        public string SelectedTwrpFilePath
+        {
+            get => _selectedTwrpFilePath;
+            set
+            {
+                if (SetProperty(ref _selectedTwrpFilePath, value))
+                {
+                    OnPropertyChanged(nameof(SelectedTwrpFileName));
+                    OnPropertyChanged(nameof(SelectedTwrpFileSizeText));
+                    OnPropertyChanged(nameof(HasSelectedTwrpFile));
+                }
+            }
+        }
+
+        /// <summary>
         /// 是否在更新前清除用户数据。
         /// </summary>
         public bool WipeData
@@ -59,23 +80,50 @@ namespace JiXingFlashTool.ViewModels
         /// 当前用于界面展示的文件名。
         /// </summary>
         public string SelectedFileName => string.IsNullOrWhiteSpace(SelectedFilePath)
-            ? "未选择文件"
+            ? LocalizationService.Instance.GetString(string.Empty, "UpdateDialog_SystemNotSelected")
             : Path.GetFileName(SelectedFilePath);
+
+        /// <summary>
+        /// 当前用于界面展示的 TWRP 镜像文件名。
+        /// </summary>
+        public string SelectedTwrpFileName => string.IsNullOrWhiteSpace(SelectedTwrpFilePath)
+            ? "未选择 TWRP"
+            : Path.GetFileName(SelectedTwrpFilePath);
+
+        /// <summary>
+        /// 当前用于界面展示的更新文件大小。
+        /// </summary>
+        public string SelectedFileSizeText => GetSelectedFileSizeText();
+
+        /// <summary>
+        /// 当前用于界面展示的 TWRP 镜像文件大小。
+        /// </summary>
+        public string SelectedTwrpFileSizeText => GetFileSizeText(SelectedTwrpFilePath);
 
         /// <summary>
         /// 当前是否已选择更新文件。
         /// </summary>
-        /// <summary>
-        /// 褰撳墠鐢ㄤ簬鐣岄潰灞曠ず鐨勬枃浠跺ぇ灏忋€?
-        /// </summary>
-        public string SelectedFileSizeText => GetSelectedFileSizeText();
-
         public bool HasSelectedFile => !string.IsNullOrWhiteSpace(SelectedFilePath);
+
+        /// <summary>
+        /// 当前是否已选择 TWRP 镜像。
+        /// </summary>
+        public bool HasSelectedTwrpFile => !string.IsNullOrWhiteSpace(SelectedTwrpFilePath);
 
         /// <summary>
         /// 选择文件命令。
         /// </summary>
         public RelayCommand SelectFileCommand => _selectFileCommand;
+
+        /// <summary>
+        /// 选择 TWRP 镜像命令。
+        /// </summary>
+        public RelayCommand SelectTwrpFileCommand => _selectTwrpFileCommand;
+
+        /// <summary>
+        /// 清除 TWRP 镜像命令。
+        /// </summary>
+        public RelayCommand ClearTwrpFileCommand => _clearTwrpFileCommand;
 
         /// <summary>
         /// 取消命令。
@@ -91,11 +139,14 @@ namespace JiXingFlashTool.ViewModels
         /// 使用选中的设备初始化弹窗。
         /// </summary>
         /// <param name="selectedDevices">当前选中的设备列表。</param>
-        public UpdateSystemDialogViewModel(IReadOnlyList<DeviceItemViewModel> selectedDevices, Action<DeviceItemViewModel, string, bool> startUpdateTask)
+        /// <param name="startUpdateTask">更新任务入队回调。</param>
+        public UpdateSystemDialogViewModel(IReadOnlyList<DeviceItemViewModel> selectedDevices, Action<DeviceItemViewModel, string, bool, string> startUpdateTask)
         {
             _selectedDevices = selectedDevices ?? Array.Empty<DeviceItemViewModel>();
             _startUpdateTask = startUpdateTask ?? throw new ArgumentNullException(nameof(startUpdateTask));
             _selectFileCommand = new RelayCommand(SelectFile);
+            _selectTwrpFileCommand = new RelayCommand(SelectTwrpFile);
+            _clearTwrpFileCommand = new RelayCommand(ClearTwrpFile);
             _cancelCommand = new RelayCommand(Cancel);
             _startTaskCommand = new RelayCommand(StartTask, CanStartTask);
         }
@@ -114,6 +165,30 @@ namespace JiXingFlashTool.ViewModels
                     SelectedFilePath = openFileDialog.FileName;
                 }
             }
+        }
+
+        /// <summary>
+        /// 选择本地 TWRP 镜像文件。
+        /// </summary>
+        private void SelectTwrpFile()
+        {
+            using (var openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "TWRP 镜像文件 (*.img)|*.img|所有文件 (*.*)|*.*";
+                openFileDialog.Multiselect = false;
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    SelectedTwrpFilePath = openFileDialog.FileName;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 清除当前选择的 TWRP 镜像文件。
+        /// </summary>
+        private void ClearTwrpFile()
+        {
+            SelectedTwrpFilePath = string.Empty;
         }
 
         /// <summary>
@@ -136,7 +211,7 @@ namespace JiXingFlashTool.ViewModels
 
             foreach (var deviceItemViewModel in _selectedDevices.Where(item => item != null))
             {
-                _startUpdateTask(deviceItemViewModel, SelectedFilePath, WipeData);
+                _startUpdateTask(deviceItemViewModel, SelectedFilePath, WipeData, SelectedTwrpFilePath);
             }
 
             Dialog?.Close();
@@ -152,9 +227,9 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
-        /// 鑾峰彇宸查€夋枃浠剁殑鍙嬪ソ澶у皬鏂囨湰銆?
+        /// 获取已选更新文件的友好大小文本。
         /// </summary>
-        /// <returns>鏈€夋枃浠舵垨鏂囦欢涓嶅瓨鍦ㄦ椂杩斿洖绌哄瓧绗︿覆銆?</returns>
+        /// <returns>未选文件或文件不存在时返回空字符串。</returns>
         private string GetSelectedFileSizeText()
         {
             if (string.IsNullOrWhiteSpace(SelectedFilePath) || !File.Exists(SelectedFilePath))
@@ -162,15 +237,30 @@ namespace JiXingFlashTool.ViewModels
                 return string.Empty;
             }
 
-            var fileLength = new FileInfo(SelectedFilePath).Length;
+            return GetFileSizeText(SelectedFilePath);
+        }
+
+        /// <summary>
+        /// 获取指定文件的友好大小文本。
+        /// </summary>
+        /// <param name="filePath">本地文件路径。</param>
+        /// <returns>文件不存在时返回空字符串。</returns>
+        private static string GetFileSizeText(string filePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            {
+                return string.Empty;
+            }
+
+            var fileLength = new FileInfo(filePath).Length;
             return $"({FormatFileSize(fileLength)})";
         }
 
         /// <summary>
-        /// 灏嗘枃浠跺瓧鑺傛暟杞崲涓虹晫闈㈠睍绀虹殑 MB/KB 鏂囨湰銆?
+        /// 将文件字节数转换为界面展示的 GB/MB/KB 文本。
         /// </summary>
-        /// <param name="fileLength">鏂囦欢瀛楄妭鏁般€?/param>
-        /// <returns>鏍煎紡鍖栧悗鐨勬枃浠跺ぇ灏忔枃鏈€?</returns>
+        /// <param name="fileLength">文件字节数。</param>
+        /// <returns>格式化后的文件大小文本。</returns>
         private static string FormatFileSize(long fileLength)
         {
             const double oneKilobyte = 1024d;

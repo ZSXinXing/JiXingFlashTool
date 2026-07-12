@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using JXHeimdall.Models;
 using System.IO;
+using System.Linq;
 
 namespace JiXingFlashTool.ItemViewModel.Odin
 {
@@ -76,13 +77,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string BlFilePath
         {
             get => _blFilePath;
-            set
-            {
-                if (SetProperty(ref _blFilePath, value))
-                {
-                    OnPropertyChanged(nameof(BlFileName));
-                }
-            }
+            set => SetFirmwarePath(ref _blFilePath, value, nameof(BlFilePath), nameof(BlFileName));
         }
 
         /// <summary>
@@ -91,13 +86,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string ApFilePath
         {
             get => _apFilePath;
-            set
-            {
-                if (SetProperty(ref _apFilePath, value))
-                {
-                    OnPropertyChanged(nameof(ApFileName));
-                }
-            }
+            set => SetFirmwarePath(ref _apFilePath, value, nameof(ApFilePath), nameof(ApFileName));
         }
 
         /// <summary>
@@ -106,13 +95,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string TwrpFilePath
         {
             get => _twrpFilePath;
-            set
-            {
-                if (SetProperty(ref _twrpFilePath, value))
-                {
-                    OnPropertyChanged(nameof(TwrpFileName));
-                }
-            }
+            set => SetFirmwarePath(ref _twrpFilePath, value, nameof(TwrpFilePath), nameof(TwrpFileName));
         }
 
         /// <summary>
@@ -121,13 +104,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string SystemPackageFilePath
         {
             get => _systemPackageFilePath;
-            set
-            {
-                if (SetProperty(ref _systemPackageFilePath, value))
-                {
-                    OnPropertyChanged(nameof(SystemPackageFileName));
-                }
-            }
+            set => SetFirmwarePath(ref _systemPackageFilePath, value, nameof(SystemPackageFilePath), nameof(SystemPackageFileName));
         }
 
         /// <summary>
@@ -136,7 +113,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public bool WipeDataBeforeSystemFlash
         {
             get => _wipeDataBeforeSystemFlash;
-            set => SetProperty(ref _wipeDataBeforeSystemFlash, value);
+            set => SetCleanupOption(ref _wipeDataBeforeSystemFlash, value, nameof(WipeDataBeforeSystemFlash));
         }
 
         /// <summary>
@@ -145,7 +122,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public bool WipeSystemBeforeSystemFlash
         {
             get => _wipeSystemBeforeSystemFlash;
-            set => SetProperty(ref _wipeSystemBeforeSystemFlash, value);
+            set => SetCleanupOption(ref _wipeSystemBeforeSystemFlash, value, nameof(WipeSystemBeforeSystemFlash));
         }
 
         /// <summary>
@@ -154,7 +131,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public bool FormatDataBeforeSystemFlash
         {
             get => _formatDataBeforeSystemFlash;
-            set => SetProperty(ref _formatDataBeforeSystemFlash, value);
+            set => SetCleanupOption(ref _formatDataBeforeSystemFlash, value, nameof(FormatDataBeforeSystemFlash));
         }
 
         /// <summary>
@@ -163,13 +140,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string CpFilePath
         {
             get => _cpFilePath;
-            set
-            {
-                if (SetProperty(ref _cpFilePath, value))
-                {
-                    OnPropertyChanged(nameof(CpFileName));
-                }
-            }
+            set => SetFirmwarePath(ref _cpFilePath, value, nameof(CpFilePath), nameof(CpFileName));
         }
 
         /// <summary>
@@ -178,13 +149,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string CscFilePath
         {
             get => _cscFilePath;
-            set
-            {
-                if (SetProperty(ref _cscFilePath, value))
-                {
-                    OnPropertyChanged(nameof(CscFileName));
-                }
-            }
+            set => SetFirmwarePath(ref _cscFilePath, value, nameof(CscFilePath), nameof(CscFileName));
         }
 
         /// <summary>
@@ -193,13 +158,7 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string UserdataFilePath
         {
             get => _userdataFilePath;
-            set
-            {
-                if (SetProperty(ref _userdataFilePath, value))
-                {
-                    OnPropertyChanged(nameof(UserdataFileName));
-                }
-            }
+            set => SetFirmwarePath(ref _userdataFilePath, value, nameof(UserdataFilePath), nameof(UserdataFileName));
         }
 
         /// <summary>
@@ -247,6 +206,25 @@ namespace JiXingFlashTool.ItemViewModel.Odin
         public string UserdataFileName => GetDisplayFileName(UserdataFilePath);
 
         /// <summary>
+        /// TWRP 系统安装前的清理选项展示文本，未启用时显示占位横线。
+        /// </summary>
+        public string CleanupOptionsText
+        {
+            get
+            {
+                var options = new[]
+                {
+                    WipeDataBeforeSystemFlash ? "双清" : string.Empty,
+                    WipeSystemBeforeSystemFlash ? "清除系统" : string.Empty,
+                    FormatDataBeforeSystemFlash ? "格式化" : string.Empty
+                };
+
+                var selectedOptions = string.Join(" | ", options.Where(item => !string.IsNullOrWhiteSpace(item)));
+                return string.IsNullOrWhiteSpace(selectedOptions) ? "-" : selectedOptions;
+            }
+        }
+
+        /// <summary>
         /// 为当前设备分配固件路径。
         /// </summary>
         /// <param name="blFilePath">BL 文件路径。</param>
@@ -282,6 +260,35 @@ namespace JiXingFlashTool.ItemViewModel.Odin
             CscFilePath = cscFilePath;
             UserdataFilePath = userdataFilePath;
             StatusText = "已分配";
+        }
+
+        /// <summary>
+        /// 设置固件路径并同步刷新对应文件名展示，减少各槽位属性的重复通知逻辑。
+        /// </summary>
+        /// <param name="field">固件路径字段引用。</param>
+        /// <param name="value">新的固件路径。</param>
+        /// <param name="propertyName">路径属性名称。</param>
+        /// <param name="fileNamePropertyName">文件名展示属性名称。</param>
+        private void SetFirmwarePath(ref string field, string value, string propertyName, string fileNamePropertyName)
+        {
+            if (SetProperty(ref field, value, propertyName))
+            {
+                OnPropertyChanged(fileNamePropertyName);
+            }
+        }
+
+        /// <summary>
+        /// 设置系统安装清理选项并同步刷新列表展示文本。
+        /// </summary>
+        /// <param name="field">清理选项字段引用。</param>
+        /// <param name="value">新的选中状态。</param>
+        /// <param name="propertyName">清理选项属性名称。</param>
+        private void SetCleanupOption(ref bool field, bool value, string propertyName)
+        {
+            if (SetProperty(ref field, value, propertyName))
+            {
+                OnPropertyChanged(nameof(CleanupOptionsText));
+            }
         }
 
         /// <summary>

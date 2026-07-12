@@ -1,4 +1,4 @@
-﻿<Window x:Class="JiXingFlashTool.Views.MainWindow"
+<Window x:Class="JiXingFlashTool.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converter="clr-namespace:JiXingFlashTool.Converters"
@@ -7,12 +7,11 @@
         xmlns:local="clr-namespace:JiXingFlashTool.Utils"
         xmlns:odin="clr-namespace:JiXingFlashTool.Views.Odin"
         xmlns:viewModel="clr-namespace:JiXingFlashTool.ViewModels"
-        Title=""
-        Width="1600"
-        Height="1066.5"
-        MinWidth="1280"
+        Title="{lang:Loc Key=Sidebar_ProductName}"
+        Width="1100"
+        Height="1000"
+        MinWidth="1500"
         MinHeight="780"
-        Icon="{x:Null}"
         Background="White"
         FontFamily="Microsoft YaHei UI"
         SnapsToDevicePixels="True"
@@ -24,523 +23,11 @@
     </Window.DataContext>
 
     <Window.Resources>
-        <converter:VisibilityBoolConverter x:Key="VisibilityBoolConverter" />
-        <converter:InverseVisibilityBoolConverter x:Key="InverseVisibilityBoolConverter" />
-        <converter:BooleanToGridLengthConverter x:Key="BooleanToGridLengthConverter" />
-        <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#FAFAFA" />
-        <SolidColorBrush x:Key="SidebarBorderBrush" Color="#E0E0E0" />
-        <SolidColorBrush x:Key="PageBackgroundBrush" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="PagePanelBrush" Color="#FFFFFF" />
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#2196F3" />
-        <SolidColorBrush x:Key="PrimarySoftBrush" Color="#E3F2FD" />
-        <SolidColorBrush x:Key="WarningBrush" Color="#FF9800" />
-        <SolidColorBrush x:Key="DangerBrush" Color="#F44336" />
-        <SolidColorBrush x:Key="PurpleBrush" Color="#9C27B0" />
-        <SolidColorBrush x:Key="SidebarSelectedBackgroundBrush" Color="#EBF0FF" />
-        <SolidColorBrush x:Key="SidebarSelectedForegroundBrush" Color="#5C82FD" />
-        <SolidColorBrush x:Key="TextBrush" Color="#333333" />
-        <SolidColorBrush x:Key="MutedTextBrush" Color="#999999" />
-        <SolidColorBrush x:Key="BorderBrush" Color="#E0E0E0" />
-        <SolidColorBrush x:Key="LightInputBrush" Color="#FAFAFA" />
-
-        <Style x:Key="TwrpDropDownMenuItemStyle" TargetType="Button">
-            <Setter Property="Height" Value="24.5" />
-            <Setter Property="Padding" Value="9,0,10,0" />
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontSize" Value="10.5" />
-            <Setter Property="FontWeight" Value="Medium" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="RootBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4"
-                                SnapsToDevicePixels="True">
-                            <ContentPresenter HorizontalAlignment="Stretch"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RootBorder" Property="Background" Value="#EEF4FF" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="RootBorder" Property="Background" Value="#E4EDFF" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="TwrpDropDownPopupBorderStyle" TargetType="Border">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#E6E8EF" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="4" />
-            <Setter Property="Padding" Value="6" />
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="16"
-                                      Color="#22000000"
-                                      Direction="270"
-                                      Opacity="0.18"
-                                      ShadowDepth="2" />
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="TwrpDropDownToggleButtonStyle" TargetType="ToggleButton">
-            <Setter Property="MinWidth" Value="75.25" />
-            <Setter Property="Height" Value="24.5" />
-            <Setter Property="Padding" Value="10.5,0" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="FontSize" Value="10.5" />
-            <Setter Property="FontWeight" Value="Medium" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="Focusable" Value="False" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Border x:Name="RootBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="3.5"
-                                SnapsToDevicePixels="True">
-                            <Grid Margin="{TemplateBinding Padding}"
-                                  UseLayoutRounding="True">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="12.25" />
-                                    <ColumnDefinition Width="10.5" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="7" />
-                                    <ColumnDefinition Width="10.5" />
-                                </Grid.ColumnDefinitions>
-                                <Image Width="12.25"
-                                       Height="12.25"
-                                       Source="{TemplateBinding Tag}"
-                                       Grid.Column="0"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Margin="0" />
-                                <TextBlock Text="{TemplateBinding Content}"
-                                           Grid.Column="2"
-                                           HorizontalAlignment="Left"
-                                           VerticalAlignment="Center"
-                                           TextAlignment="Center"
-                                           Foreground="{TemplateBinding Foreground}"
-                                           FontSize="{TemplateBinding FontSize}"
-                                           FontWeight="{TemplateBinding FontWeight}"
-                                           TextWrapping="NoWrap"
-                                           Margin="0,-1,0,0" />
-                                <Border Grid.Column="4"
-                                        Width="10.5"
-                                        Height="10.5"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Margin="0">
-                                    <Image Source="{x:Static local:IconResources.TwrpDropDownArrowIcon}"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Stretch="Uniform" />
-                                </Border>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="RootBorder" Property="Opacity" Value="0.98" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="UpdateSystemActionButtonStyle" TargetType="Button">
-            <Setter Property="MinWidth" Value="75.25" />
-            <Setter Property="Height" Value="24.5" />
-            <Setter Property="Padding" Value="10.5,0" />
-            <Setter Property="Background" Value="#5C82FD" />
-            <Setter Property="BorderBrush" Value="#5C82FD" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="#FFFFFF" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="3.5">
-                            <Grid Margin="{TemplateBinding Padding}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="12.25" />
-                                    <ColumnDefinition Width="10.5" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <Image Width="12.25"
-                                       Height="12.25"
-                                       Grid.Column="0"
-                                       Margin="0"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Source="{x:Static local:IconResources.MaintenanceUpdateIcon}" />
-                                <TextBlock Grid.Column="2"
-                                           Margin="0,-1,0,0"
-                                           HorizontalAlignment="Left"
-                                           VerticalAlignment="Center"
-                                           FontSize="10.5"
-                                           FontWeight="Medium"
-                                           Foreground="{TemplateBinding Foreground}"
-                                           Text="{lang:Loc Key=Toolbar_UpdateFile}" />
-                            </Grid>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="SidebarButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="38.5" />
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Foreground" Value="#B3333333" />
-            <Setter Property="FontSize" Value="12.25" />
-            <Setter Property="FontWeight" Value="Medium" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="Padding" Value="10.5,0" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="RootBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="3.5">
-                            <ContentPresenter VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RootBorder" Property="Background" Value="#EEF5FB" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="SidebarSelectedButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource SidebarButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource SidebarSelectedBackgroundBrush}" />
-            <Setter Property="Foreground" Value="{StaticResource SidebarSelectedForegroundBrush}" />
-        </Style>
-
-        <Style x:Key="SidebarSmallButtonStyle" TargetType="Button" BasedOn="{StaticResource SidebarButtonStyle}">
-            <Setter Property="Height" Value="35" />
-            <Setter Property="Padding" Value="10.5,0" />
-            <Setter Property="FontSize" Value="12.25" />
-        </Style>
-
-        <Style x:Key="SidebarNavButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource SidebarButtonStyle}">
-            <Setter Property="Height" Value="38.5" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="RootBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="3.5">
-                            <ContentPresenter Margin="10.5,0" VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RootBorder" Property="Background" Value="#F5F8FF" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="RootBorder" Property="Background" Value="#E3EBFF" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="SidebarNavIconButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource SidebarButtonStyle}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="RootBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="3.5">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RootBorder" Property="Background" Value="#F5F8FF" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="RootBorder" Property="Background" Value="#E3EBFF" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="SidebarIconButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource SidebarButtonStyle}">
-            <Setter Property="Width" Value="41" />
-            <Setter Property="Height" Value="30" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="RootBorder"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="3.5">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="RootBorder" Property="Background" Value="#EEF5FB" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="SidebarSelectedIconButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource SidebarIconButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource SidebarSelectedBackgroundBrush}" />
-            <Setter Property="Foreground" Value="{StaticResource SidebarSelectedForegroundBrush}" />
-        </Style>
-
-        <Style x:Key="ToolbarActionButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="26.5" />
-            <Setter Property="Margin" Value="0" />
-            <Setter Property="Padding" Value="10.5,0" />
-            <Setter Property="FontSize" Value="10.5" />
-            <Setter Property="FontWeight" Value="Medium" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="3.5">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center" />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="ToolbarOutlineButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource ToolbarActionButtonStyle}">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-        </Style>
-
-        <Style x:Key="WarningToolbarButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource ToolbarActionButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource WarningBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource WarningBrush}" />
-        </Style>
-
-        <Style x:Key="DangerToolbarButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource ToolbarActionButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource DangerBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
-        </Style>
-
-        <Style x:Key="PurpleToolbarButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource ToolbarActionButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource PurpleBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource PurpleBrush}" />
-        </Style>
-
-        <Style x:Key="ProfessionalInstructionButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource ToolbarActionButtonStyle}">
-            <Setter Property="Height" Value="24.5" />
-            <Setter Property="Margin" Value="0" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="VerticalContentAlignment" Value="Stretch" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="3.5">
-                            <ContentPresenter HorizontalAlignment="Stretch"
-                                              VerticalAlignment="Stretch" />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Height" Value="31.5" />
-            <Setter Property="FontSize" Value="12.25" />
-            <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-            <Setter Property="Background" Value="{StaticResource LightInputBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="31.5,0,10.5,0" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="TopSearchTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource SearchTextBoxStyle}">
-            <Setter Property="Height" Value="28" />
-            <Setter Property="FontSize" Value="10.5" />
-            <Setter Property="Padding" Value="28,0,10.5,0" />
-        </Style>
-
-        <Style x:Key="FilterComboBoxStyle"
-               TargetType="ComboBox"
-               BasedOn="{StaticResource ComboBoxBaseStyle}">
-            <Setter Property="Height" Value="31.5" />
-            <Setter Property="FontSize" Value="12.25" />
-            <Setter Property="Padding" Value="10.5,0" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-        </Style>
-
-        <Style x:Key="TableCellTextBlockStyle" TargetType="TextBlock">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="FontSize" Value="12.25" />
-            <Setter Property="TextWrapping" Value="NoWrap" />
-            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-        </Style>
-
-        <Style x:Key="HeaderCheckBoxStyle"
-               TargetType="CheckBox"
-               BasedOn="{StaticResource CheckBoxBaseStyle}">
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="0" />
-        </Style>
-
-        <Style x:Key="TableCheckBoxStyle"
-               TargetType="CheckBox"
-               BasedOn="{StaticResource HeaderCheckBoxStyle}" />
-
-        <Style TargetType="DataGrid">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="GridLinesVisibility" Value="Horizontal" />
-            <Setter Property="HeadersVisibility" Value="Column" />
-            <Setter Property="CanUserAddRows" Value="False" />
-            <Setter Property="CanUserDeleteRows" Value="False" />
-            <Setter Property="CanUserReorderColumns" Value="False" />
-            <Setter Property="CanUserResizeColumns" Value="False" />
-            <Setter Property="CanUserResizeRows" Value="False" />
-            <Setter Property="CanUserSortColumns" Value="False" />
-            <Setter Property="AutoGenerateColumns" Value="False" />
-            <Setter Property="IsReadOnly" Value="True" />
-            <Setter Property="SelectionUnit" Value="FullRow" />
-            <Setter Property="SelectionMode" Value="Extended" />
-            <Setter Property="EnableRowVirtualization" Value="True" />
-            <Setter Property="EnableColumnVirtualization" Value="True" />
-            <Setter Property="HorizontalGridLinesBrush" Value="#80E0E0E0" />
-            <Setter Property="VerticalGridLinesBrush" Value="Transparent" />
-            <Setter Property="RowBackground" Value="White" />
-            <Setter Property="AlternatingRowBackground" Value="White" />
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
-            <Setter Property="ColumnHeaderStyle">
-                <Setter.Value>
-                    <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Height" Value="43" />
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Background" Value="#FAFAFA" />
-                        <Setter Property="Foreground" Value="#CC333333" />
-                        <Setter Property="FontSize" Value="10.5" />
-                        <Setter Property="FontWeight" Value="Medium" />
-                        <Setter Property="HorizontalContentAlignment" Value="Center" />
-                        <Setter Property="VerticalContentAlignment" Value="Center" />
-                        <Setter Property="BorderBrush" Value="#80E0E0E0" />
-                        <Setter Property="BorderThickness" Value="0,0,0,1" />
-                    </Style>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="CellStyle">
-                <Setter.Value>
-                    <Style TargetType="DataGridCell">
-                        <Setter Property="Padding" Value="14,0" />
-                        <Setter Property="BorderThickness" Value="0" />
-                        <Setter Property="FontSize" Value="12.25" />
-                        <Setter Property="Foreground" Value="#E6333333" />
-                        <Setter Property="HorizontalContentAlignment" Value="Center" />
-                        <Setter Property="VerticalContentAlignment" Value="Center" />
-                        <Setter Property="Background" Value="White" />
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="White" />
-                                <Setter Property="Foreground" Value="#E6333333" />
-                            </Trigger>
-                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter Property="Background" Value="White" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Setter.Value>
-            </Setter>
-            <Setter Property="RowStyle">
-                <Setter.Value>
-                    <Style TargetType="DataGridRow">
-                        <Setter Property="Height" Value="43" />
-                        <Setter Property="Background" Value="White" />
-                        <Setter Property="BorderBrush" Value="#80E0E0E0" />
-                        <Setter Property="BorderThickness" Value="0,0,0,1" />
-                        <Setter Property="SnapsToDevicePixels" Value="True" />
-                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="White" />
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="White" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/Style/MainWindowStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Window.Resources>
 
     <Border Background="{StaticResource PageBackgroundBrush}"
@@ -577,44 +64,20 @@
                                 <ColumnDefinition Width="7" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-
-                            <Viewbox Width="28"
-                                     Height="28"
-                                     HorizontalAlignment="Left"
-                                     VerticalAlignment="Top"
-                                     Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
-                                <Canvas Width="24.5" Height="24.5">
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M18.375 4.08333H6.125C4.99742 4.08333 4.08333 4.99742 4.08333 6.125V18.375C4.08333 19.5026 4.99742 20.4167 6.125 20.4167H18.375C19.5026 20.4167 20.4167 19.5026 20.4167 18.375V6.125C20.4167 4.99742 19.5026 4.08333 18.375 4.08333Z" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M14.2917 9.1875H10.2083C9.64454 9.1875 9.1875 9.64454 9.1875 10.2083V14.2917C9.1875 14.8555 9.64454 15.3125 10.2083 15.3125H14.2917C14.8555 15.3125 15.3125 14.8555 15.3125 14.2917V10.2083C15.3125 9.64454 14.8555 9.1875 14.2917 9.1875Z" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M15.3125 2.04167V4.08333" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M15.3125 20.4167V22.4583" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.04167 15.3125H4.08333" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.04167 9.1875H4.08333" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M20.4167 15.3125H22.4583" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M20.4167 9.1875H22.4583" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M9.1875 2.04167V4.08333" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.04167" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M9.1875 20.4167V22.4583" />
-                                </Canvas>
-                            </Viewbox>
-                            <Viewbox Width="31.5"
-                                     Height="31.5"
-                                     HorizontalAlignment="Left"
-                                     VerticalAlignment="Top"
-                                     Visibility="{Binding IsSidebarExpanded, Converter={StaticResource InverseVisibilityBoolConverter}}">
-                                <Canvas Width="28" Height="28">
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M21 4.66667H7C5.71134 4.66667 4.66667 5.71134 4.66667 7V21C4.66667 22.2887 5.71134 23.3333 7 23.3333H21C22.2887 23.3333 23.3333 22.2887 23.3333 21V7C23.3333 5.71134 22.2887 4.66667 21 4.66667Z" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M16.3333 10.5H11.6667C11.0223 10.5 10.5 11.0223 10.5 11.6667V16.3333C10.5 16.9777 11.0223 17.5 11.6667 17.5H16.3333C16.9777 17.5 17.5 16.9777 17.5 16.3333V11.6667C17.5 11.0223 16.9777 10.5 16.3333 10.5Z" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M17.5 2.33333V4.66667" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M17.5 23.3333V25.6667" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.33333 17.5H4.66667" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.33333 10.5H4.66667" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M23.3333 17.5H25.6667" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M23.3333 10.5H25.6667" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M10.5 2.33333V4.66667" />
-                                    <Path Fill="Transparent" Stroke="#5C82FD" StrokeThickness="2.33333" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M10.5 23.3333V25.6667" />
-                                </Canvas>
-                            </Viewbox>
-
+                            <Image Width="28"
+                                   Height="28"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Top"
+                                   Source="/logo.ico"
+                                   Stretch="Uniform"
+                                   Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}" />
+                            <Image Width="31.5"
+                                   Height="31.5"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Top"
+                                   Source="/logo.ico"
+                                   Stretch="Uniform"
+                                   Visibility="{Binding IsSidebarExpanded, Converter={StaticResource InverseVisibilityBoolConverter}}" />
                             <StackPanel Grid.Column="2"
                                         MinWidth="0"
                                         Visibility="{Binding IsSidebarExpanded, Converter={StaticResource VisibilityBoolConverter}}">
@@ -667,8 +130,7 @@
                             <Button Style="{StaticResource SidebarNavButtonStyle}"
                                     Margin="0,0,0,3.5"
                                     Background="{Binding OdinNavBackground}"
-                                    Command="{Binding ShowOdinFlashPageCommand}"
-                                    Visibility="{Binding IsOdinNavigationVisible, Converter={StaticResource VisibilityBoolConverter}}">
+                                    Command="{Binding ShowOdinFlashPageCommand}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="17.5" />
@@ -685,6 +147,33 @@
                                                FontSize="12.25"
                                                FontWeight="Medium"
                                                Foreground="{Binding OdinNavForeground}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Left" />
+                                </Grid>
+                            </Button>
+
+                            <Button Style="{StaticResource SidebarNavButtonStyle}"
+                                    Margin="0,0,0,3.5"
+                                    Background="Transparent"
+                                    Command="{Binding ShowResourcePageCommand}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="17.5" />
+                                        <ColumnDefinition Width="7" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Viewbox Grid.Column="0" Width="17.5" Height="17.5" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                        <Canvas Width="17.5" Height="17.5">
+                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.91667 5.10417L8.75 1.75L14.5833 5.10417V12.3958L8.75 15.75L2.91667 12.3958V5.10417Z" />
+                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M2.91667 5.10417L8.75 8.75L14.5833 5.10417" />
+                                            <Path Fill="Transparent" Stroke="#B3333333" StrokeThickness="1.45833" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="M8.75 8.75V15.75" />
+                                        </Canvas>
+                                    </Viewbox>
+                                    <TextBlock Grid.Column="2"
+                                               Text="{lang:Loc Key=Sidebar_Resource}"
+                                               FontSize="12.25"
+                                               FontWeight="Medium"
+                                               Foreground="#B3333333"
                                                VerticalAlignment="Center"
                                                HorizontalAlignment="Left" />
                                 </Grid>
@@ -727,8 +216,7 @@
                                         Height="30"
                                         Margin="0,0,0,3.5"
                                         Background="{Binding OdinNavBackground}"
-                                        Command="{Binding ShowOdinFlashPageCommand}"
-                                        Visibility="{Binding IsOdinNavigationVisible, Converter={StaticResource VisibilityBoolConverter}}">
+                                        Command="{Binding ShowOdinFlashPageCommand}">
                                     <Viewbox Width="17.5" Height="17.5">
                                         <Canvas Width="17.5" Height="17.5">
                                             <Path Fill="Transparent"
@@ -738,6 +226,39 @@
                                                   StrokeEndLineCap="Round"
                                                   StrokeLineJoin="Round"
                                                   Data="M9.91667 1.45833L3.64583 9.1875H8.75L7.58333 16.0417L13.8542 7.29167H8.75L9.91667 1.45833Z" />
+                                        </Canvas>
+                                    </Viewbox>
+                                </Button>
+
+                                <Button Style="{StaticResource SidebarNavIconButtonStyle}"
+                                        Width="30"
+                                        Height="30"
+                                        Margin="0,0,0,3.5"
+                                        Background="Transparent"
+                                        Command="{Binding ShowResourcePageCommand}">
+                                    <Viewbox Width="17.5" Height="17.5">
+                                        <Canvas Width="17.5" Height="17.5">
+                                            <Path Fill="Transparent"
+                                                  Stroke="#B3333333"
+                                                  StrokeThickness="1.45833"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  Data="M2.91667 5.10417L8.75 1.75L14.5833 5.10417V12.3958L8.75 15.75L2.91667 12.3958V5.10417Z" />
+                                            <Path Fill="Transparent"
+                                                  Stroke="#B3333333"
+                                                  StrokeThickness="1.45833"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  Data="M2.91667 5.10417L8.75 8.75L14.5833 5.10417" />
+                                            <Path Fill="Transparent"
+                                                  Stroke="#B3333333"
+                                                  StrokeThickness="1.45833"
+                                                  StrokeStartLineCap="Round"
+                                                  StrokeEndLineCap="Round"
+                                                  StrokeLineJoin="Round"
+                                                  Data="M8.75 8.75V15.75" />
                                         </Canvas>
                                     </Viewbox>
                                 </Button>
@@ -984,7 +505,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="28" />
                         <RowDefinition Height="8.75" />
-                        <RowDefinition Height="{Binding IsProfessionalModeEnabled, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=84.25;24.5}" />
+                        <RowDefinition Height="84.25" />
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0">
@@ -1003,9 +524,9 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="24.5" />
                             <RowDefinition Height="8.75" />
-                            <RowDefinition Height="{Binding IsProfessionalModeEnabled, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=17.5;0}" />
-                            <RowDefinition Height="{Binding IsProfessionalModeEnabled, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=7;0}" />
-                            <RowDefinition Height="{Binding IsProfessionalModeEnabled, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=24.5;0}" />
+                            <RowDefinition Height="17.5" />
+                            <RowDefinition Height="7" />
+                            <RowDefinition Height="24.5" />
                         </Grid.RowDefinitions>
 
                         <Border Grid.RowSpan="5"
@@ -1049,24 +570,6 @@
                                                 ButtonText="{lang:Loc Key=Toolbar_CloseFlashlight}"
                                                 ButtonCommand="{Binding MaintenanceInstructionCommand}"
                                                 ButtonCommandParameter="FlashOff" />
-                            <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#5C82FD"
-                                                ButtonBorderBrush="#5C82FD"
-                                                ButtonIcon="{x:Static local:IconResources.MaintenanceShellIcon}"
-                                                ButtonText="{lang:Loc Key=Toolbar_ExecuteShell}"
-                                                ButtonCommand="{Binding MaintenanceInstructionCommand}"
-                                                ButtonCommandParameter="ShellCommand" />
-                                <control:IconButton
-                                                Height="24.5"
-                                                Margin="7,0,0,0"
-                                                ButtonBackground="#9C27B0"
-                                                ButtonBorderBrush="#9C27B0"
-                                                ButtonIcon="{x:Static local:IconResources.MaintenanceRootIcon}"
-                                                ButtonText="{lang:Loc Key=Toolbar_FlashRoot}"
-                                                ButtonCommand="{Binding MaintenanceInstructionCommand}"
-                                                ButtonCommandParameter="RootDevice" />
                                 <control:IconButton
                                                 Height="24.5"
                                                 Margin="7,0,0,0"
@@ -1080,16 +583,14 @@
                         <StackPanel Grid.Row="2"
                                     Margin="0,0,0,0"
                                     Panel.ZIndex="1"
-                                    Orientation="Horizontal"
-                                    Visibility="{Binding IsProfessionalModeEnabled, Converter={StaticResource VisibilityBoolConverter}}">
+                                    Orientation="Horizontal">
                                 <TextBlock Text="{lang:Loc Key=Toolbar_ProfessionalCommand}" FontSize="10.5" FontWeight="Medium" Foreground="#F44336" />
                             </StackPanel>
 
                         <StackPanel Grid.Row="4"
                                     Margin="0,0,0,0"
                                     Panel.ZIndex="1"
-                                    Orientation="Horizontal"
-                                    Visibility="{Binding IsProfessionalModeEnabled, Converter={StaticResource VisibilityBoolConverter}}">
+                                    Orientation="Horizontal">
                             <ToggleButton x:Name="ProfessionalRebootDropDownButton"
                                           Style="{StaticResource TwrpDropDownToggleButtonStyle}"
                                           ClickMode="Press"
@@ -1474,21 +975,44 @@
                                                       Width="100"
                                                       ElementStyle="{StaticResource TableCellTextBlockStyle}"
                                                       Binding="{Binding SystemVersion}" />
+                                <DataGridTextColumn Header="{lang:Loc Key=Table_BuildDate}"
+                                                      Width="110"
+                                                      ElementStyle="{StaticResource TableCellTextBlockStyle}"
+                                                      Binding="{Binding BuildDate}" />
 
                                 <DataGridTemplateColumn Header="{lang:Loc Key=Table_ConnectionType}" Width="120">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Height="21"
                                                     Padding="8.75,0"
-                                                    Background="{Binding ConnectionTagBackground}"
                                                     CornerRadius="10.5"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="{x:Type Border}">
+                                                        <Setter Property="Background" Value="#E3F2FD" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsEthernetConnection}" Value="True">
+                                                                <Setter Property="Background" Value="#E0F7FA" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
                                                 <TextBlock Text="{Binding ConnectionType}"
-                                                           Foreground="{Binding ConnectionTagForeground}"
                                                            FontSize="12.25"
                                                            FontWeight="Medium"
-                                                           VerticalAlignment="Center" />
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="{x:Type TextBlock}">
+                                                            <Setter Property="Foreground" Value="#2196F3" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsEthernetConnection}" Value="True">
+                                                                    <Setter Property="Foreground" Value="#00BCD4" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </Border>
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -1499,22 +1023,44 @@
                                         <DataTemplate>
                                             <Border Height="21"
                                                     Padding="8.75,0"
-                                                    Background="{Binding DeviceStateTagBackground}"
                                                     CornerRadius="10.5"
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center">
+                                                <Border.Style>
+                                                    <Style TargetType="{x:Type Border}">
+                                                        <Setter Property="Background" Value="#ECEFF1" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Online"><Setter Property="Background" Value="#E8F5E9" /></DataTrigger>
+                                                            <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Recovery"><Setter Property="Background" Value="#FFF3E0" /></DataTrigger>
+                                                            <DataTrigger Binding="{Binding CurrentDeviceState}" Value="BootLoader"><Setter Property="Background" Value="#F3E5F5" /></DataTrigger>
+                                                            <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Sideload"><Setter Property="Background" Value="#FCE4EC" /></DataTrigger>
+                                                            <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Offline"><Setter Property="Background" Value="#FFEBEE" /></DataTrigger>
+                                                            <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Unauthorized"><Setter Property="Background" Value="#FFEBEE" /></DataTrigger>
+                                                            <DataTrigger Binding="{Binding CurrentDeviceState}" Value="NoPermissions"><Setter Property="Background" Value="#FFEBEE" /></DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Border.Style>
                                                 <StackPanel Orientation="Horizontal"
                                                             VerticalAlignment="Center">
-                                                    <Ellipse Width="5.25"
-                                                             Height="5.25"
-                                                             Margin="0,0,3.5,0"
-                                                             Fill="{Binding DeviceStateIndicatorBrush}"
-                                                             VerticalAlignment="Center" />
                                                     <TextBlock Text="{Binding DeviceState}"
-                                                               Foreground="{Binding DeviceStateTagForeground}"
                                                                FontSize="12.25"
                                                                FontWeight="Medium"
-                                                               VerticalAlignment="Center" />
+                                                               VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="{x:Type TextBlock}">
+                                                                <Setter Property="Foreground" Value="#607D8B" />
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Online"><Setter Property="Foreground" Value="#4CAF50" /></DataTrigger>
+                                                                    <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Recovery"><Setter Property="Foreground" Value="#FF9800" /></DataTrigger>
+                                                                    <DataTrigger Binding="{Binding CurrentDeviceState}" Value="BootLoader"><Setter Property="Foreground" Value="#9C27B0" /></DataTrigger>
+                                                                    <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Sideload"><Setter Property="Foreground" Value="#E91E63" /></DataTrigger>
+                                                                    <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Offline"><Setter Property="Foreground" Value="#F44336" /></DataTrigger>
+                                                                    <DataTrigger Binding="{Binding CurrentDeviceState}" Value="Unauthorized"><Setter Property="Foreground" Value="#F44336" /></DataTrigger>
+                                                                    <DataTrigger Binding="{Binding CurrentDeviceState}" Value="NoPermissions"><Setter Property="Foreground" Value="#F44336" /></DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
                                                 </StackPanel>
                                             </Border>
                                         </DataTemplate>

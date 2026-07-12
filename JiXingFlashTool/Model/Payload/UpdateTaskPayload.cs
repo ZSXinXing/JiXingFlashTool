@@ -1,3 +1,5 @@
+using System;
+
 namespace JiXingFlashTool.Model.Payload
 {
     /// <summary>
@@ -6,5 +8,10 @@ namespace JiXingFlashTool.Model.Payload
     /// <param name="Device">目标设备。</param>
     /// <param name="FilePath">本地更新文件路径。</param>
     /// <param name="WipeData">是否在更新前清除用户数据。</param>
-    public sealed record UpdateTaskPayload(DeviceModel Device, string FilePath, bool WipeData);
+    /// <param name="TwrpFilePath">可选 TWRP 镜像路径，存在时会先更新 Recovery。</param>
+    public sealed record UpdateTaskPayload(DeviceModel Device, 
+        string FilePath, 
+        bool WipeData, 
+        string TwrpFilePath = "",
+        Action NotifyPropertyChanged = null);
 }

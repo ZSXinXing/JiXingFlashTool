@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:JiXingFlashTool.Views.AllScreen" xmlns:hc="https://handyorg.github.io/handycontrol" xmlns:viewModel="clr-namespace:JiXingFlashTool.ViewModels.AllScreen" xmlns:Converter="clr-namespace:JiXingFlashTool.Converters">
+<Converter:IndexConverter x:Key="IndexConverter"/>
+        <Style x:Key="AllScreenDeviceItemGridStyle" TargetType="{x:Type Grid}">
+            <Setter Property="Background" Value="Transparent" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelect}" Value="True">
+                    <Setter Property="Background" Value="#2D77FC" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="AllScreenDeviceItemTextStyle" TargetType="{x:Type TextBlock}">
+            <Setter Property="Foreground" Value="#252525" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSelect}" Value="True">
+                    <Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+</ResourceDictionary>

@@ -173,11 +173,13 @@ namespace JiXingFlashTool.Services
             {
                 try
                 {
+                    //先清除offline残留
+                    ClearOfflineEthernetDevices();
+                    //再进行连接
                     SNEthernetDevice();
                 }
                 catch { 
                 }
-                Thread.Sleep(5 * 1000);
             }
         }
 
@@ -327,6 +329,7 @@ namespace JiXingFlashTool.Services
 
                 if (device.State == JXAdbCore.Enums.DeviceState.Offline)
                 {
+                    DisconnectOfflineEthernetDevice(device);
                     RemoveDevice(device);
                 }
                 else if (device.State == JXAdbCore.Enums.DeviceState.Online)
@@ -384,6 +387,55 @@ namespace JiXingFlashTool.Services
         {
             if (SNDeviceCTS != null) SNDeviceCTS.Cancel();
             if (SNDeviceThread != null) SNDeviceThread.Abort();
+        }
+
+        /// <summary>
+        /// 清理 ADB 设备列表中残留的离线网络设备。
+        /// </summary>
+        private void ClearOfflineEthernetDevices()
+        {
+            List<DeviceModel> devices = AdbService.Instance.Devices();
+            foreach (DeviceModel device in devices)
+            {
+                if (device == null || device.State != DeviceState.Offline)
+                {
+                    continue;
+                }
+
+                DisconnectOfflineEthernetDevice(device);
+            }
+        }
+
+        /// <summary>
+        /// 如果设备是离线网络 ADB，则执行 disconnect 清理残留连接。
+        /// </summary>
+        /// <param name="device">待清理的设备。</param>
+        private static void DisconnectOfflineEthernetDevice(DeviceModel device)
+        {
+            if (device == null || device.State != DeviceState.Offline || !IsNetworkAdbSerial(device.Serial))
+            {
+                return;
+            }
+
+            AdbService.Instance.DisconnectDevice(device.Serial);
+        }
+
+        /// <summary>
+        /// 判断序列号是否为网络 ADB 的 ip:port 格式。
+        /// </summary>
+        /// <param name="serial">ADB 序列号。</param>
+        /// <returns>网络 ADB 序列号返回 true。</returns>
+        private static bool IsNetworkAdbSerial(string serial)
+        {
+            if (string.IsNullOrWhiteSpace(serial))
+            {
+                return false;
+            }
+
+            string[] parts = serial.Split(':');
+            return parts.Length == 2 &&
+                   IPAddress.TryParse(parts[0], out _) &&
+                   int.TryParse(parts[1], out _);
         }
 
         private bool CheckExistDevice(DeviceModel device) {

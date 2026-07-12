@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="JiXingFlashTool.Views.Odin.OdinFlashView"
+<UserControl x:Class="JiXingFlashTool.Views.Odin.OdinFlashView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converter="clr-namespace:JiXingFlashTool.Converters"
@@ -6,103 +6,11 @@
              SnapsToDevicePixels="True"
              Background="#F5F5F5">
     <UserControl.Resources>
-        <converter:VisibilityBoolConverter x:Key="VisibilityBoolConverter" />
-        <SolidColorBrush x:Key="OdinBorderBrush" Color="#E0E0E0" />
-        <SolidColorBrush x:Key="OdinMutedBrush" Color="#999999" />
-
-        <Style x:Key="OdinCellTextStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12.25" />
-            <Setter Property="Foreground" Value="#E6333333" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="TextAlignment" Value="Center" />
-            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-            <Setter Property="TextWrapping" Value="NoWrap" />
-            <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}" />
-        </Style>
-
-        <Style x:Key="OdinMutedCellTextStyle" TargetType="TextBlock" BasedOn="{StaticResource OdinCellTextStyle}">
-            <Setter Property="FontSize" Value="10.5" />
-            <Setter Property="Foreground" Value="#999999" />
-        </Style>
-
-        <Style x:Key="OdinHeaderCheckBoxStyle"
-               TargetType="CheckBox"
-               BasedOn="{StaticResource CheckBoxBaseStyle}">
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="0" />
-        </Style>
-
-        <Style x:Key="OdinTableCheckBoxStyle"
-               TargetType="CheckBox"
-               BasedOn="{StaticResource OdinHeaderCheckBoxStyle}" />
-
-        <Style x:Key="OdinToolbarButtonStyle" TargetType="Button">
-            <Setter Property="Height" Value="31.5" />
-            <Setter Property="Padding" Value="10.5,0" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="FontSize" Value="10.5" />
-            <Setter Property="FontWeight" Value="Medium" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="3.5"
-                                Opacity="1">
-                            <Grid Margin="{TemplateBinding Padding}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="12.25" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0"
-                                           Text="{TemplateBinding Tag}"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="12.25"
-                                           Foreground="{TemplateBinding Foreground}"
-                                           VerticalAlignment="Center" />
-                                <TextBlock Grid.Column="2"
-                                           Text="{TemplateBinding Content}"
-                                           Foreground="{TemplateBinding Foreground}"
-                                           FontSize="{TemplateBinding FontSize}"
-                                           FontWeight="{TemplateBinding FontWeight}"
-                                           VerticalAlignment="Center"
-                                           TextAlignment="Center"
-                                           TextTrimming="None" />
-                            </Grid>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#F5F5F5" />
-                    <Setter Property="BorderBrush" Value="#E0E0E0" />
-                    <Setter Property="Foreground" Value="#999999" />
-                    <Setter Property="Cursor" Value="Arrow" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <Style x:Key="OdinSelectFirmwareButtonStyle" TargetType="Button" BasedOn="{StaticResource OdinToolbarButtonStyle}">
-            <Setter Property="Width" Value="122.5" />
-            <Setter Property="Background" Value="#1A5C82FD" />
-            <Setter Property="BorderBrush" Value="#665C82FD" />
-            <Setter Property="Foreground" Value="#5C82FD" />
-            <Setter Property="Tag" Value="&#xE8E5;" />
-        </Style>
-
-        <Style x:Key="OdinStopButtonStyle" TargetType="Button" BasedOn="{StaticResource OdinToolbarButtonStyle}">
-            <Setter Property="Width" Value="101.5" />
-            <Setter Property="Background" Value="#1AF44336" />
-            <Setter Property="BorderBrush" Value="#66F44336" />
-            <Setter Property="Foreground" Value="#F44336" />
-            <Setter Property="Tag" Value="&#xE71A;" />
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/Style/OdinFlashStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid>
@@ -190,7 +98,7 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Width="66.5">
+                        <DataGridTemplateColumn Width="54">
                             <DataGridTemplateColumn.HeaderStyle>
                                 <Style TargetType="DataGridColumnHeader">
                                     <Setter Property="Height" Value="39" />
@@ -228,26 +136,29 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="序号" Width="58" IsReadOnly="True">
+                        <DataGridTemplateColumn Header="序号" Width="50" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding DisplayIndex, StringFormat={}{0:00}}" Style="{StaticResource OdinCellTextStyle}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="设备" Width="190" IsReadOnly="True">
+                        <DataGridTemplateColumn Header="设备" Width="155" IsReadOnly="True">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Serial}" Style="{StaticResource OdinCellTextStyle}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="BL" Width="1.05*" Binding="{Binding BlFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="AP" Width="1.35*" Binding="{Binding ApFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="CP" Width="1.35*" Binding="{Binding CpFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="CSC" Width="1.05*" Binding="{Binding CscFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="USERDATA" Width="1.1*" Binding="{Binding UserdataFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
-                        <DataGridTextColumn Header="任务详情" Width="2.15*" Binding="{Binding StatusText}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="BL" MinWidth="82" Width="0.9*" Binding="{Binding BlFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="AP" MinWidth="105" Width="1.15*" Binding="{Binding ApFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="CP" MinWidth="82" Width="0.9*" Binding="{Binding CpFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="CSC" MinWidth="82" Width="0.9*" Binding="{Binding CscFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="USERDATA" MinWidth="92" Width="0.95*" Binding="{Binding UserdataFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="TWRP" MinWidth="105" Width="1.05*" Binding="{Binding TwrpFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="系统包" MinWidth="112" Width="1.1*" Binding="{Binding SystemPackageFileName}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="清理选项" MinWidth="108" Width="1.05*" Binding="{Binding CleanupOptionsText}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
+                        <DataGridTextColumn Header="任务详情" MinWidth="130" Width="1.35*" Binding="{Binding StatusText}" ElementStyle="{StaticResource OdinMutedCellTextStyle}" IsReadOnly="True" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Border>

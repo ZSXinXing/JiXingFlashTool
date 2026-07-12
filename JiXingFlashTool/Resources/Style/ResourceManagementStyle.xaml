@@ -1,0 +1,92 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:converter="clr-namespace:JiXingFlashTool.Converters" xmlns:lang="clr-namespace:LanguageCore;assembly=LanguageCore">
+<converter:VisibilityBoolConverter x:Key="VisibilityBoolConverter" />
+        <SolidColorBrush x:Key="ResourceBorderBrush" Color="#E0E0E0" />
+        <SolidColorBrush x:Key="ResourceTextBrush" Color="#333333" />
+        <SolidColorBrush x:Key="ResourceMutedTextBrush" Color="#999999" />
+
+        <DrawingImage x:Key="ResourceFileIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="{x:Null}"
+                                     Geometry="M1.16667 11.0833V2.91667C1.16667 2.60725 1.28958 2.3105 1.50838 2.09171C1.72717 1.87292 2.02391 1.75 2.33333 1.75H5.25L6.41667 3.5H11.6667C11.9761 3.5 12.2728 3.62292 12.4916 3.84171C12.7104 4.0605 12.8333 4.35725 12.8333 4.66667V11.0833C12.8333 11.3928 12.7104 11.6895 12.4916 11.9083C12.2728 12.1271 11.9761 12.25 11.6667 12.25H2.33333C2.02391 12.25 1.72717 12.1271 1.50838 11.9083C1.28958 11.6895 1.16667 11.3928 1.16667 11.0833Z">
+                        <GeometryDrawing.Pen>
+                            <Pen Brush="{StaticResource ResourceMutedTextBrush}"
+                                 Thickness="1.16667"
+                                 StartLineCap="Round"
+                                 EndLineCap="Round"
+                                 LineJoin="Round" />
+                        </GeometryDrawing.Pen>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <Style x:Key="ResourceCloseButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="21" />
+            <Setter Property="Height" Value="21" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="RootBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="3.5">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="RootBorder" Property="Background" Value="#F5F5F5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ResourcePanelButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3.5">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ResourceTabButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="41.5" />
+            <Setter Property="BorderThickness" Value="0,0,0,2" />
+            <Setter Property="FontSize" Value="12.25" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+</ResourceDictionary>

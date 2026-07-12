@@ -173,7 +173,6 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             foreach (CastScreenItemViewModel ob in DeviceList)
             {
                 ob.IsSelect = isSelectAll;
-                ob.RefreshItemBorderThickness();
             }
             WeakReferenceMessenger.Default.Send<ValueChangedMessage<bool>, string>
             (new ValueChangedMessage<bool>(isSelectAll), DSCastScreenSelectMessageKey);

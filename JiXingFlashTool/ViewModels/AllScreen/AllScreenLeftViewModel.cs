@@ -72,9 +72,6 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             SynchronizationContext.Current.Post(pl =>
             {
                 ob.IsSelect = true;
-                ob.RefreshItemBackgroundColor();
-                ob.RefreshItemForegroundColor();
-                ob.RefreshItemBorderThickness();
                 WeakReferenceMessenger.Default.Send<ValueChangedMessage<DeviceItemViewModel>, string>
                 (new ValueChangedMessage<DeviceItemViewModel>(ob), ASLShowCastScreenMessageKey);
             }, null);
@@ -89,9 +86,6 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             SynchronizationContext.Current.Post(pl =>
             {
                 ob.IsSelect = !ob.IsSelect;
-                ob.RefreshItemBackgroundColor();
-                ob.RefreshItemForegroundColor();
-                ob.RefreshItemBorderThickness();
             }, null);
         }
 
@@ -169,8 +163,7 @@ namespace JiXingFlashTool.ViewModels.AllScreen
             {
                 foreach (var ob in DeviceList)
                 {
-                    ob.RefreshItemBackgroundColor();
-                    ob.RefreshItemForegroundColor();
+                    ob.IsSelect = e.Value;
                 }
             }
             catch

@@ -9,7 +9,7 @@ namespace JiXingFlashTool.Utils
     public class StaticConstant
     {
         public static string AppDomainPath = AppDomain.CurrentDomain.BaseDirectory;
-        public static string PathAdb { get; } = $"{AppDomainPath}\\Library\\ADB\\adb.exe";
+        public static string PathAdb { get; } = $"{AppDomainPath}\\Resources\\Library\\ADB\\adb.exe";
         public static string UpdateKernelPath = "/data/local/tmp/boot.img";
         public static string UpdateSystemPath = "/data/local/tmp/update.zip";
         public static string UpdateSystemFileContext = "boot-recovery\r\n--update_package=/data/local/tmp/update.zip\r\n--wipe_data\r\n--wipe_cache\r\n--wipe_media\r\nreboot";

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Condition=" '$(EAZFUSCATOR_NET_HOME)' != '' and Exists('$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets') " Project="$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -35,12 +35,13 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <GenerateSatelliteAssembliesForCore Condition="'$(MSBuildRuntimeType)' == 'Core'">true</GenerateSatelliteAssembliesForCore>
     <TargetFrameworkProfile />
+    <ApplicationIcon>logo.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Eazfuscator.NET is integrated with this project at MSBuild level: https://help.gapotchenko.com/eazfuscator.net/kb/100036 -->
     <EazfuscatorIntegration>MSBuild</EazfuscatorIntegration>
-    <EazfuscatorActiveConfiguration>Release</EazfuscatorActiveConfiguration>
-    <EazfuscatorCompatibilityVersion>2024.2</EazfuscatorCompatibilityVersion>
+    <EazfuscatorActiveConfiguration>ObfuscationRelease</EazfuscatorActiveConfiguration>
+    <EazfuscatorCompatibilityVersion>2025.3</EazfuscatorCompatibilityVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -78,6 +79,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -120,24 +122,35 @@
     <Compile Include="Model\AppConfigModel.cs" />
     <Compile Include="Model\CommandModel.cs" />
     <Compile Include="Model\ControlMessage.cs" />
+    <Compile Include="Model\CurrentDeviceInfoModel.cs" />
     <Compile Include="Model\DeviceInstallModel.cs" />
     <Compile Include="Model\DeviceModel.cs" />
-    <Compile Include="Model\DeviceModel.KeepLink.cs" />
     <Compile Include="Model\EthernetSNModel.cs" />
     <Compile Include="Model\FileModel.cs" />
     <Compile Include="Model\Payload\FlashFilePayload.cs" />
     <Compile Include="Model\Payload\UpdateBootRecoveryPayload.cs" />
     <Compile Include="Model\Payload\UpdateTaskPayload.cs" />
     <Compile Include="Model\Payload\SingleCommandPayload.cs" />
+    <Compile Include="Model\RomPackageArchiveSource.cs" />
+    <Compile Include="Model\ResourceFilePathModel.cs" />
+    <Compile Include="Model\RomPackageExtractionResult.cs" />
+    <Compile Include="Model\RomPackageManifest.cs" />
+    <Compile Include="Model\RomFirmwarePackage.cs" />
+    <Compile Include="Model\RomApi\RomApiEncryptedResponse.cs" />
     <Compile Include="Model\SocketPackageModel.cs" />
+    <Compile Include="Model\TwrpPackageManifest.cs" />
+    <Compile Include="Model\TwrpRecoveryImage.cs" />
     <Compile Include="Model\YuvModel.cs" />
     <Compile Include="Capability\AdbCapability.cs" />
     <Compile Include="Capability\HeimdallCapability.cs" />
     <Compile Include="Enums\OdinFlashMode.cs" />
     <Compile Include="Interface\IAdbCapability.cs" />
     <Compile Include="Interface\IHeimdallCapability.cs" />
+    <Compile Include="Interface\IRomApiClient.cs" />
+    <Compile Include="Interface\IRomApiService.cs" />
     <Compile Include="ItemViewModel\DeviceItemViewModel.cs" />
     <Compile Include="ItemViewModel\Odin\OdinDeviceItemViewModel.cs" />
+    <Compile Include="ItemViewModel\ResourceFileItemViewModel.cs" />
     <Compile Include="ItemViewModel\CastScreenItemViewModel.cs" />
     <Compile Include="ItemViewModel\DeviceInstallItemViewModel.cs" />
     <Compile Include="Services\AdbService.cs" />
@@ -146,7 +159,15 @@
     <Compile Include="Services\CastScreenService.cs" />
     <Compile Include="Services\DeviceService.cs" />
     <Compile Include="Services\DeviceTaskService.cs" />
+    <Compile Include="Services\OdinFlashModeResolver.cs" />
+    <Compile Include="Services\OdinTwrpSystemInstallService.cs" />
+    <Compile Include="Services\RomApiClient.cs" />
+    <Compile Include="Services\RomApiDataDecryptor.cs" />
+    <Compile Include="Services\RomApiEndpointProvider.cs" />
+    <Compile Include="Services\RomApiEndpointPaths.cs" />
+    <Compile Include="Services\RomApiService.cs" />
     <Compile Include="Services\SQLService.cs" />
+    <Compile Include="Services\ResourceFilePathService.cs" />
     <Compile Include="Services\TaskLogLocalizationService.cs" />
     <Compile Include="Services\TCSocketService.cs" />
     <Compile Include="Model\Payload\OdinFlashPayload.cs" />
@@ -166,6 +187,10 @@
     <Compile Include="Utils\KeycodeHelper.cs" />
     <Compile Include="Utils\IconResources.cs" />
     <Compile Include="Utils\RecoveryFstabTool.cs" />
+    <Compile Include="Utils\RomUtil.cs" />
+    <Compile Include="Entitys\ResourceFilePathEntity.cs" />
+    <Compile Include="Extensions\ResourceFilePathMappingExtensions.cs" />
+    <Compile Include="Repositorys\ResourceFilePathRepository.cs" />
     <Compile Include="Utils\StaticConstant.cs" />
     <Compile Include="Utils\VideoStreamDecoder.cs" />
     <Compile Include="Compatibility\IsExternalInit.cs" />
@@ -184,6 +209,7 @@
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\Odin\OdinFirmwareSelectionDialogViewModel.cs" />
     <Compile Include="ViewModels\Odin\OdinFlashViewModel.cs" />
+    <Compile Include="ViewModels\ResourceManagementViewModel.cs" />
     <Compile Include="ViewModels\LoginDialogViewModel.cs" />
     <Compile Include="ViewModels\SyncFileProgressViewModel.cs" />
     <Compile Include="ViewModels\SyncFileViewModel.cs" />
@@ -220,6 +246,9 @@
     </Compile>
     <Compile Include="Views\LoginDialogView.xaml.cs">
       <DependentUpon>LoginDialogView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ResourceManagementView.xaml.cs">
+      <DependentUpon>ResourceManagementView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Odin\OdinFirmwareSelectionDialogView.xaml.cs">
       <DependentUpon>OdinFirmwareSelectionDialogView.xaml</DependentUpon>
@@ -260,13 +289,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\AllScreen\DeviceScreenListView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Views\LoginDialogView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\AllScreen\DeviceScreenListView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\AllScreen\DeviceScreenWindow.xaml">
       <SubType>Designer</SubType>
@@ -292,6 +321,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\ResourceManagementView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\SyncFileProgressView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -310,6 +343,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SQLCore\SQLCore.csproj">
+      <Project>{CE0FEA1F-798A-4C7E-B3E2-9630A445D247}</Project>
+      <Name>SQLCore</Name>
+    </ProjectReference>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -344,30 +381,31 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Library\ADB\adb.exe">
+    <Content Include="Resources\Library\ADB\adb.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Library\ADB\AdbWinApi.dll">
+    <Content Include="Resources\Library\ADB\AdbWinApi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Library\ADB\AdbWinUsbApi.dll">
+    <Content Include="Resources\Library\ADB\AdbWinUsbApi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Library\Heimdall\heimdall.exe">
+    <Content Include="Resources\Library\Heimdall\heimdall.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Library\Heimdall\libgcc_s_seh-1.dll">
+    <Content Include="Resources\Library\Heimdall\libgcc_s_seh-1.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Library\Heimdall\libstdc++-6.dll">
+    <Content Include="Resources\Library\Heimdall\libstdc++-6.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Library\Heimdall\libwinpthread-1.dll">
+    <Content Include="Resources\Library\Heimdall\libwinpthread-1.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Library\Heimdall\wdi-64bit.exe">
+    <Content Include="Resources\Library\Heimdall\wdi-64bit.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="logo.ico" />
     <Content Include="Resources\ffmpeg\avcodec-58.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -555,6 +593,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Analyzer Include="$(UserProfile)\.nuget\packages\communitytoolkit.mvvm\8.2.2\analyzers\dotnet\roslyn4.0\cs\CommunityToolkit.Mvvm.SourceGenerators.dll" />
     <Reference Include="CommunityToolkit.Mvvm">
       <HintPath>$(UserProfile)\.nuget\packages\communitytoolkit.mvvm\8.2.2\lib\netstandard2.0\CommunityToolkit.Mvvm.dll</HintPath>
       <Private>True</Private>
@@ -599,6 +638,22 @@
       <HintPath>$(UserProfile)\.nuget\packages\sqlite-net-pcl\1.8.116\lib\netstandard2.0\SQLite-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SQLitePCLRaw.batteries_v2">
+      <HintPath>$(UserProfile)\.nuget\packages\sqlitepclraw.bundle_green\2.0.4\lib\net461\SQLitePCLRaw.batteries_v2.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.nativelibrary">
+      <HintPath>$(UserProfile)\.nuget\packages\sqlitepclraw.bundle_green\2.0.4\lib\net461\SQLitePCLRaw.nativelibrary.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.core">
+      <HintPath>$(UserProfile)\.nuget\packages\sqlitepclraw.core\2.0.4\lib\netstandard2.0\SQLitePCLRaw.core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SQLitePCLRaw.provider.dynamic_cdecl">
+      <HintPath>$(UserProfile)\.nuget\packages\sqlitepclraw.provider.dynamic_cdecl\2.0.4\lib\netstandard2.0\SQLitePCLRaw.provider.dynamic_cdecl.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Buffers">
       <HintPath>$(UserProfile)\.nuget\packages\system.buffers\4.5.1\ref\net45\System.Buffers.dll</HintPath>
       <Private>True</Private>
@@ -623,6 +678,10 @@
       <HintPath>$(UserProfile)\.nuget\packages\microsoft.bcl.asyncinterfaces\10.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Content Include="$(UserProfile)\.nuget\packages\sqlitepclraw.lib.e_sqlite3\2.0.4\runtimes\win-x64\native\e_sqlite3.dll">
+      <Link>runtimes\win-x64\native\e_sqlite3.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Reference Include="System.Threading.Tasks.Extensions">
       <HintPath>$(UserProfile)\.nuget\packages\system.threading.tasks.extensions\4.6.3\lib\net462\System.Threading.Tasks.Extensions.dll</HintPath>
       <Private>True</Private>
@@ -639,6 +698,52 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Resources\Style\CommandListStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\LoginDialogStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\MainWindowStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\ResourceManagementStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\SyncFileProgressStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\SyncFileStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\UpdateSystemDialogStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\AllScreenLeftStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\DeviceScreenListStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\OdinFirmwareSelectionDialogStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\Style\OdinFlashStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildSDKsPath)\Microsoft.NET.Sdk.WindowsDesktop\targets\Microsoft.WinFX.targets" Condition="'$(MSBuildRuntimeType)' == 'Core' And Exists('$(MSBuildSDKsPath)\Microsoft.NET.Sdk.WindowsDesktop\targets\Microsoft.WinFX.targets')" />

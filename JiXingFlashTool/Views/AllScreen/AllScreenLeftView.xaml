@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="JiXingFlashTool.Views.AllScreen.AllScreenLeftView"
+<UserControl x:Class="JiXingFlashTool.Views.AllScreen.AllScreenLeftView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -11,9 +11,11 @@
              >
 
     <UserControl.Resources>
-        <Converter:IndexConverter x:Key="IndexConverter"/>
-        <Converter:ASLVItemBackgroundConverter x:Key="ASLVItemBackgroundConverter"/>
-        <Converter:ASLVItemForegroundConverter x:Key="ASLVItemForegroundConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/Style/AllScreenLeftStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <UserControl.DataContext>
         <viewModel:AllScreenLeftViewModel/>
@@ -53,13 +55,13 @@
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type ListBoxItem}">
                                 <Border Name="DeviceBord" BorderThickness="1" Height="28">
-                                    <Grid Background="{Binding ItemBackgroundColor}">
+                                    <Grid Style="{StaticResource AllScreenDeviceItemGridStyle}">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="40"></ColumnDefinition>
                                             <ColumnDefinition Width="260"></ColumnDefinition>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="{Binding Index}" Foreground="{Binding ItemForegroundColor}" VerticalAlignment="Center"  Margin="6 0 0 0"></TextBlock>
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{Binding ItemForegroundColor}" TextAlignment="Left" VerticalAlignment="Center"></TextBlock>
+                                        <TextBlock Grid.Column="0" Text="{Binding Index}" Style="{StaticResource AllScreenDeviceItemTextStyle}" VerticalAlignment="Center"  Margin="6 0 0 0"></TextBlock>
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Style="{StaticResource AllScreenDeviceItemTextStyle}" TextAlignment="Left" VerticalAlignment="Center"></TextBlock>
                                         <Grid.InputBindings>
                                             <MouseBinding MouseAction="LeftDoubleClick" Command="{Binding DataContext.ItemDoubleClickCommand,ElementName=DeviceLB}" CommandParameter="{Binding DataContext, ElementName=DeviceBord}"></MouseBinding>
                                             <MouseBinding MouseAction="LeftClick" Command="{Binding DataContext.ItemClickCommand,ElementName=DeviceLB}" CommandParameter="{Binding DataContext, ElementName=DeviceBord}"></MouseBinding>

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="JiXingFlashTool.Views.AllScreen.DeviceScreenListView"
+<UserControl x:Class="JiXingFlashTool.Views.AllScreen.DeviceScreenListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -13,12 +13,11 @@
         <viewModel:DeviceScreenListViewModel/>
     </UserControl.DataContext>
     <UserControl.Resources>
-        <Converter:VisibilityBoolConverter x:Key="VisibilityBoolConverter"/>
-        <Converter:InverseVisibilityBoolConverter x:Key="InverseVisibilityBoolConverter"/>
-        <Converter:ListIndexConverter x:Key="ListIndexConverter"/>
-        <Converter:DeviceMiniBorderStyleConverter x:Key="DeviceMiniBorderStyleConverter"/>
-        <SolidColorBrush Color="#000000" Opacity="0.4" x:Key="OpacityBrush"/>
-        <SolidColorBrush Color="#ffffff" Opacity="0.6" x:Key="InputOpacityBackgroud"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/Style/DeviceScreenListStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <DockPanel>
         <DockPanel Width="{Binding ControlCastScreenWidth}" Margin="5 5 0 0">

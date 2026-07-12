@@ -36,6 +36,10 @@ namespace JXAdbCore
             await socket.SendAdbRequestAsync("host:devices-l", cancellationToken);
             await socket.ReadAdbResponseAsync(cancellationToken);
             string reply = await socket.ReadStringAsync(cancellationToken);
+            if (string.IsNullOrWhiteSpace(reply))
+            {
+                return new List<DeviceData>();
+            }
 
             string[] data = reply.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
 

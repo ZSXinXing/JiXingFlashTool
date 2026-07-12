@@ -3,12 +3,17 @@ using JiXingFlashTool.Extensions;
 using JiXingFlashTool.Interface;
 using JiXingFlashTool.Model;
 using JiXingFlashTool.Services;
+using JiXingFlashTool.Utils;
 using JXAdbCore.Receivers;
+using LanguageCore;
 using NPOI.OpenXmlFormats.Spreadsheet;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -61,13 +66,69 @@ namespace JiXingFlashTool.Capability
         }
 
         /// <summary>
-        /// 获取系统属性。
+        /// 获取系统属性；设备存在 su 时使用 Root 权限读取。
         /// </summary>
         /// <param name="propKey">属性键名。</param>
         /// <returns>属性值。</returns>
         public string GetProp(string propKey)
         {
-            return AdbService.Instance.GetProp(_device, propKey);
+            string escapedPropKey = EscapeShellArgument(propKey?.Trim());
+            string command = string.IsNullOrWhiteSpace(escapedPropKey) ? "getprop" : $"getprop \"{escapedPropKey}\"";
+            return ExecuteRemoteCommand(HasRemoteCommand("su") ? $"su -c {command}" : command);
+        }
+
+        /// <summary>
+        /// 获取系统编译日期。
+        /// </summary>
+        /// <returns>格式为 yyyy-MM-dd 的系统编译日期；无法获取时返回空字符串。</returns>
+        public string GetBuildDate()
+        {
+            string buildTimestamp = GetProp("ro.build.date.utc")?.Trim();
+            if (!long.TryParse(buildTimestamp, out long unixTimestamp))
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                return DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).LocalDateTime.ToString("yyyy-MM-dd");
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// 批量获取指定系统属性；设备存在 su 时使用 Root 权限读取，避免为每个属性重复执行 ADB Shell 指令。
+        /// </summary>
+        /// <param name="propKeys">属性键名集合。</param>
+        /// <returns>属性键名与属性值的只读映射；不存在的属性值为空字符串。</returns>
+        public IReadOnlyDictionary<string, string> GetProps(IEnumerable<string> propKeys)
+        {
+            var requestedKeys = new HashSet<string>(
+                (propKeys ?? Enumerable.Empty<string>())
+                    .Where(key => !string.IsNullOrWhiteSpace(key))
+                    .Select(key => key.Trim()),
+                StringComparer.Ordinal);
+            var properties = requestedKeys.ToDictionary(key => key, key => string.Empty, StringComparer.Ordinal);
+            if (properties.Count == 0)
+            {
+                return properties;
+            }
+
+            bool isSuAvailable = HasRemoteCommand("su");
+            string output = ExecuteRemoteCommand(isSuAvailable ? "su -c getprop" : "getprop");
+            foreach (Match match in Regex.Matches(output ?? string.Empty, @"^\[(?<key>[^\]]+)\]:\s\[(?<value>.*)\]$", RegexOptions.Multiline))
+            {
+                string key = match.Groups["key"].Value;
+                if (properties.ContainsKey(key))
+                {
+                    properties[key] = match.Groups["value"].Value;
+                }
+            }
+
+            return properties;
         }
 
         /// <summary>
@@ -132,9 +193,24 @@ namespace JiXingFlashTool.Capability
         /// <returns>设备状态枚举。</returns>
         public JXAdbCore.Enums.DeviceState GetDeviceState()
         {
+            return GetCurrentDeviceState();
+        }
+
+        /// <summary>
+        /// 获取当前设备状态，并优先从 ADB 进程获取最新结果。
+        /// </summary>
+        public JXAdbCore.Enums.DeviceState GetCurrentDeviceState()
+        {
             if (_device == null)
             {
                 return JXAdbCore.Enums.DeviceState.Offline;
+            }
+
+            var stateFromAdbProcess = TryGetDeviceStateFromAdbProcess();
+            if (stateFromAdbProcess != JXAdbCore.Enums.DeviceState.Unknown)
+            {
+                _device.State = stateFromAdbProcess;
+                return stateFromAdbProcess;
             }
 
             try
@@ -154,6 +230,33 @@ namespace JiXingFlashTool.Capability
             }
 
             return _device.State;
+        }
+
+        /// <summary>
+        /// 获取当前设备的展示信息。
+        /// </summary>
+        public CurrentDeviceInfoModel GetCurrentDeviceInfo()
+        {
+            var state = GetCurrentDeviceState();
+            RefreshCurrentDeviceIdentityInfo(state);
+
+            bool isEthernetConnection = !string.IsNullOrWhiteSpace(_device.Serial) && _device.Serial.Contains(":");
+            string connectionTypeResourceKey = isEthernetConnection ? "Connection_Ethernet" : string.Empty;
+            string stateResourceKey = GetDeviceStateResourceKey(state);
+            return new CurrentDeviceInfoModel
+            {
+                Serial = _device.Serial ?? string.Empty,
+                Brand = _device.Brand ?? string.Empty,
+                Model = _device.Model ?? string.Empty,
+                AndroidVersion = GetDisplayAndroidVersion(state),
+                SystemVersion = _device.PolestarVersion ?? string.Empty,
+                ConnectionType = isEthernetConnection ? GetLangText(connectionTypeResourceKey) : "USB",
+                ConnectionTypeResourceKey = connectionTypeResourceKey,
+                IsEthernetConnection = isEthernetConnection,
+                State = state,
+                StateText = string.IsNullOrWhiteSpace(stateResourceKey) ? "Download" : GetLangText(stateResourceKey),
+                StateResourceKey = stateResourceKey
+            };
         }
 
         /// <summary>
@@ -191,6 +294,58 @@ namespace JiXingFlashTool.Capability
             };
 
             return bootCandidates.Any(path => AdbService.Instance.FileExist(_device, path));
+        }
+
+        /// <summary>
+        /// 恢复局域网设备连接；仅在设备 IP 可 Ping 通时执行 ADB 重连。
+        /// </summary>
+        public bool RestoreConnection(CancellationToken cancellationToken = default)
+        {
+            if (!TryCreateNetworkEndpoint(_device.Serial, out DnsEndPoint endpoint))
+            {
+                return false;
+            }
+
+            while (true)
+            {
+                if (!CanPingDevice(endpoint.Host, cancellationToken))
+                {
+                    return false;
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var currentDevice = FindCurrentDeviceInAdbList();
+                if (currentDevice != null && currentDevice.State != JXAdbCore.Enums.DeviceState.Offline)
+                {
+                    _device.State = currentDevice.State;
+                    return true;
+                }
+
+                try
+                {
+                    if (currentDevice != null && currentDevice.State == JXAdbCore.Enums.DeviceState.Offline)
+                    {
+                        AdbService.Instance.Disconnect(endpoint);
+                    }
+
+                    if (AdbService.Instance.Connect(endpoint))
+                    {
+                        WaitForConnectionRetry(cancellationToken);
+                        currentDevice = FindCurrentDeviceInAdbList();
+                        if (currentDevice != null && currentDevice.State != JXAdbCore.Enums.DeviceState.Offline)
+                        {
+                            _device.State = currentDevice.State;
+                            return true;
+                        }
+                    }
+                }
+                catch
+                {
+                }
+
+                WaitForConnectionRetry(cancellationToken);
+            }
         }
 
         /// <summary>
@@ -239,6 +394,36 @@ namespace JiXingFlashTool.Capability
         }
 
         /// <summary>
+        /// 通过 adb 进程推送本地文件，并返回传输是否成功。
+        /// </summary>
+        public void PushLocalFileByAdbProcess(string filePath, string remotePath, IProgress<int> progress = null, CancellationToken cancellationToken = default)
+        {
+            ValidateLocalPushFile(filePath, remotePath);
+
+            string arguments = $"-s {EscapeProcessArgument(_device.Serial)} push {EscapeProcessArgument(filePath)} {EscapeProcessArgument(remotePath)}";
+            int lastReportedProgress = -1;
+            string output = RunAdbProcess(arguments, line =>
+            {
+                int percentage = ReadProgressPercentage(line);
+                if (percentage < 0 || percentage == lastReportedProgress)
+                {
+                    return;
+                }
+
+                lastReportedProgress = percentage;
+                progress?.Report(percentage);
+            }, cancellationToken);
+
+            if (output.IndexOf("error:", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                output.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                throw new InvalidOperationException($"ADB 闂傚倷绀侀幖顐﹀磹缁嬫５娲晲閸涱亝鐎婚梺闈涚箞閸婃洜绮婚幎鑺ョ厪濠电偟鍋撻弶褰掓煕鐎ｎ偅灏伴柟宄版嚇楠炴牠鎮欓悧鍫熺窔闂? {output}");
+            }
+
+            progress?.Report(100);
+        }
+
+        /// <summary>
         /// 执行侧载刷入指令。
         /// </summary>
         /// <param name="filePath">本地刷入文件路径。</param>
@@ -249,12 +434,12 @@ namespace JiXingFlashTool.Capability
         {
             if (string.IsNullOrWhiteSpace(filePath))
             {
-                throw new ArgumentException("刷入文件路径不能为空。", nameof(filePath));
+                throw new ArgumentException("文件路径不能为空。", nameof(filePath));
             }
 
             if (!File.Exists(filePath))
             {
-                throw new FileNotFoundException("刷入文件不存在。", filePath);
+                throw new FileNotFoundException("本地文件不存在。", filePath);
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -340,7 +525,7 @@ namespace JiXingFlashTool.Capability
         {
             if (string.IsNullOrWhiteSpace(remotePath))
             {
-                throw new ArgumentException("目标路径不能为空。", nameof(remotePath));
+                throw new ArgumentException("设备目标路径不能为空。", nameof(remotePath));
             }
 
             string tempFilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.txt");
@@ -383,7 +568,7 @@ namespace JiXingFlashTool.Capability
         {
             if (string.IsNullOrWhiteSpace(resourceName))
             {
-                throw new ArgumentException("资源名不能为空。", nameof(resourceName));
+                throw new ArgumentException("嵌入资源名称不能为空。", nameof(resourceName));
             }
 
             assembly ??= typeof(AdbCapability).Assembly;
@@ -392,7 +577,7 @@ namespace JiXingFlashTool.Capability
             {
                 if (stream == null)
                 {
-                    throw new FileNotFoundException($"找不到嵌入资源: {resourceName}", resourceName);
+                    throw new FileNotFoundException($"闂傚倷绀佺紞濠傤焽瑜戦妵鎰版倷閻㈢數鐣舵繝銏ｅ煐閸旀洜绮堥崱娑欑厸濠㈣泛瀛╃涵鍫曟煏閸垺鏆柡灞剧缁犳稓鈧綆浜滄慨銈囩磽娴ｉ璐伴柛瀣閸? {resourceName}", resourceName);
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -412,7 +597,7 @@ namespace JiXingFlashTool.Capability
         {
             if (string.IsNullOrWhiteSpace(resourceName))
             {
-                throw new ArgumentException("资源名不能为空。", nameof(resourceName));
+                throw new ArgumentException("嵌入资源名称不能为空。", nameof(resourceName));
             }
 
             assembly ??= typeof(AdbCapability).Assembly;
@@ -450,7 +635,7 @@ namespace JiXingFlashTool.Capability
         {
             if (string.IsNullOrWhiteSpace(remotePath))
             {
-                throw new ArgumentException("设备文件路径不能为空。", nameof(remotePath));
+                throw new ArgumentException("设备目标路径不能为空。", nameof(remotePath));
             }
 
             string escapedPath = EscapeShellArgument(remotePath);
@@ -518,6 +703,21 @@ namespace JiXingFlashTool.Capability
             string localMd5 = ComputeFileMd5(localFilePath);
             string remoteMd5 = GetRemoteFileMd5(remotePath, useRoot);
             return !string.IsNullOrWhiteSpace(localMd5) && localMd5.Equals(remoteMd5, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 比较远端文件与本地文件的大小是否一致。
+        /// </summary>
+        public bool IsRemoteFileSizeEqualToLocalFile(string remotePath, string localFilePath, bool useRoot = false)
+        {
+            if (string.IsNullOrWhiteSpace(localFilePath) || !File.Exists(localFilePath))
+            {
+                return false;
+            }
+
+            long remoteFileSize = GetRemoteFileSize(remotePath, useRoot);
+            long localFileSize = new FileInfo(localFilePath).Length;
+            return remoteFileSize >= 0 && remoteFileSize == localFileSize;
         }
 
         /// <summary>
@@ -641,6 +841,289 @@ namespace JiXingFlashTool.Capability
         }
 
         /// <summary>
+        /// 从当前 ADB 设备列表中查找目标设备。
+        /// </summary>
+        private DeviceModel FindCurrentDeviceInAdbList()
+        {
+            if (string.IsNullOrWhiteSpace(_device.Serial))
+            {
+                return null;
+            }
+
+            try
+            {
+                return AdbService.Instance
+                    .Devices()
+                    .FirstOrDefault(item => item != null && string.Equals(item.Serial, _device.Serial, StringComparison.OrdinalIgnoreCase));
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 将设备序列号解析为网络端点。
+        /// </summary>
+        private static bool TryCreateNetworkEndpoint(string serial, out DnsEndPoint endpoint)
+        {
+            endpoint = null;
+            if (string.IsNullOrWhiteSpace(serial))
+            {
+                return false;
+            }
+
+            string[] parts = serial.Split(':');
+            if (parts.Length != 2 ||
+                !IPAddress.TryParse(parts[0], out _) ||
+                !int.TryParse(parts[1], out int port))
+            {
+                return false;
+            }
+
+            endpoint = new DnsEndPoint(parts[0], port);
+            return true;
+        }
+
+        /// <summary>
+        /// 等待下一次连接重试。
+        /// </summary>
+        private static void WaitForConnectionRetry(CancellationToken cancellationToken)
+        {
+            if (cancellationToken.WaitHandle.WaitOne(1000))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+        }
+
+        /// <summary>
+        /// 检测目标设备 IP 是否可以 Ping 通。
+        /// </summary>
+        private static bool CanPingDevice(string host, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(host))
+            {
+                return false;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                using (var ping = new Ping())
+                {
+                    PingReply reply = ping.Send(host, 1000);
+                    return reply != null && reply.Status == IPStatus.Success;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 通过 adb devices 命令获取设备状态。
+        /// </summary>
+        private JXAdbCore.Enums.DeviceState TryGetDeviceStateFromAdbProcess()
+        {
+            if (string.IsNullOrWhiteSpace(_device.Serial))
+            {
+                return JXAdbCore.Enums.DeviceState.Unknown;
+            }
+
+            try
+            {
+                string output = RunAdbProcess("devices -l", null, CancellationToken.None);
+                string[] lines = (output ?? string.Empty).Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string line in lines)
+                {
+                    string trimmedLine = line.Trim();
+                    if (trimmedLine.Length == 0 ||
+                        trimmedLine.StartsWith("List of devices", StringComparison.OrdinalIgnoreCase) ||
+                        !trimmedLine.StartsWith(_device.Serial, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    string[] parts = Regex.Split(trimmedLine, @"\s+");
+                    if (parts.Length >= 2 && string.Equals(parts[0], _device.Serial, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ConvertAdbStateText(parts[1]);
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return JXAdbCore.Enums.DeviceState.Unknown;
+        }
+
+        /// <summary>
+        /// 刷新设备品牌、型号和系统版本等身份信息。
+        /// </summary>
+        private void RefreshCurrentDeviceIdentityInfo(JXAdbCore.Enums.DeviceState state)
+        {
+            if (_device == null)
+            {
+                return;
+            }
+
+            _device.Brand = GetCachedOrPropValue(_device.Brand, "ro.product.brand");
+            _device.Name = GetCachedOrPropValue(_device.Name, "ro.product.device");
+
+            if (state == JXAdbCore.Enums.DeviceState.Online)
+            {
+                _device.AndroidVersion = GetCachedOrPropValue(_device.AndroidVersion, "ro.build.version.release");
+                _device.PolestarVersion = GetCachedOrRootPropValue(_device.PolestarVersion, "ro.polestar.system.version");
+            }
+            else if (state == JXAdbCore.Enums.DeviceState.Recovery)
+            {
+                _device.TWRPVersion = GetCachedOrPropValue(_device.TWRPVersion, "ro.twrp.version");
+            }
+        }
+
+        /// <summary>
+        /// 获取缓存值或读取普通系统属性。
+        /// </summary>
+        private string GetCachedOrPropValue(string cachedValue, string propKey)
+        {
+            if (!string.IsNullOrWhiteSpace(cachedValue))
+            {
+                return cachedValue;
+            }
+
+            return ReadDeviceProp(propKey);
+        }
+
+        /// <summary>
+        /// 获取缓存值或读取需要 Root 权限的系统属性。
+        /// </summary>
+        private string GetCachedOrRootPropValue(string cachedValue, string propKey)
+        {
+            if (!string.IsNullOrWhiteSpace(cachedValue))
+            {
+                return cachedValue;
+            }
+
+            string rootValue = ReadRootDeviceProp(propKey);
+            return string.IsNullOrWhiteSpace(rootValue) ? ReadDeviceProp(propKey) : rootValue;
+        }
+
+        /// <summary>
+        /// 读取普通系统属性。
+        /// </summary>
+        private string ReadDeviceProp(string propKey)
+        {
+            try
+            {
+                return (GetProp(propKey) ?? string.Empty).Trim();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// 读取需要 Root 权限的系统属性。
+        /// </summary>
+        private string ReadRootDeviceProp(string propKey)
+        {
+            try
+            {
+                return (ExecuteRootCommand($"getprop {propKey}") ?? string.Empty).Trim();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// 获取用于界面展示的 Android 版本。
+        /// </summary>
+        private string GetDisplayAndroidVersion(JXAdbCore.Enums.DeviceState state)
+        {
+            if (state == JXAdbCore.Enums.DeviceState.Recovery)
+            {
+                return _device.TWRPVersion ?? string.Empty;
+            }
+
+            return state == JXAdbCore.Enums.DeviceState.Online ? _device.AndroidVersion ?? string.Empty : string.Empty;
+        }
+
+        /// <summary>
+        /// 获取设备状态对应的多语言资源键。
+        /// </summary>
+        private static string GetDeviceStateResourceKey(JXAdbCore.Enums.DeviceState state)
+        {
+            switch (state)
+            {
+                case JXAdbCore.Enums.DeviceState.Online:
+                    return "DeviceState_System";
+                case JXAdbCore.Enums.DeviceState.Recovery:
+                    return "DeviceState_Recovery";
+                case JXAdbCore.Enums.DeviceState.BootLoader:
+                    return string.Empty;
+                case JXAdbCore.Enums.DeviceState.Sideload:
+                    return "DeviceState_Sideload";
+                case JXAdbCore.Enums.DeviceState.Offline:
+                    return "DeviceState_Offline";
+                case JXAdbCore.Enums.DeviceState.Unauthorized:
+                    return "DeviceState_Unauthorized";
+                case JXAdbCore.Enums.DeviceState.Authorizing:
+                    return "DeviceState_Verifying";
+                case JXAdbCore.Enums.DeviceState.NoPermissions:
+                    return "DeviceState_NoPermission";
+                case JXAdbCore.Enums.DeviceState.Host:
+                    return "DeviceState_NetworkMode";
+                default:
+                    return "DeviceState_Unknown";
+            }
+        }
+
+        /// <summary>
+        /// 读取指定资源键的当前语言文本。
+        /// </summary>
+        private static string GetLangText(string key)
+        {
+            return string.IsNullOrWhiteSpace(key) ? string.Empty : LocalizationService.Instance.GetString(string.Empty, key);
+        }
+
+        /// <summary>
+        /// 将 adb 状态文本转换为设备状态枚举。
+        /// </summary>
+        private static JXAdbCore.Enums.DeviceState ConvertAdbStateText(string stateText)
+        {
+            switch ((stateText ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "device":
+                    return JXAdbCore.Enums.DeviceState.Online;
+                case "recovery":
+                    return JXAdbCore.Enums.DeviceState.Recovery;
+                case "sideload":
+                    return JXAdbCore.Enums.DeviceState.Sideload;
+                case "download":
+                case "bootloader":
+                    return JXAdbCore.Enums.DeviceState.BootLoader;
+                case "offline":
+                    return JXAdbCore.Enums.DeviceState.Offline;
+                case "unauthorized":
+                    return JXAdbCore.Enums.DeviceState.Unauthorized;
+                case "authorizing":
+                    return JXAdbCore.Enums.DeviceState.Authorizing;
+                case "no permissions":
+                    return JXAdbCore.Enums.DeviceState.NoPermissions;
+                case "host":
+                    return JXAdbCore.Enums.DeviceState.Host;
+                default:
+                    return JXAdbCore.Enums.DeviceState.Unknown;
+            }
+        }
+
+        /// <summary>
         /// 根据 root 类型构造可执行指令。
         /// </summary>
         /// <param name="command">原始指令。</param>
@@ -684,7 +1167,7 @@ namespace JiXingFlashTool.Capability
                 return;
             }
 
-            throw new InvalidOperationException($"APK 安装失败: {output}");
+            throw new InvalidOperationException($"APK 闂備浇顕уù鐑藉箠閹惧嚢鍥箮閸撳灝顦扮换婵嬪礃閵娧呯嵁闂佸搫顦悧婊堝磻婢跺寒鏉? {output}");
         }
 
         /// <summary>
@@ -705,6 +1188,23 @@ namespace JiXingFlashTool.Capability
             string output = useRoot ? ExecuteRootCommand(command) : ExecuteRemoteCommand(command);
             Match match = Regex.Match(output ?? string.Empty, @"([a-fA-F0-9]{32})");
             return match.Success ? match.Groups[1].Value.ToLowerInvariant() : string.Empty;
+        }
+
+        /// <summary>
+        /// 获取远端文件大小。
+        /// </summary>
+        private long GetRemoteFileSize(string remotePath, bool useRoot)
+        {
+            if (string.IsNullOrWhiteSpace(remotePath))
+            {
+                return -1;
+            }
+
+            string escapedPath = EscapeShellArgument(remotePath);
+            string command = $"wc -c < \"{escapedPath}\"";
+            string output = useRoot ? ExecuteRootCommand(command) : ExecuteRemoteCommand(command);
+            Match match = Regex.Match(output ?? string.Empty, @"\d+");
+            return match.Success && long.TryParse(match.Value, out long fileSize) ? fileSize : -1;
         }
 
         /// <summary>
@@ -768,6 +1268,119 @@ namespace JiXingFlashTool.Capability
         }
 
         /// <summary>
+        /// 校验本地待推送文件是否有效。
+        /// </summary>
+        private static void ValidateLocalPushFile(string filePath, string remotePath)
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("文件路径不能为空。", nameof(filePath));
+            }
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("本地文件不存在。", filePath);
+            }
+
+            if (string.IsNullOrWhiteSpace(remotePath))
+            {
+                throw new ArgumentException("设备目标路径不能为空。", nameof(remotePath));
+            }
+        }
+
+        /// <summary>
+        /// 执行 adb 进程并获取输出。
+        /// </summary>
+        private static string RunAdbProcess(string arguments, Action<string> outputLineReceived, CancellationToken cancellationToken)
+        {
+            var outputBuilder = new StringBuilder();
+            using (var process = new Process())
+            {
+                process.StartInfo.FileName = StaticConstant.PathAdb;
+                process.StartInfo.Arguments = arguments;
+                process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+                process.StartInfo.StandardErrorEncoding = Encoding.UTF8;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
+                process.StartInfo.CreateNoWindow = true;
+
+                process.OutputDataReceived += (sender, args) => AppendAdbOutput(outputBuilder, outputLineReceived, args.Data);
+                process.ErrorDataReceived += (sender, args) => AppendAdbOutput(outputBuilder, outputLineReceived, args.Data);
+
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                while (!process.WaitForExit(200))
+                {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        continue;
+                    }
+
+                    TryKillProcess(process);
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
+                if (process.ExitCode == 0)
+                {
+                    return outputBuilder.ToString();
+                }
+
+                throw new InvalidOperationException($"ADB 闂傚倷绀侀幉锛勭矙閹烘鍨傛繝闈涱儏缁狀噣鏌曢崼婵愭Ц缂佺姰鍎抽幉鎼佸箣閿旇　鍋撴笟鈧獮瀣倷閼碱剛鐛梺鍝勵槸閻楁粓宕戞径搴澓闂傚倷鐒︾€笛呯矙閹达附鍎楅柛宀€鍋涢悞鍨亜閹达絾顥夊ù婊堢畺濮婃椽宕ㄦ繝鍌滀紘濠电偛鎷戠紞渚€骞? {process.ExitCode}闂傚倷鐒︾€笛呯矙閹达附鍎楀ù锝囧劋椤愯姤銇勯幘鍗炵仼缂佲偓? {outputBuilder}");
+            }
+        }
+
+        /// <summary>
+        /// 追加 adb 进程输出内容。
+        /// </summary>
+        private static void AppendAdbOutput(StringBuilder outputBuilder, Action<string> outputLineReceived, string line)
+        {
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                return;
+            }
+
+            outputBuilder.AppendLine(line);
+            outputLineReceived?.Invoke(line);
+        }
+
+        /// <summary>
+        /// 从 adb 输出中读取传输进度。
+        /// </summary>
+        private static int ReadProgressPercentage(string line)
+        {
+            Match match = Regex.Match(line ?? string.Empty, @"(\d+)%");
+            return match.Success && int.TryParse(match.Groups[1].Value, out int percentage) ? percentage : -1;
+        }
+
+        /// <summary>
+        /// 转义 adb 进程参数。
+        /// </summary>
+        private static string EscapeProcessArgument(string argument)
+        {
+            return "\"" + (argument ?? string.Empty).Replace("\"", "\\\"") + "\"";
+        }
+
+        /// <summary>
+        /// 尝试终止超时的 adb 进程。
+        /// </summary>
+        private static void TryKillProcess(Process process)
+        {
+            try
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill();
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        /// <summary>
         /// 根据简写资源名解析真实嵌入资源名。
         /// </summary>
         /// <param name="assembly">资源所在程序集。</param>
@@ -789,7 +1402,7 @@ namespace JiXingFlashTool.Capability
                 return suffixMatch;
             }
 
-            throw new FileNotFoundException($"找不到嵌入资源: {resourceName}", resourceName);
+            throw new FileNotFoundException($"闂傚倷绀佺紞濠傤焽瑜戦妵鎰版倷閻㈢數鐣舵繝銏ｅ煐閸旀洜绮堥崱娑欑厸濠㈣泛瀛╃涵鍫曟煏閸垺鏆柡灞剧缁犳稓鈧綆浜滄慨銈囩磽娴ｉ璐伴柛瀣閸? {resourceName}", resourceName);
         }
     }
 }

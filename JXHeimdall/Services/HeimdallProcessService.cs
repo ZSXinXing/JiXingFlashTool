@@ -47,7 +47,7 @@ namespace JXHeimdall.Services
         {
             if (!IsAvailable)
             {
-                throw new FileNotFoundException("未找到 heimdall.exe，请放置到 Library\\Heimdall\\heimdall.exe 或配置系统 PATH。", _heimdallExecutablePath);
+                throw new FileNotFoundException("未找到 heimdall.exe，请放置到 Resources\\Library\\Heimdall\\heimdall.exe 或配置系统 PATH。", _heimdallExecutablePath);
             }
 
             var outputBuilder = new StringBuilder();
@@ -139,7 +139,7 @@ namespace JXHeimdall.Services
         private static string ResolveHeimdallExecutablePath()
         {
             var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            var bundledPath = Path.Combine(baseDirectory, "Library", "Heimdall", "heimdall.exe");
+            var bundledPath = Path.Combine(baseDirectory, "Resources", "Library", "Heimdall", "heimdall.exe");
             if (File.Exists(bundledPath))
             {
                 return bundledPath;

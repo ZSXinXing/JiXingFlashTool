@@ -28,36 +28,84 @@ using LanguageCore;
 using TaskCore.Scheduling;
 using TaskCore.Sessions;
 using TaskCore.Tasks;
+using JiXingFlashTool.Utils;
 
 namespace JiXingFlashTool.ViewModels
 {
     /// <summary>
     /// 主页面视图模型，负责设备列表状态、筛选条件和主窗口入口命令的统一编排。
     /// </summary>
-    public class MainWindowViewModel : ObservableObject
+    public partial class MainWindowViewModel : ObservableObject
     {
+        #region 状态与集合
+
         /// <summary>
         /// 主窗口视图模型单例，供任务和服务层按需回查当前设备列表。
         /// </summary>
         public static MainWindowViewModel Instance { get; private set; }
 
+        [ObservableProperty]
         private string _title = string.Empty;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
+        [NotifyPropertyChangedFor(nameof(ShowDeviceTable))]
         private bool _isLoading;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowEmptyState))]
+        [NotifyPropertyChangedFor(nameof(ShowDeviceTable))]
         private bool _hasLoadError;
+
+        [ObservableProperty]
         private string _loadErrorMessage;
+
+        [ObservableProperty]
         private string _searchKeyword = string.Empty;
+
+        [ObservableProperty]
         private string _modelFilter;
+
+        [ObservableProperty]
         private string _connectionTypeFilter;
+
+        [ObservableProperty]
         private string _deviceStateFilter;
+
+        [ObservableProperty]
         private string _deviceSummaryText;
+
+        [ObservableProperty]
         private string _appVersionText;
+
+        [ObservableProperty]
         private bool _isSelectAll;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(SidebarPanelWidth))]
+        [NotifyPropertyChangedFor(nameof(SidebarHeaderHeight))]
+        [NotifyPropertyChangedFor(nameof(SidebarFooterHeight))]
+        [NotifyPropertyChangedFor(nameof(SidebarToggleIconGlyph))]
         private bool _isSidebarExpanded = true;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(MaintainerModeEntryText))]
         private bool _isProfessionalModeEnabled;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsDeviceManagePage))]
+        [NotifyPropertyChangedFor(nameof(DeviceManageNavBackground))]
+        [NotifyPropertyChangedFor(nameof(DeviceManageNavForeground))]
+        [NotifyPropertyChangedFor(nameof(OdinNavBackground))]
+        [NotifyPropertyChangedFor(nameof(OdinNavForeground))]
         private bool _isOdinFlashPage;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(SidebarDeviceCountText))]
         private int _listCount;
         private readonly RelayCommand _showDeviceManagePageCommand;
         private readonly AsyncRelayCommand _showOdinFlashPageCommand;
+        private readonly RelayCommand _showResourcePageCommand;
         private const double SidebarWidthScale = 1D;
         private const double SidebarCollapsedWidth = 60D;
 
@@ -97,193 +145,14 @@ namespace JiXingFlashTool.ViewModels
         public OdinFlashViewModel OdinFlashViewModel { get; } = new OdinFlashViewModel();
 
         /// <summary>
-        /// 当前窗口标题。
+        /// 侧边栏维护者模式入口文案。
         /// </summary>
-        public string Title
-        {
-            get => _title;
-            set => SetProperty(ref _title, value);
-        }
-
-        /// <summary>
-        /// 当前页面是否处于初始化中。
-        /// </summary>
-        public bool IsLoading
-        {
-            get => _isLoading;
-            set
-            {
-                if (SetProperty(ref _isLoading, value))
-                {
-                    RaisePageStateChanged();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 当前页面是否存在加载失败状态。
-        /// </summary>
-        public bool HasLoadError
-        {
-            get => _hasLoadError;
-            set
-            {
-                if (SetProperty(ref _hasLoadError, value))
-                {
-                    RaisePageStateChanged();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 加载失败时展示的错误文案。
-        /// </summary>
-        public string LoadErrorMessage
-        {
-            get => _loadErrorMessage;
-            set => SetProperty(ref _loadErrorMessage, value);
-        }
-
-        /// <summary>
-        /// 顶部和列表区共用的搜索关键字。
-        /// </summary>
-        public string SearchKeyword
-        {
-            get => _searchKeyword;
-            set
-            {
-                if (SetProperty(ref _searchKeyword, value))
-                {
-                    ScheduleRefreshDeviceView();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 当前型号筛选项。
-        /// </summary>
-        public string ModelFilter
-        {
-            get => _modelFilter;
-            set
-            {
-                if (SetProperty(ref _modelFilter, value))
-                {
-                    RefreshDeviceView();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 当前连接方式筛选项。
-        /// </summary>
-        public string ConnectionTypeFilter
-        {
-            get => _connectionTypeFilter;
-            set
-            {
-                if (SetProperty(ref _connectionTypeFilter, value))
-                {
-                    RefreshDeviceView();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 当前设备状态筛选项。
-        /// </summary>
-        public string DeviceStateFilter
-        {
-            get => _deviceStateFilter;
-            set
-            {
-                if (SetProperty(ref _deviceStateFilter, value))
-                {
-                    RefreshDeviceView();
-                }
-            }
-        }
-
-        /// <summary>
-        /// 页面底部汇总文案。
-        /// </summary>
-        public string DeviceSummaryText
-        {
-            get => _deviceSummaryText;
-            set => SetProperty(ref _deviceSummaryText, value);
-        }
-
-        /// <summary>
-        /// 侧边栏版本文案。
-        /// </summary>
-        public string AppVersionText
-        {
-            get => _appVersionText;
-            set => SetProperty(ref _appVersionText, value);
-        }
-
-        /// <summary>
-        /// 侧边栏是否展开。
-        /// </summary>
-        public bool IsSidebarExpanded
-        {
-            get => _isSidebarExpanded;
-            set
-            {
-                if (SetProperty(ref _isSidebarExpanded, value))
-                {
-                    OnPropertyChanged(nameof(SidebarPanelWidth));
-                    OnPropertyChanged(nameof(SidebarHeaderHeight));
-                    OnPropertyChanged(nameof(SidebarFooterHeight));
-                    OnPropertyChanged(nameof(SidebarToggleIconGlyph));
-                }
-            }
-        }
-
-        /// <summary>
-        /// 当前是否已进入维护者模式。
-        /// </summary>
-        public bool IsProfessionalModeEnabled
-        {
-            get => _isProfessionalModeEnabled;
-            set
-            {
-                if (SetProperty(ref _isProfessionalModeEnabled, value))
-                {
-                    OnPropertyChanged(nameof(MaintainerModeEntryText));
-                    OnPropertyChanged(nameof(IsOdinNavigationVisible));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Odin 刷机入口是否可见，仅维护者模式登录后显示。
-        /// </summary>
-        public bool IsOdinNavigationVisible => IsProfessionalModeEnabled;
+        public string MaintainerModeEntryText => IsProfessionalModeEnabled ? GetLangText("Sidebar_ExitMaintainerMode") : GetLangText("Sidebar_MaintainerMode");
 
         /// <summary>
         /// 当前右侧内容区是否显示设备管理页面。
         /// </summary>
         public bool IsDeviceManagePage => !IsOdinFlashPage;
-
-        /// <summary>
-        /// 当前右侧内容区是否显示 Odin 刷机页面。
-        /// </summary>
-        public bool IsOdinFlashPage
-        {
-            get => _isOdinFlashPage;
-            set
-            {
-                if (SetProperty(ref _isOdinFlashPage, value))
-                {
-                    OnPropertyChanged(nameof(IsDeviceManagePage));
-                    OnPropertyChanged(nameof(DeviceManageNavBackground));
-                    OnPropertyChanged(nameof(DeviceManageNavForeground));
-                    OnPropertyChanged(nameof(OdinNavBackground));
-                    OnPropertyChanged(nameof(OdinNavForeground));
-                }
-            }
-        }
 
         /// <summary>
         /// 设备管理菜单背景色。
@@ -306,11 +175,6 @@ namespace JiXingFlashTool.ViewModels
         public string OdinNavForeground => IsOdinFlashPage ? "#5C82FD" : "#B3333333";
 
         /// <summary>
-        /// 侧边栏维护者模式入口文案。
-        /// </summary>
-        public string MaintainerModeEntryText => IsProfessionalModeEnabled ? GetLangText("Sidebar_ExitMaintainerMode") : GetLangText("Sidebar_MaintainerMode");
-
-        /// <summary>
         /// 侧边栏当前宽度。
         /// </summary>
         public double SidebarPanelWidth => IsSidebarExpanded ? 223D * SidebarWidthScale : SidebarCollapsedWidth;
@@ -329,39 +193,6 @@ namespace JiXingFlashTool.ViewModels
         /// 侧边栏折叠按钮图标。
         /// </summary>
         public string SidebarToggleIconGlyph => IsSidebarExpanded ? "\uE76B" : "\uE76C";
-
-        /// <summary>
-        /// 当前设备总数。
-        /// </summary>
-        public int ListCount
-        {
-            get => _listCount;
-            set
-            {
-                if (SetProperty(ref _listCount, value))
-                {
-                    OnPropertyChanged(nameof(SidebarDeviceCountText));
-                }
-            }
-        }
-
-        /// <summary>
-        /// 当前是否为全选状态。
-        /// </summary>
-        public bool IsSelectAll
-        {
-            get => _isSelectAll;
-            set
-            {
-                if (SetProperty(ref _isSelectAll, value))
-                {
-                    foreach (var deviceItemViewModel in DeviceCollection)
-                    {
-                        deviceItemViewModel.IsSelect = _isSelectAll;
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// 侧边栏设备统计文案。
@@ -383,13 +214,64 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         public bool ShowDeviceTable => !IsLoading && !HasLoadError && HasDevices;
 
+        /// <summary>
+        /// 搜索关键字变化后启动筛选防抖。
+        /// </summary>
+        partial void OnSearchKeywordChanged(string value)
+        {
+            ScheduleRefreshDeviceView();
+        }
+
+        /// <summary>
+        /// 筛选条件变化后刷新可见设备集合。
+        /// </summary>
+        partial void OnModelFilterChanged(string value)
+        {
+            RefreshDeviceView();
+        }
+
+        /// <summary>
+        /// 连接方式筛选条件变化后刷新可见设备集合。
+        /// </summary>
+        partial void OnConnectionTypeFilterChanged(string value)
+        {
+            RefreshDeviceView();
+        }
+
+        /// <summary>
+        /// 设备状态筛选条件变化后刷新可见设备集合。
+        /// </summary>
+        partial void OnDeviceStateFilterChanged(string value)
+        {
+            RefreshDeviceView();
+        }
+
+        /// <summary>
+        /// 全选状态变化后同步到当前筛选结果中的设备行。
+        /// </summary>
+        partial void OnIsSelectAllChanged(bool value)
+        {
+            foreach (var deviceItemViewModel in DeviceView)
+            {
+                deviceItemViewModel.IsSelect = value;
+            }
+        }
+
         private readonly List<DeviceItemViewModel> _deviceList = new List<DeviceItemViewModel>();
         private readonly DispatcherTimer _searchRefreshTimer;
-        private readonly IDeviceTaskScheduler _taskScheduler;
+
+        #endregion
+
+        #region 命令与生命周期
+
+        /// <summary>
+        /// 全局设备任务调度器。
+        /// </summary>
+        private IDeviceTaskScheduler TaskScheduler => App.Instance.TaskScheduler;
 
         /// <summary>
         /// 全选命令。
-        /// </summary>
+        /// </summary>TaskScheduler
         public RelayCommand SelectAllCommand => new Lazy<RelayCommand>(() => new RelayCommand(SelectAll)).Value;
 
         /// <summary>
@@ -463,6 +345,11 @@ namespace JiXingFlashTool.ViewModels
         public AsyncRelayCommand ShowOdinFlashPageCommand => _showOdinFlashPageCommand;
 
         /// <summary>
+        /// 显示资源管理弹窗命令。
+        /// </summary>
+        public RelayCommand ShowResourcePageCommand => _showResourcePageCommand;
+
+        /// <summary>
         /// 初始化主页面视图模型。
         /// </summary>
         public MainWindowViewModel()
@@ -470,6 +357,7 @@ namespace JiXingFlashTool.ViewModels
             Instance = this;
             _showDeviceManagePageCommand = new RelayCommand(ShowDeviceManagePage);
             _showOdinFlashPageCommand = new AsyncRelayCommand(ShowOdinFlashPageAsync);
+            _showResourcePageCommand = new RelayCommand(ShowResourcePage);
             WeakEventManager<LocalizationService, EventArgs>.AddHandler(
                 LocalizationService.Instance,
                 nameof(LocalizationService.LanguageChanged),
@@ -488,11 +376,6 @@ namespace JiXingFlashTool.ViewModels
             DeviceService.Instance.DeviceDisconnected += PDeviceDisconnected;
             DeviceService.Instance.DeviceConnected += PDeviceConnected;
             DeviceService.Instance.DeviceChange += PDeviceChanage;
-
-            var sessionFactory = new TaskCoreBridge.AdbDeviceSessionFactory(GetDeviceBySerial);
-            var sessionProvider = new EphemeralDeviceSessionProvider(sessionFactory);
-            _taskScheduler = new DeviceTaskScheduler(sessionProvider);
-            _taskScheduler.Log += OnTaskSchedulerLog;
 
             RefreshDeviceSummary();
             RefreshConnectDeviceNameList();
@@ -516,7 +399,7 @@ namespace JiXingFlashTool.ViewModels
                     AdbService.Instance.StartServiceAsync();
                     CastScreenManageService.Instance.StartMonitor();
 
-                    RunOnUiThread(() =>
+                    CommonTool.RunOnUiThread(() =>
                     {
                         IsLoading = false;
                         RefreshDeviceSummary();
@@ -524,7 +407,7 @@ namespace JiXingFlashTool.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    RunOnUiThread(() =>
+                    CommonTool.RunOnUiThread(() =>
                     {
                         IsLoading = false;
                         HasLoadError = true;
@@ -534,6 +417,10 @@ namespace JiXingFlashTool.ViewModels
                 }
             });
         }
+
+        #endregion
+
+        #region 页面操作
 
         /// <summary>
         /// 打开常用 ADB 命令窗口。
@@ -620,7 +507,7 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
-        /// 进入维护者模式并刷新界面状态。
+        /// 进入维护者模式并刷新入口文案。
         /// </summary>
         private void EnableProfessionalMode()
         {
@@ -629,217 +516,12 @@ namespace JiXingFlashTool.ViewModels
         }
 
         /// <summary>
-        /// 退出维护者模式并恢复未登录状态。
+        /// 退出维护者模式并刷新入口文案。
         /// </summary>
         private void ExitProfessionalMode()
         {
             IsProfessionalModeEnabled = false;
-            if (IsOdinFlashPage)
-            {
-                ShowDeviceManagePage();
-            }
-
             Growl.Info(GetLangText("Message_ExitMaintainerMode"));
-        }
-
-        /// <summary>
-        /// 执行专业模式快捷指令。
-        /// </summary>
-        /// <param name="commandKey">指令标识。</param>
-        private void ExecuteProfessionalInstructionCommand(string commandKey)
-        {
-            var selectList = GetSelectedDevices().Where(item => item?.Device != null).ToList();
-            if (selectList.Count == 0)
-            {
-                Growl.Warning(GetLangText("Message_SelectPhoneFirst"));
-                return;
-            }
-
-            switch (commandKey)
-            {
-                case "RebootSystem":
-                    EnqueueSingleCommand(selectList, CommandType.RebootSystem);
-                    break;
-                case "RebootTwrp":
-                    EnqueueSingleCommand(selectList, CommandType.RebootRecovery);
-                    break;
-                case "RebootDownload":
-                    EnqueueSingleCommand(selectList, CommandType.RebootDownload);
-                    break;
-                case "Wipe":
-                    EnqueueSingleCommand(selectList, CommandType.WipeUserData);
-                    break;
-                case "ClearSystem":
-                    EnqueueSingleCommand(selectList, CommandType.WipeSystem);
-                    break;
-                case "FormatData":
-                    EnqueueSingleCommand(selectList, CommandType.Format);
-                    break;
-                case "FlashFile":
-                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_FlashPackage"), EnqueueFlashFileTask);
-                    break;
-                case "FlashKernel":
-                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_All"), EnqueueUpdateBootRecoveryTaskForKernel);
-                    break;
-                case "UpdateTwrp":
-                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_Img"), EnqueueUpdateBootRecoveryTask);
-                    break;
-                case "Decrypt":
-                    Task.Run(() =>
-                    {
-                        foreach (var deviceItemViewModel in selectList)
-                        {
-                            deviceItemViewModel.Service.Decrypt();
-                        }
-                    });
-                    break;
-                case "DisableDeveloper":
-                    EnqueueSingleCommand(selectList, CommandType.CloseDeveloperMode);
-                    break;
-                case "SkipGuide":
-                    EnqueueSingleCommand(selectList, CommandType.SkipGuide);
-                    break;
-                case "0":
-                    EnqueueSingleCommand(selectList, CommandType.RebootSystem);
-                    break;
-                case "5":
-                    EnqueueSingleCommand(selectList, CommandType.RebootRecovery);
-                    break;
-                case "6":
-                    EnqueueSingleCommand(selectList, CommandType.RebootDownload);
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// 将选中的设备批量封装为 TaskCore 单条任务入队。
-        /// </summary>
-        /// <param name="selectList">选中的设备列表。</param>
-        /// <param name="commandType">需要执行的指令类型。</param>
-        private void EnqueueSingleCommand(List<DeviceItemViewModel> selectList, CommandType commandType)
-        {
-
-            Task.Run(async () =>
-            {
-                foreach (var deviceItemViewModel in selectList)
-                {
-                    if (deviceItemViewModel?.Device == null)
-                    {
-                        continue;
-                    }
-
-                    deviceItemViewModel.TaskDetailMessage = string.Empty;
-
-                    var payload = new SingleCommandPayload(deviceItemViewModel.Device, commandType);
-                  _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial,new SingleCommandTask(), payload,detail: commandType.ToString());
-                }
-            });
-        }
-
-        /// <summary>
-        /// 将选中的设备批量封装为刷入文件任务入队。
-        /// </summary>
-        /// <param name="deviceItemViewModel">设备项。</param>
-        /// <param name="filePath">本地刷入文件路径。</param>
-        private void EnqueueFlashFileTask(DeviceItemViewModel deviceItemViewModel, string filePath)
-        {
-            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
-            {
-                return;
-            }
-
-            var payload = new FlashFilePayload(deviceItemViewModel.Device, filePath);
-            _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new FlashFileTask(), payload, detail: "FlashFile");
-        }
-
-        /// <summary>
-        /// 将选中的设备封装为系统更新任务入队。
-        /// </summary>
-        /// <param name="deviceItemViewModel">设备项。</param>
-        /// <param name="filePath">本地更新文件路径。</param>
-        /// <param name="wipeData">是否清除用户数据。</param>
-        private void EnqueueUpdateTask(DeviceItemViewModel deviceItemViewModel, string filePath, bool wipeData)
-        {
-            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
-            {
-                return;
-            }
-
-            var payload = new UpdateTaskPayload(deviceItemViewModel.Device, filePath, wipeData);
-            _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new UpdateTask(), payload, detail: "UpdateTask");
-        }
-
-        /// <summary>
-        /// 将选中的设备批量封装为 Boot / Recovery 更新任务入队。
-        /// </summary>
-        /// <param name="deviceItemViewModel">设备项。</param>
-        /// <param name="filePath">本地镜像路径。</param>
-        private void EnqueueUpdateBootRecoveryTask(DeviceItemViewModel deviceItemViewModel, string filePath)
-        {
-            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
-            {
-                return;
-            }
-
-            var payload = new UpdateBootRecoveryPayload(deviceItemViewModel.Device, filePath, TWRPCommandType.UpdateTWRP);
-            _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new UpdateBootRecoveryTask(), payload, detail: "UpdateTwrp");
-        }
-
-        /// <summary>
-        /// 将选中的设备批量封装为内核更新任务入队。
-        /// </summary>
-        /// <param name="deviceItemViewModel">设备项。</param>
-        /// <param name="filePath">本地镜像路径。</param>
-        private void EnqueueUpdateBootRecoveryTaskForKernel(DeviceItemViewModel deviceItemViewModel, string filePath)
-        {
-            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
-            {
-                return;
-            }
-
-            var payload = new UpdateBootRecoveryPayload(deviceItemViewModel.Device, filePath, TWRPCommandType.FlashKernel);
-            _ = _taskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new UpdateBootRecoveryTask(), payload, detail: "FlashKernel");
-        }
-
-        /// <summary>
-        /// 接收 TaskCore 的全局日志，并回写到对应设备行。
-        /// </summary>
-        /// <param name="deviceId">设备序列号。</param>
-        /// <param name="log">任务日志。</param>
-        private void OnTaskSchedulerLog(string deviceId, TaskLog log)
-        {
-            if (string.IsNullOrWhiteSpace(deviceId) || log == null)
-            {
-                return;
-            }
-
-            var targetMessage = TaskLogLocalizationService.NormalizeMessage(log.Message ?? string.Empty);
-            var deviceItemViewModel = _deviceList.FirstOrDefault(item =>
-                item?.Device != null &&
-                string.Equals(item.Device.Serial, deviceId, StringComparison.OrdinalIgnoreCase));
-
-            if (deviceItemViewModel == null)
-            {
-                return;
-            }
-
-            RunOnUiThread(() =>
-            {
-                deviceItemViewModel.TaskDetailMessage = targetMessage;
-            });
-        }
-
-        /// <summary>
-        /// 根据序列号获取当前内存中的设备模型。
-        /// </summary>
-        /// <param name="serial">设备序列号。</param>
-        /// <returns>匹配到的设备模型。</returns>
-        private DeviceModel GetDeviceBySerial(string serial)
-        {
-            return _deviceList
-                .Where(item => item?.Device != null)
-                .Select(item => item.Device)
-                .FirstOrDefault(item => string.Equals(item.Serial, serial, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -1005,6 +687,10 @@ namespace JiXingFlashTool.ViewModels
             viewModel.Dialog = Dialog.Show(dialog);
         }
 
+        #endregion
+
+        #region 筛选与排序
+
         /// <summary>
         /// 刷新设备视图和汇总信息。
         /// </summary>
@@ -1092,7 +778,7 @@ namespace JiXingFlashTool.ViewModels
         /// </summary>
         private void SyncDeviceView()
         {
-            RunOnUiThread(() =>
+            CommonTool.RunOnUiThread(() =>
             {
                 var filteredDevices = _deviceList
                     .Where(IsDeviceVisible)
@@ -1138,24 +824,6 @@ namespace JiXingFlashTool.ViewModels
 
             DeviceView.Insert(insertIndex, deviceItemViewModel);
             RefreshVisibleDisplayIndex();
-        }
-
-        /// <summary>
-        /// 从可见集合移除单个设备项。
-        /// </summary>
-        /// <param name="deviceItemViewModel">待移除的设备项。</param>
-        private void RemoveDeviceViewItem(DeviceItemViewModel deviceItemViewModel)
-        {
-            if (deviceItemViewModel == null)
-            {
-                return;
-            }
-
-            if (DeviceView.Contains(deviceItemViewModel))
-            {
-                DeviceView.Remove(deviceItemViewModel);
-                RefreshVisibleDisplayIndex();
-            }
         }
 
         /// <summary>
@@ -1308,6 +976,10 @@ namespace JiXingFlashTool.ViewModels
             return ipAddress.GetAddressBytes();
         }
 
+        #endregion
+
+        #region 导航
+
         /// <summary>
         /// 切换侧边栏显示状态。
         /// </summary>
@@ -1330,14 +1002,27 @@ namespace JiXingFlashTool.ViewModels
         /// <returns>异步刷新任务。</returns>
         private async Task ShowOdinFlashPageAsync()
         {
-            if (!IsProfessionalModeEnabled)
-            {
-                return;
-            }
-
             IsOdinFlashPage = true;
             await OdinFlashViewModel.RefreshDevicesAsync();
         }
+
+        /// <summary>
+        /// 打开资源管理弹窗。
+        /// </summary>
+        private void ShowResourcePage()
+        {
+            var viewModel = new ResourceManagementViewModel();
+            var dialog = new ResourceManagementView
+            {
+                DataContext = viewModel
+            };
+
+            viewModel.Dialog = Dialog.Show(dialog);
+        }
+
+        #endregion
+
+        #region 设备展示与本地化
 
         /// <summary>
         /// 获取当前选中的设备列表。
@@ -1522,26 +1207,6 @@ namespace JiXingFlashTool.ViewModels
             OnPropertyChanged(nameof(ShowDeviceTable));
         }
 
-        /// <summary>
-        /// 切回 UI 线程执行更新。
-        /// </summary>
-        private void RunOnUiThread(Action action)
-        {
-            var dispatcher = System.Windows.Application.Current?.Dispatcher;
-            if (dispatcher == null)
-            {
-                action();
-                return;
-            }
-
-            if (dispatcher.CheckAccess())
-            {
-                action();
-                return;
-            }
-
-            dispatcher.BeginInvoke(action);
-        }
 
         /// <summary>
         /// 判断指定文本是否包含关键字。
@@ -1558,6 +1223,248 @@ namespace JiXingFlashTool.ViewModels
         private void OnDeviceCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             RaisePageStateChanged();
+        }
+
+        #endregion
+
+        #region 任务分发
+
+        /// <summary>
+        /// 执行专业模式快捷指令。
+        /// </summary>
+        /// <param name="commandKey">指令标识。</param>
+        private void ExecuteProfessionalInstructionCommand(string commandKey)
+        {
+            var selectList = GetSelectedDevices().Where(item => item?.Device != null).ToList();
+            if (selectList.Count == 0)
+            {
+                Growl.Warning(GetLangText("Message_SelectPhoneFirst"));
+                return;
+            }
+
+            switch (commandKey)
+            {
+                case "RebootSystem":
+                    EnqueueSingleCommand(selectList, CommandType.RebootSystem);
+                    break;
+                case "RebootTwrp":
+                    EnqueueSingleCommand(selectList, CommandType.RebootRecovery);
+                    break;
+                case "RebootDownload":
+                    EnqueueSingleCommand(selectList, CommandType.RebootDownload);
+                    break;
+                case "Wipe":
+                    EnqueueSingleCommand(selectList, CommandType.WipeUserData);
+                    break;
+                case "ClearSystem":
+                    EnqueueSingleCommand(selectList, CommandType.WipeSystem);
+                    break;
+                case "FormatData":
+                    EnqueueSingleCommand(selectList, CommandType.Format);
+                    break;
+                case "FlashFile":
+                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_FlashPackage"), EnqueueFlashFileTask);
+                    break;
+                case "FlashKernel":
+                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_All"), EnqueueUpdateBootRecoveryTaskForKernel);
+                    break;
+                case "UpdateTwrp":
+                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_Img"), EnqueueUpdateBootRecoveryTask);
+                    break;
+                case "Decrypt":
+                    Task.Run(() =>
+                    {
+                        foreach (var deviceItemViewModel in selectList)
+                        {
+                            deviceItemViewModel.Service.Decrypt();
+                        }
+                    });
+                    break;
+                case "DisableDeveloper":
+                    EnqueueSingleCommand(selectList, CommandType.CloseDeveloperMode);
+                    break;
+                case "SkipGuide":
+                    EnqueueSingleCommand(selectList, CommandType.SkipGuide);
+                    break;
+                case "0":
+                    EnqueueSingleCommand(selectList, CommandType.RebootSystem);
+                    break;
+                case "5":
+                    EnqueueSingleCommand(selectList, CommandType.RebootRecovery);
+                    break;
+                case "6":
+                    EnqueueSingleCommand(selectList, CommandType.RebootDownload);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 将选中的设备批量封装为 TaskCore 单条任务入队。
+        /// </summary>
+        /// <param name="selectList">选中的设备列表。</param>
+        /// <param name="commandType">需要执行的指令类型。</param>
+        private void EnqueueSingleCommand(List<DeviceItemViewModel> selectList, CommandType commandType)
+        {
+
+            Task.Run(async () =>
+            {
+                foreach (var deviceItemViewModel in selectList)
+                {
+                    if (deviceItemViewModel?.Device == null)
+                    {
+                        continue;
+                    }
+
+                    deviceItemViewModel.TaskDetailMessage = string.Empty;
+
+                    var payload = new SingleCommandPayload(deviceItemViewModel.Device, commandType);
+                     _ = TaskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new SingleCommandTask(), payload, observer: deviceItemViewModel.CreateTaskObserver(), detail: commandType.ToString());
+                }
+            });
+        }
+
+        /// <summary>
+        /// 将选中的设备批量封装为刷入文件任务入队。
+        /// </summary>
+        /// <param name="deviceItemViewModel">设备项。</param>
+        /// <param name="filePath">本地刷入文件路径。</param>
+        private void EnqueueFlashFileTask(DeviceItemViewModel deviceItemViewModel, string filePath)
+        {
+            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            var payload = new FlashFilePayload(deviceItemViewModel.Device, filePath);
+            _ = TaskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new FlashFileTask(), payload, observer: deviceItemViewModel.CreateTaskObserver(), detail: "FlashFile");
+        }
+
+        /// <summary>
+        /// 将选中的设备封装为系统更新任务入队，并支持可选 TWRP 镜像。
+        /// </summary>
+        /// <param name="deviceItemViewModel">设备项。</param>
+        /// <param name="filePath">本地更新文件路径。</param>
+        /// <param name="wipeData">是否清除用户数据。</param>
+        /// <param name="twrpFilePath">可选 TWRP 镜像路径。</param>
+        private void EnqueueUpdateTask(DeviceItemViewModel deviceItemViewModel, string filePath, bool wipeData, string twrpFilePath)
+        {
+            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+
+
+            var payload = new UpdateTaskPayload(deviceItemViewModel.Device, filePath, wipeData, twrpFilePath, NotifyPropertyChanged: deviceItemViewModel.RefreshDeviceProperties);
+            _ = TaskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new UpdateTask(), payload, observer: deviceItemViewModel.CreateTaskObserver(), detail: "UpdateTask");
+        }
+
+        /// <summary>
+        /// 将选中的设备批量封装为 Boot / Recovery 更新任务入队。
+        /// </summary>
+        /// <param name="deviceItemViewModel">设备项。</param>
+        /// <param name="filePath">本地镜像路径。</param>
+        private void EnqueueUpdateBootRecoveryTask(DeviceItemViewModel deviceItemViewModel, string filePath)
+        {
+            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            var payload = new UpdateBootRecoveryPayload(deviceItemViewModel.Device, filePath, TWRPCommandType.UpdateTWRP);
+            _ = TaskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new UpdateBootRecoveryTask(), payload, observer: deviceItemViewModel.CreateTaskObserver(), detail: "UpdateTwrp");
+        }
+
+        /// <summary>
+        /// 将选中的设备批量封装为内核更新任务入队。
+        /// </summary>
+        /// <param name="deviceItemViewModel">设备项。</param>
+        /// <param name="filePath">本地镜像路径。</param>
+        private void EnqueueUpdateBootRecoveryTaskForKernel(DeviceItemViewModel deviceItemViewModel, string filePath)
+        {
+            if (deviceItemViewModel?.Device == null || string.IsNullOrWhiteSpace(filePath))
+            {
+                return;
+            }
+
+            var payload = new UpdateBootRecoveryPayload(deviceItemViewModel.Device, filePath, TWRPCommandType.FlashKernel);
+            _ = TaskScheduler.EnqueueAsync(deviceItemViewModel.Device.Serial, new UpdateBootRecoveryTask(), payload, observer: deviceItemViewModel.CreateTaskObserver(), detail: "FlashKernel");
+        }
+        #endregion
+
+        #region 设备连接与断开
+
+        /// <summary>
+        /// 添加设备到页面集合。
+        /// </summary>
+        protected virtual void AddDevice(DeviceModel device, int index)
+        {
+            var deviceItemViewModel = new DeviceItemViewModel(device);
+
+            CommonTool.RunOnUiThread(() =>
+            {
+                try
+                {
+                    var safeIndex = Math.Max(0, Math.Min(index, _deviceList.Count));
+                    _deviceList.Insert(safeIndex, deviceItemViewModel);
+                    DeviceCollection.Insert(safeIndex, deviceItemViewModel);
+                    InsertDeviceViewItem(deviceItemViewModel, safeIndex);
+                }
+                catch
+                {
+                    _deviceList.Add(deviceItemViewModel);
+                    DeviceCollection.Add(deviceItemViewModel);
+                    InsertDeviceViewItem(deviceItemViewModel, _deviceList.Count - 1);
+                }
+
+                deviceItemViewModel.IsSelect = IsSelectAll;
+                RefreshDevicePresentationState();
+            });
+        }
+
+        /// <summary>
+        /// 从页面集合移除设备。
+        /// </summary>
+        protected virtual void RemoveDevice(DeviceModel device)
+        {
+            var deviceItemViewModel = _deviceList.Find(item => item != null && item.Device.RoSerialNo.Equals(device.RoSerialNo));
+            if (deviceItemViewModel == null)
+            {
+                return;
+            }
+
+            //如果是需要保持连接就不断开
+            if (deviceItemViewModel.Device.IsKeepLink) return;
+
+            CommonTool.RunOnUiThread(() =>
+            {
+                DeviceCollection.Remove(deviceItemViewModel);
+                _deviceList.Remove(deviceItemViewModel);
+                RemoveDeviceViewItem(deviceItemViewModel);
+                RefreshDevicePresentationState();
+            });
+        }
+
+
+        /// <summary>
+        /// 从可见集合移除单个设备项。
+        /// </summary>
+        /// <param name="deviceItemViewModel">待移除的设备项。</param>
+        private void RemoveDeviceViewItem(DeviceItemViewModel deviceItemViewModel)
+        {
+            if (deviceItemViewModel == null)
+            {
+                return;
+            }
+
+
+            if (deviceItemViewModel.Device.IsKeepLink) return;
+
+            if (DeviceView.Contains(deviceItemViewModel))
+            {
+                DeviceView.Remove(deviceItemViewModel);
+                RefreshVisibleDisplayIndex();
+            }
         }
 
         /// <summary>
@@ -1602,53 +1509,7 @@ namespace JiXingFlashTool.ViewModels
             }
         }
 
-        /// <summary>
-        /// 添加设备到页面集合。
-        /// </summary>
-        protected virtual void AddDevice(DeviceModel device, int index)
-        {
-            var deviceItemViewModel = new DeviceItemViewModel(device);
-
-            RunOnUiThread(() =>
-            {
-                try
-                {
-                    var safeIndex = Math.Max(0, Math.Min(index, _deviceList.Count));
-                    _deviceList.Insert(safeIndex, deviceItemViewModel);
-                    DeviceCollection.Insert(safeIndex, deviceItemViewModel);
-                    InsertDeviceViewItem(deviceItemViewModel, safeIndex);
-                }
-                catch
-                {
-                    _deviceList.Add(deviceItemViewModel);
-                    DeviceCollection.Add(deviceItemViewModel);
-                    InsertDeviceViewItem(deviceItemViewModel, _deviceList.Count - 1);
-                }
-
-                deviceItemViewModel.IsSelect = _isSelectAll;
-                RefreshDevicePresentationState();
-            });
-        }
-
-        /// <summary>
-        /// 从页面集合移除设备。
-        /// </summary>
-        protected virtual void RemoveDevice(DeviceModel device)
-        {
-            var deviceItemViewModel = _deviceList.Find(item => item != null && item.Device.RoSerialNo.Equals(device.RoSerialNo));
-            if (deviceItemViewModel == null)
-            {
-                return;
-            }
-
-            RunOnUiThread(() =>
-            {
-                DeviceCollection.Remove(deviceItemViewModel);
-                _deviceList.Remove(deviceItemViewModel);
-                RemoveDeviceViewItem(deviceItemViewModel);
-                RefreshDevicePresentationState();
-            });
-        }
+        #endregion
     }
 }
 

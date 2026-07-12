@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using JiXingFlashTool.Enums;
+using JiXingFlashTool.Model;
 using TaskCore.Abstractions;
 
 namespace JiXingFlashTool.Interface
@@ -29,6 +30,19 @@ namespace JiXingFlashTool.Interface
         string GetProp(string propKey);
 
         /// <summary>
+        /// 获取系统编译日期。
+        /// </summary>
+        /// <returns>格式为 yyyy-MM-dd 的系统编译日期；无法获取时返回空字符串。</returns>
+        string GetBuildDate();
+
+        /// <summary>
+        /// 批量获取指定系统属性。
+        /// </summary>
+        /// <param name="propKeys">属性键名集合。</param>
+        /// <returns>属性键名与属性值的只读映射。</returns>
+        IReadOnlyDictionary<string, string> GetProps(IEnumerable<string> propKeys);
+
+        /// <summary>
         /// 获取当前设备 root 类型。
         /// </summary>
         SystemRootType GetRootType();
@@ -50,10 +64,29 @@ namespace JiXingFlashTool.Interface
         JXAdbCore.Enums.DeviceState GetDeviceState();
 
         /// <summary>
+        /// 实时获取当前手机所处状态。
+        /// </summary>
+        /// <returns>当前手机状态枚举。</returns>
+        JXAdbCore.Enums.DeviceState GetCurrentDeviceState();
+
+        /// <summary>
+        /// 获取当前手机在设备列表中展示的核心信息。
+        /// </summary>
+        /// <returns>当前手机展示信息模型。</returns>
+        CurrentDeviceInfoModel GetCurrentDeviceInfo();
+
+        /// <summary>
         /// 判断当前设备是否已经安装可正常开机的系统。
         /// </summary>
         /// <returns>已经安装且可正常开机返回 true。</returns>
         bool HasBootableSystem();
+
+        /// <summary>
+        /// 恢复当前网络 ADB 设备连接；未连接时执行 connect，离线时先 disconnect 再 connect。
+        /// </summary>
+        /// <param name="cancellationToken">取消令牌。</param>
+        /// <returns>连接成功返回 true。</returns>
+        bool RestoreConnection(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 异步执行需要 root 权限的指令。
@@ -64,6 +97,7 @@ namespace JiXingFlashTool.Interface
         /// 推送本地文件到设备。
         /// </summary>
         void PushLocalFile(string filePath, string remotePath, IProgress<int> progress = null, CancellationToken cancellationToken = default);
+
 
         /// <summary>
         /// 安装本地 APK 文件。
@@ -121,6 +155,15 @@ namespace JiXingFlashTool.Interface
         /// 比较设备文件与本地文件的 MD5 是否一致。
         /// </summary>
         bool IsRemoteFileMd5EqualToLocalFile(string remotePath, string localFilePath, bool useRoot = false);
+
+        /// <summary>
+        /// 比较设备文件与本地文件的大小是否一致。
+        /// </summary>
+        /// <param name="remotePath">设备文件路径。</param>
+        /// <param name="localFilePath">本地文件路径。</param>
+        /// <param name="useRoot">是否使用 root 权限。</param>
+        /// <returns>文件大小一致返回 true。</returns>
+        bool IsRemoteFileSizeEqualToLocalFile(string remotePath, string localFilePath, bool useRoot = false);
 
         /// <summary>
         /// 比较设备文件与嵌入资源的 MD5 是否一致。
