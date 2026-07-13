@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:converter="clr-namespace:JiXingFlashTool.Converters"
              xmlns:lang="clr-namespace:LanguageCore;assembly=LanguageCore"
              mc:Ignorable="d"
              HorizontalAlignment="Stretch"
@@ -23,7 +22,7 @@
     </UserControl.Resources>
 
     <Grid Background="Transparent">
-        <Border Width="480"
+        <Border Width="500"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Background="#FFFFFF"
@@ -33,18 +32,61 @@
                 SnapsToDevicePixels="True">
             <Border.Style>
                 <Style TargetType="Border">
-                    <Setter Property="Height" Value="333.5" />
+                    <Setter Property="Height" Value="352.75" />
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding WipeData}" Value="True">
-                            <Setter Property="Height" Value="379.5" />
+                        <DataTrigger Binding="{Binding SelectedModeIndex}" Value="1">
+                            <Setter Property="Height" Value="482.25" />
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsFlashFileMode}" Value="True">
+                            <Setter Property="Height" Value="222.5" />
+                        </DataTrigger>
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding IsFlashFileMode}" Value="True" />
+                                <Condition Binding="{Binding SelectedModeIndex}" Value="1" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Height" Value="421.5" />
+                        </MultiDataTrigger>
                     </Style.Triggers>
                 </Style>
             </Border.Style>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="46.5" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition>
+                        <RowDefinition.Style>
+                            <Style TargetType="RowDefinition">
+                                <Setter Property="Height" Value="193.5" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedModeIndex}" Value="1">
+                                        <Setter Property="Height" Value="323" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsFlashFileMode}" Value="True">
+                                        <Setter Property="Height" Value="124" />
+                                    </DataTrigger>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding IsFlashFileMode}" Value="True" />
+                                            <Condition Binding="{Binding SelectedModeIndex}" Value="1" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Height" Value="323" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </RowDefinition.Style>
+                    </RowDefinition>
+                    <RowDefinition>
+                        <RowDefinition.Style>
+                            <Style TargetType="RowDefinition">
+                                <Setter Property="Height" Value="58.75" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsFlashFileMode}" Value="True">
+                                        <Setter Property="Height" Value="0" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </RowDefinition.Style>
+                    </RowDefinition>
                     <RowDefinition Height="52" />
                 </Grid.RowDefinitions>
 
@@ -57,10 +99,7 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="21" />
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Orientation="Horizontal"
-                                    Width="70"
-                                    Height="17.5"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center">
                             <Image Width="14"
@@ -69,12 +108,11 @@
                                    Stretch="Uniform" />
                             <TextBlock Margin="7,0,0,0"
                                        Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                       Text="{lang:Loc Key=Toolbar_UpdateFile}"
+                                       Text="{Binding DialogTitleText}"
                                        FontSize="12.25"
                                        FontWeight="Medium"
                                        Foreground="{StaticResource UpdateDialogTextBrush}" />
                         </StackPanel>
-
                         <Button Grid.Column="1"
                                 Style="{StaticResource UpdateDialogIconButtonStyle}"
                                 Command="{Binding CancelCommand}">
@@ -94,326 +132,353 @@
                     </Grid>
                 </Border>
 
-                <Grid Grid.Row="1"
-                      Margin="17.5,17.5,17.5,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="16" />
-                        <RowDefinition Height="3.25" />
-                        <RowDefinition Height="35" />
-                        <RowDefinition Height="12" />
-                        <RowDefinition Height="16" />
-                        <RowDefinition Height="3.25" />
-                        <RowDefinition Height="35" />
-                        <RowDefinition Height="14" />
-                        <RowDefinition Height="59.75" />
-                        <RowDefinition Height="{Binding WipeData, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=14;0}" />
-                        <RowDefinition Height="{Binding WipeData, Converter={StaticResource BooleanToGridLengthConverter}, ConverterParameter=33.5;0}" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0"
-                               MinHeight="14"
-                               HorizontalAlignment="Stretch"
-                               Style="{StaticResource UpdateDialogTextBlockStyle}"
-                               Text="{lang:Loc Key=UpdateDialog_SelectSystem}"
-                               FontSize="10.5"
-                               LineHeight="16"
-                               FontWeight="Medium"
-                               Foreground="{StaticResource UpdateDialogTextBrush}" />
-
-                    <Button Grid.Row="2"
-                            Height="35"
-                            Width="443"
-                            HorizontalAlignment="Stretch"
-                            Padding="0"
-                            HorizontalContentAlignment="Stretch"
-                            VerticalContentAlignment="Stretch"
-                            Background="#80F5F5F5"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            Command="{Binding SelectFileCommand}">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Grid HorizontalAlignment="Stretch"
-                                      VerticalAlignment="Stretch">
-                                    <Border Background="{TemplateBinding Background}"
-                                            CornerRadius="3.5" />
-                                    <Rectangle Margin="0.5"
-                                               RadiusX="3.5"
-                                               RadiusY="3.5"
-                                               Stroke="{StaticResource UpdateDialogBorderBrush}"
-                                               StrokeThickness="1"
-                                               StrokeDashArray="2,2"
-                                               Fill="Transparent" />
-                                    <Grid Margin="11.5,1,11.5,1"
-                                          HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Stretch">
+                <TabControl Grid.Row="1"
+                            Style="{StaticResource UpdateDialogTabControlStyle}"
+                            SelectedIndex="{Binding SelectedModeIndex}">
+                    <TabItem Width="249"
+                             Header="{lang:Loc Key=UpdateDialog_ManualTab}"
+                             Style="{StaticResource UpdateDialogTabItemStyle}">
+                        <Grid Margin="17.5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="16" />
+                                <RowDefinition Height="4" />
+                                <RowDefinition Height="35" />
+                                <RowDefinition Height="14" />
+                                <RowDefinition Height="16" />
+                                <RowDefinition Height="4" />
+                                <RowDefinition Height="35" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                       Text="{Binding SelectFileLabel}"
+                                       FontSize="10.5"
+                                       FontWeight="Medium"
+                                       Foreground="{StaticResource UpdateDialogTextBrush}" />
+                            <Button Grid.Row="2"
+                                    Style="{StaticResource UpdateDialogFileButtonStyle}"
+                                    Command="{Binding SelectFileCommand}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="14" />
+                                        <ColumnDefinition Width="8.75" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Image Width="14" Height="14" Source="{StaticResource UpdateDialogFileIcon}" />
+                                    <TextBlock Grid.Column="2"
+                                               Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                               Text="{Binding SelectedFileName}"
+                                               TextTrimming="CharacterEllipsis"
+                                               FontSize="10.5"
+                                               Foreground="{StaticResource UpdateDialogTextBrush}" />
+                                    <TextBlock Grid.Column="3"
+                                               Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                               Text="{Binding SelectedFileSizeText}"
+                                               FontSize="10.5"
+                                               Foreground="{StaticResource UpdateDialogMutedTextBrush}" />
+                                </Grid>
+                            </Button>
+                            <TextBlock Grid.Row="4"
+                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                       Text="TWRP"
+                                       FontSize="10.5"
+                                       FontWeight="Medium"
+                                       Foreground="{StaticResource UpdateDialogTextBrush}"
+                                       Visibility="{Binding IsFlashFileMode, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                            <Grid Grid.Row="6"
+                                  Visibility="{Binding IsFlashFileMode, Converter={StaticResource InverseVisibilityBoolConverter}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="7" />
+                                    <ColumnDefinition Width="56" />
+                                </Grid.ColumnDefinitions>
+                                <Button Style="{StaticResource UpdateDialogFileButtonStyle}"
+                                        Command="{Binding SelectTwrpFileCommand}">
+                                    <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="14" />
                                             <ColumnDefinition Width="8.75" />
                                             <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-
-                                        <Image Grid.Column="0"
-                                               Width="14"
-                                               Height="14"
-                                               HorizontalAlignment="Left"
-                                               VerticalAlignment="Center"
-                                               Source="{StaticResource UpdateDialogFileIcon}"
-                                               Stretch="Uniform" />
+                                        <Image Width="14" Height="14" Source="{StaticResource UpdateDialogFileIcon}" />
                                         <TextBlock Grid.Column="2"
-                                                   Height="14"
-                                                   Margin="0,-1,0,0"
-                                                   VerticalAlignment="Center"
                                                    Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                                   Text="{Binding SelectedFileName}"
+                                                   Text="{Binding SelectedTwrpFileName}"
                                                    TextTrimming="CharacterEllipsis"
                                                    FontSize="10.5"
-                                                   FontWeight="Regular"
-                                                   Foreground="{StaticResource UpdateDialogMutedTextBrush}"
-                                                   Visibility="{Binding HasSelectedFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
-                                        <Grid Grid.Column="2"
-                                              VerticalAlignment="Center"
-                                              Visibility="{Binding HasSelectedFile, Converter={StaticResource VisibilityBoolConverter}}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="12.25" />
-                                                <ColumnDefinition Width="7" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="7" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <Image Grid.Column="0"
-                                                   Width="12.25"
-                                                   Height="12.25"
-                                                   Source="{StaticResource UpdateDialogSelectedFileIcon}"
-                                                   Stretch="Uniform" />
-                                            <TextBlock Grid.Column="2"
-                                                       Height="14"
-                                                       Margin="0,-1,0,0"
-                                                       VerticalAlignment="Center"
-                                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                                       Text="{Binding SelectedFileName}"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       FontSize="10.5"
-                                                       FontWeight="Regular"
-                                                       Foreground="{StaticResource UpdateDialogTextBrush}" />
-                                            <TextBlock Grid.Column="4"
-                                                       Height="14"
-                                                       Margin="0,-1,0,0"
-                                                       VerticalAlignment="Center"
-                                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                                       Text="{Binding SelectedFileSizeText}"
-                                                       FontSize="10.5"
-                                                       FontWeight="Regular"
-                                                       Foreground="{StaticResource UpdateDialogMutedTextBrush}" />
-                                        </Grid>
+                                                   Foreground="{StaticResource UpdateDialogTextBrush}" />
+                                        <TextBlock Grid.Column="3"
+                                                   Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                   Text="{Binding SelectedTwrpFileSizeText}"
+                                                   FontSize="10.5"
+                                                   Foreground="{StaticResource UpdateDialogMutedTextBrush}" />
                                     </Grid>
-                                </Grid>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+                                </Button>
+                                <Button Grid.Column="2"
+                                        Style="{StaticResource UpdateDialogFooterButtonStyle}"
+                                        Background="#FFFFFF"
+                                        BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                        BorderThickness="1"
+                                        Command="{Binding ClearTwrpFileCommand}"
+                                        Content="{lang:Loc Key=Toolbar_Clear}"
+                                        Foreground="{StaticResource UpdateDialogTextBrush}"
+                                        Visibility="{Binding HasSelectedTwrpFile, Converter={StaticResource VisibilityBoolConverter}}" />
+                            </Grid>
+                        </Grid>
+                    </TabItem>
 
-                    <TextBlock Grid.Row="4"
-                               MinHeight="14"
-                               HorizontalAlignment="Stretch"
-                               Style="{StaticResource UpdateDialogTextBlockStyle}"
-                               Text="TWRP"
-                               FontSize="10.5"
-                               LineHeight="16"
-                               FontWeight="Medium"
-                               Foreground="{StaticResource UpdateDialogTextBrush}" />
+                    <TabItem Width="249"
+                             Header="{lang:Loc Key=UpdateDialog_AutomaticTab}"
+                             Style="{StaticResource UpdateDialogTabItemStyle}">
+                        <Grid Margin="17.5">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="33.5" />
+                                <RowDefinition Height="14" />
+                                <RowDefinition Height="206" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="7" />
-                            <ColumnDefinition Width="56" />
-                        </Grid.ColumnDefinitions>
-
-                        <Button Grid.Column="0"
-                                Height="35"
-                                HorizontalAlignment="Stretch"
-                                Padding="0"
-                                HorizontalContentAlignment="Stretch"
-                                VerticalContentAlignment="Stretch"
-                                Background="#80F5F5F5"
-                                BorderThickness="0"
-                                Cursor="Hand"
-                                Command="{Binding SelectTwrpFileCommand}">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Grid HorizontalAlignment="Stretch"
-                                          VerticalAlignment="Stretch">
-                                        <Border Background="{TemplateBinding Background}"
-                                                CornerRadius="3.5" />
-                                        <Rectangle Margin="0.5"
-                                                   RadiusX="3.5"
-                                                   RadiusY="3.5"
-                                                   Stroke="{StaticResource UpdateDialogBorderBrush}"
-                                                   StrokeThickness="1"
-                                                   StrokeDashArray="2,2"
-                                                   Fill="Transparent" />
-                                        <Grid Margin="11.5,1,11.5,1"
-                                              HorizontalAlignment="Stretch"
-                                              VerticalAlignment="Stretch">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="14" />
-                                                <ColumnDefinition Width="8.75" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="7" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <Image Grid.Column="0"
-                                                   Width="14"
-                                                   Height="14"
-                                                   HorizontalAlignment="Left"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="226.25" />
+                                    <ColumnDefinition Width="10.5" />
+                                    <ColumnDefinition Width="226.25" />
+                                </Grid.ColumnDefinitions>
+                                <Border Background="#4DF5F5F5"
+                                        BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="3.5">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Grid.ColumnSpan" Value="1" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsFlashFileMode}" Value="True">
+                                                    <Setter Property="Grid.ColumnSpan" Value="3" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <Grid Margin="11.5,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="14" />
+                                            <ColumnDefinition Width="8.75" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12.25" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox VerticalAlignment="Center"
+                                                  IsChecked="{Binding IsFlashRomEnabled}"
+                                                  Style="{StaticResource UpdateDialogBlueCheckBoxStyle}"
+                                                  Visibility="{Binding IsRomLoading, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                        <Border Width="14"
+                                                Height="14"
+                                                VerticalAlignment="Center"
+                                                Background="#2196F3"
+                                                CornerRadius="3.5"
+                                                Visibility="{Binding IsRomLoading, Converter={StaticResource VisibilityBoolConverter}}" />
+                                        <TextBlock Grid.Column="2"
                                                    VerticalAlignment="Center"
-                                                   Source="{StaticResource UpdateDialogFileIcon}"
-                                                   Stretch="Uniform" />
-                                            <TextBlock Grid.Column="2"
-                                                       Height="14"
-                                                       Margin="0,-1,0,0"
-                                                       VerticalAlignment="Center"
-                                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                                       Text="{Binding SelectedTwrpFileName}"
-                                                       TextTrimming="CharacterEllipsis"
-                                                       FontSize="10.5"
-                                                       FontWeight="Regular"
-                                                       Foreground="{StaticResource UpdateDialogMutedTextBrush}"
-                                                       Visibility="{Binding HasSelectedTwrpFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
-                                            <Grid Grid.Column="2"
-                                                  VerticalAlignment="Center"
-                                                  Visibility="{Binding HasSelectedTwrpFile, Converter={StaticResource VisibilityBoolConverter}}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="12.25" />
-                                                    <ColumnDefinition Width="7" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="7" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <Image Grid.Column="0"
-                                                       Width="12.25"
-                                                       Height="12.25"
-                                                       Source="{StaticResource UpdateDialogSelectedFileIcon}"
-                                                       Stretch="Uniform" />
-                                                <TextBlock Grid.Column="2"
-                                                           Height="14"
-                                                           Margin="0,-1,0,0"
-                                                           VerticalAlignment="Center"
-                                                           Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                                           Text="{Binding SelectedTwrpFileName}"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           FontSize="10.5"
-                                                           FontWeight="Regular"
-                                                           Foreground="{StaticResource UpdateDialogTextBrush}" />
-                                                <TextBlock Grid.Column="4"
-                                                           Height="14"
-                                                           Margin="0,-1,0,0"
-                                                           VerticalAlignment="Center"
-                                                           Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                                           Text="{Binding SelectedTwrpFileSizeText}"
-                                                           FontSize="10.5"
-                                                           FontWeight="Regular"
-                                                           Foreground="{StaticResource UpdateDialogMutedTextBrush}" />
-                                            </Grid>
-                                        </Grid>
+                                                   Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                   Text="{lang:Loc Key=UpdateDialog_FlashRom}"
+                                                   FontSize="10.5"
+                                                   FontWeight="Medium"
+                                                   Foreground="{StaticResource UpdateDialogTextBrush}" />
+                                        <ContentControl Grid.Column="3"
+                                                        Style="{StaticResource UpdateDialogLoadingIconStyle}"
+                                                        Visibility="{Binding IsRomLoading, Converter={StaticResource VisibilityBoolConverter}}" />
                                     </Grid>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+                                </Border>
+                                <Border Grid.Column="2"
+                                        Background="#4DF5F5F5"
+                                        BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="3.5"
+                                        Visibility="{Binding IsFlashFileMode, Converter={StaticResource InverseVisibilityBoolConverter}}">
+                                    <Grid Margin="11.5,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="14" />
+                                            <ColumnDefinition Width="8.75" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="12.25" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox VerticalAlignment="Center"
+                                                  IsChecked="{Binding IsFlashTwrpEnabled}"
+                                                  Style="{StaticResource UpdateDialogOrangeCheckBoxStyle}"
+                                                  Visibility="{Binding IsTwrpLoading, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                        <Border Width="14"
+                                                Height="14"
+                                                VerticalAlignment="Center"
+                                                Background="#FF9800"
+                                                CornerRadius="3.5"
+                                                Visibility="{Binding IsTwrpLoading, Converter={StaticResource VisibilityBoolConverter}}" />
+                                        <TextBlock Grid.Column="2"
+                                                   VerticalAlignment="Center"
+                                                   Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                   Text="{lang:Loc Key=UpdateDialog_FlashTwrp}"
+                                                   FontSize="10.5"
+                                                   FontWeight="Medium"
+                                                   Foreground="{StaticResource UpdateDialogTextBrush}" />
+                                        <ContentControl Grid.Column="3"
+                                                        Style="{StaticResource UpdateDialogLoadingIconStyle}"
+                                                        Visibility="{Binding IsTwrpLoading, Converter={StaticResource VisibilityBoolConverter}}" />
+                                    </Grid>
+                                </Border>
+                            </Grid>
 
-                        <Button Grid.Column="2"
-                                Height="35"
-                                Style="{StaticResource UpdateDialogFooterButtonStyle}"
-                                Background="#FFFFFF"
-                                BorderBrush="{StaticResource UpdateDialogBorderBrush}"
-                                BorderThickness="1"
-                                Command="{Binding ClearTwrpFileCommand}"
-                                Content="{lang:Loc Key=Toolbar_Clear}"
-                                Foreground="{StaticResource UpdateDialogTextBrush}"
-                                Visibility="{Binding HasSelectedTwrpFile, Converter={StaticResource VisibilityBoolConverter}}" />
-                    </Grid>
+                            <Border Grid.Row="2"
+                                    Background="#33F5F5F5"
+                                    CornerRadius="3.5"
+                                    SnapsToDevicePixels="True">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="29" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Border Padding="10.5,7,10.5,8"
+                                            BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                            BorderThickness="0,0,0,1">
+                                        <TextBlock Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                   Text="{lang:Loc Key=UpdateDialog_DetectedResources}"
+                                                   FontSize="10.5"
+                                                   FontWeight="Medium"
+                                                   Foreground="{StaticResource UpdateDialogMutedTextBrush}" />
+                                    </Border>
 
-                    <Border Grid.Row="8"
-                            Height="59.75"
-                            HorizontalAlignment="Stretch"
-                            Padding="11.5,11.5,11.5,1"
-                            Background="#4DF5F5F5"
-                            BorderBrush="{StaticResource UpdateDialogBorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="3.5">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="14" />
-                                <ColumnDefinition Width="10.5" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-
-                            <CheckBox Grid.Column="0"
-                                      Style="{StaticResource UpdateDialogDangerCheckBoxStyle}"
-                                      Margin="0,1.75,0,0"
-                                      VerticalAlignment="Top"
-                                      IsChecked="{Binding WipeData}" />
-
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Height="14"
-                                           Margin="0,4,0,0"
-                                           Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                           Text="清除数据"
-                                           FontSize="10.5"
-                                           FontWeight="Medium"
-                                           Foreground="{StaticResource UpdateDialogTextBrush}" />
-                                <TextBlock Height="14"
-                                           Margin="0,4.75,0,0"
-                                           Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                           Text="刷入前格式化 Data 分区（将清空所有用户数据）"
-                                           FontSize="10.5"
-                                           FontWeight="Medium"
-                                           Foreground="{StaticResource UpdateDialogMutedTextBrush}" />
-                            </StackPanel>
+                                    <ListBox Grid.Row="1"
+                                             ItemsSource="{Binding AutomaticResourceGroups}"
+                                             Style="{StaticResource UpdateDialogAutomaticListStyle}"
+                                             ItemContainerStyle="{StaticResource UpdateDialogResourceGroupItemStyle}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Height="87"
+                                                        Padding="10.5"
+                                                        BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                                        BorderThickness="0,0,0,1">
+                                                    <Grid>
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="20.5" />
+                                                            <RowDefinition Height="22.75" />
+                                                            <RowDefinition Height="22.75" />
+                                                        </Grid.RowDefinitions>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <Border Padding="7,1.75"
+                                                                    Background="#1A5C82FD"
+                                                                    CornerRadius="3.5">
+                                                                <TextBlock Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                                           Text="{Binding SeriesName}"
+                                                                           FontSize="11"
+                                                                           FontWeight="Bold"
+                                                                           Foreground="{StaticResource UpdateDialogPrimaryBrush}" />
+                                                            </Border>
+                                                            <TextBlock Margin="7,3.25,0,0"
+                                                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                                       Text="{Binding DeviceCountText}"
+                                                                       FontSize="10.5"
+                                                                       Foreground="{StaticResource UpdateDialogMutedTextBrush}" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Row="1"
+                                                                    Orientation="Horizontal"
+                                                                    VerticalAlignment="Bottom">
+                                                            <Border Padding="5.25,1.75"
+                                                                    Background="#1A2196F3"
+                                                                    CornerRadius="3.5">
+                                                                <TextBlock Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                                           Text="ROM"
+                                                                           FontSize="10"
+                                                                           FontWeight="Bold"
+                                                                           Foreground="#2196F3" />
+                                                            </Border>
+                                                            <TextBlock Margin="5.25,1.75,0,0"
+                                                                       MaxWidth="390"
+                                                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                                       Text="{Binding RomFileName}"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       FontSize="10.5"
+                                                                       Foreground="{StaticResource UpdateDialogTextBrush}"
+                                                                       Visibility="{Binding DataContext.IsRomLoading, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                                            <ContentControl Margin="5.25,1.75,0,0"
+                                                                            Style="{StaticResource UpdateDialogLoadingIconStyle}"
+                                                                            Visibility="{Binding DataContext.IsRomLoading, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource VisibilityBoolConverter}}" />
+                                                        </StackPanel>
+                                                        <StackPanel Grid.Row="2"
+                                                                    Orientation="Horizontal"
+                                                                    VerticalAlignment="Bottom"
+                                                                    Visibility="{Binding DataContext.IsFlashFileMode, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseVisibilityBoolConverter}}">
+                                                            <Border Padding="5.25,1.75"
+                                                                    Background="#1AFF9800"
+                                                                    CornerRadius="3.5">
+                                                                <TextBlock Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                                           Text="TWRP"
+                                                                           FontSize="10"
+                                                                           FontWeight="Bold"
+                                                                           Foreground="#FF9800" />
+                                                            </Border>
+                                                            <TextBlock Margin="5.25,1.75,0,0"
+                                                                       MaxWidth="385"
+                                                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                                                       Text="{Binding TwrpFileName}"
+                                                                       TextTrimming="CharacterEllipsis"
+                                                                       FontSize="10.5"
+                                                                       Foreground="{StaticResource UpdateDialogTextBrush}"
+                                                                       Visibility="{Binding DataContext.IsTwrpLoading, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource InverseVisibilityBoolConverter}}" />
+                                                            <ContentControl Margin="5.25,1.75,0,0"
+                                                                            Style="{StaticResource UpdateDialogLoadingIconStyle}"
+                                                                            Visibility="{Binding DataContext.IsTwrpLoading, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource VisibilityBoolConverter}}" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                    <Border Grid.RowSpan="2"
+                                            Margin="0.5"
+                                            BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="3.5"
+                                            IsHitTestVisible="False"
+                                            SnapsToDevicePixels="True" />
+                                </Grid>
+                            </Border>
                         </Grid>
-                    </Border>
-
-                    <Border Grid.Row="10"
-                            Height="33.5"
-                            HorizontalAlignment="Stretch"
-                            Background="#1AF44336"
-                            BorderBrush="#4DF44336"
-                            BorderThickness="1"
-                            CornerRadius="3.5"
-                            Visibility="{Binding WipeData, Converter={StaticResource VisibilityBoolConverter}}">
-                        <Grid>
-                            <Path Width="12.25"
-                                  Height="12.25"
-                                  Margin="10.5,10.5,0,0"
-                                  HorizontalAlignment="Left"
-                                  VerticalAlignment="Top"
-                                  Data="M6.125 1.53125L11.2292 10.7188H1.02083L6.125 1.53125ZM6.125 4.59375V6.63542M6.125 8.67708H6.1301"
-                                  Stroke="{StaticResource UpdateDialogDangerBrush}"
-                                  StrokeThickness="1.02"
-                                  StrokeStartLineCap="Round"
-                                  StrokeEndLineCap="Round"
-                                  StrokeLineJoin="Round" />
-                            <TextBlock Height="14"
-                                       Margin="29.75,8.75,0,0"
-                                       HorizontalAlignment="Left"
-                                       VerticalAlignment="Top"
-                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
-                                       Text="警告：勾选&quot;清除数据&quot;将在刷入前格式化 Data 分区，所有用户数据将永久删除！"
-                                       FontSize="10.5"
-                                       FontWeight="Regular"
-                                       Foreground="{StaticResource UpdateDialogDangerBrush}" />
-                        </Grid>
-                    </Border>
-                </Grid>
+                    </TabItem>
+                </TabControl>
 
                 <Border Grid.Row="2"
+                        Padding="17.5,11.5,17.5,10.5"
+                        BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                        BorderThickness="0,1,0,0"
+                        Visibility="{Binding IsFlashFileMode, Converter={StaticResource InverseVisibilityBoolConverter}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="10.5" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <CheckBox Margin="0,1.75,0,0"
+                                  VerticalAlignment="Top"
+                                  Style="{StaticResource UpdateDialogDangerCheckBoxStyle}"
+                                  IsChecked="{Binding WipeData}" />
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Margin="0,2,0,0"
+                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                       Text="{lang:Loc Key=UpdateDialog_WipeData}"
+                                       FontSize="10.5"
+                                       FontWeight="Medium"
+                                       Foreground="{StaticResource UpdateDialogTextBrush}" />
+                            <TextBlock Margin="0,7,0,0"
+                                       Style="{StaticResource UpdateDialogTextBlockStyle}"
+                                       Text="{lang:Loc Key=UpdateDialog_WipeDataDescription}"
+                                       FontSize="10.5"
+                                       Foreground="{StaticResource UpdateDialogMutedTextBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="3"
                         Padding="17.5,13.25,17.5,12.25"
                         BorderBrush="{StaticResource UpdateDialogBorderBrush}"
                         BorderThickness="0,1,0,0">
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Width="51"
                                 Margin="0,0,7,0"
                                 Style="{StaticResource UpdateDialogFooterButtonStyle}"
@@ -423,11 +488,10 @@
                                 Command="{Binding CancelCommand}"
                                 Content="{lang:Loc Key=Login_Cancel}"
                                 Foreground="{StaticResource UpdateDialogTextBrush}" />
-
                         <Button Width="70"
                                 Style="{StaticResource UpdateDialogPrimaryButtonStyle}"
                                 Command="{Binding StartTaskCommand}"
-                                IsEnabled="{Binding HasSelectedFile}"
+                                IsEnabled="{Binding CanStartCurrentMode}"
                                 Content="{lang:Loc Key=UpdateDialog_StartTask}" />
                     </StackPanel>
                 </Border>

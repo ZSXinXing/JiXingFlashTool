@@ -28,36 +28,44 @@ namespace JiXingFlashTool.Tasks
             var adb = ctx.Device.GetCapability<IAdbCapability>();
             var filePath = ctx.Payload?.filePath ?? string.Empty;
 
+            //判断文件是否存在
             if (!FileUtil.IsLocalFileExists(filePath))
             {
                 Log(ctx, "TaskLog_FlashFileMissingUnableToSideload");
                 return;
             }
 
+            //保持不断开
             ctx.Payload.Device.IsKeepLink = true;
 
         Start_Flash_File:
+            //指令进入sideload
             Log(ctx, "TaskLog_PrepareEnterSideload");
             adb.ExecuteRemoteCommand("twrp sideload", ctx.CancellationToken);
             await Task.Delay(2000, ctx.CancellationToken);
 
             Log(ctx, "TaskLog_EnteringSideloadKeepPower");
 
+            //等待进入sideload模式
             while (adb.GetDeviceState() != JXAdbCore.Enums.DeviceState.Sideload &&
                    !ctx.CancellationToken.IsCancellationRequested)
             {
                 await Task.Delay(1000, ctx.CancellationToken);
+                //尝试重新连接
+                adb.RestoreConnection();
             }
 
             Log(ctx, "TaskLog_EnteredSideloadPrepareFlash");
             await Task.Delay(2000, ctx.CancellationToken);
 
+            //通过sideload指令刷入
             Log(ctx, "TaskLog_StartFlashFile");
             var result = adb.SideloadFile(filePath, new Progress<int>(progress =>
             {
                 Log(ctx, "TaskLog_FlashProgressKeepPower", progress);
             }), ctx.CancellationToken);
 
+            //判断刷入状态
             if (!string.IsNullOrWhiteSpace(result) &&
                 (result.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0 ||
                  result.IndexOf("error", StringComparison.OrdinalIgnoreCase) >= 0))

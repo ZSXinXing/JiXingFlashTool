@@ -1,4 +1,3 @@
-using JiXingFlashTool.Entitys;
 using JiXingFlashTool.Extensions;
 using JiXingFlashTool.Model;
 using JiXingFlashTool.Repositorys;
@@ -64,10 +63,7 @@ namespace JiXingFlashTool.Services
                     return;
                 }
 
-                await DataBootstrap.InitAsync(
-                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "db.sqlite3"),
-                    new[] { typeof(ResourceFilePathEntity).Assembly },
-                    repositories => repositories.Register(context => new ResourceFilePathRepository(context)));
+                await SQLService.Instance.InitializeAsync();
 
                 var entities = await GetRepository().GetAllAsync();
                 UpdateCache(entities.Select(entity => entity.ToModel()));

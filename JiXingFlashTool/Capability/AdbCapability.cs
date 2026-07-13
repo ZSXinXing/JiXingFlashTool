@@ -297,6 +297,17 @@ namespace JiXingFlashTool.Capability
         }
 
         /// <summary>
+        /// 检查当前局域网设备的 IP 是否可以 Ping 通。
+        /// </summary>
+        /// <param name="cancellationToken">取消令牌。</param>
+        /// <returns>可以 Ping 通返回 true。</returns>
+        public bool CanPingDevice(CancellationToken cancellationToken = default)
+        {
+            return TryCreateNetworkEndpoint(_device.Serial, out DnsEndPoint endpoint) &&
+                   CanPingDevice(endpoint.Host, cancellationToken);
+        }
+
+        /// <summary>
         /// 恢复局域网设备连接；仅在设备 IP 可 Ping 通时执行 ADB 重连。
         /// </summary>
         public bool RestoreConnection(CancellationToken cancellationToken = default)

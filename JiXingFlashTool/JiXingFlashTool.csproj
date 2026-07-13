@@ -149,6 +149,8 @@
     <Compile Include="Interface\IRomApiClient.cs" />
     <Compile Include="Interface\IRomApiService.cs" />
     <Compile Include="ItemViewModel\DeviceItemViewModel.cs" />
+    <Compile Include="ItemViewModel\AutomaticUpdateDeviceItemViewModel.cs" />
+    <Compile Include="ItemViewModel\AutomaticUpdateResourceGroupViewModel.cs" />
     <Compile Include="ItemViewModel\Odin\OdinDeviceItemViewModel.cs" />
     <Compile Include="ItemViewModel\ResourceFileItemViewModel.cs" />
     <Compile Include="ItemViewModel\CastScreenItemViewModel.cs" />

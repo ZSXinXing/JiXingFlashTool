@@ -38,6 +38,8 @@
   <data name="Toolbar_UpdateFile" xml:space="preserve"><value>更新文件</value></data>
   <data name="UpdateDialog_StartTask" xml:space="preserve"><value>开始任务</value></data>
   <data name="UpdateDialog_SelectSystem" xml:space="preserve"><value>选择系统</value></data>
+  <data name="FlashDialog_SelectFile" xml:space="preserve"><value>选择文件</value></data>
+  <data name="FlashDialog_FileNotSelected" xml:space="preserve"><value>未选择文件</value></data>
   <data name="UpdateDialog_SystemNotSelected" xml:space="preserve"><value>未选择系统</value></data>
   <data name="Toolbar_DisableDeveloper" xml:space="preserve"><value>关闭开发者</value></data>
   <data name="Toolbar_SkipGuide" xml:space="preserve"><value>跳过向导</value></data>
@@ -163,4 +165,24 @@
   <data name="TaskLog_KernelNodeNotFound" xml:space="preserve"><value>未找到内核分区节点</value></data>
   <data name="TaskLog_UpdateKernelStart" xml:space="preserve"><value>开始更新内核</value></data>
   <data name="TaskLog_UpdateKernelSuccessManualBoot" xml:space="preserve"><value>内核更新成功，请手动启动设备</value></data>
+  <data name="UpdateDialog_ManualTab" xml:space="preserve"><value>手动</value></data>
+  <data name="UpdateDialog_AutomaticTab" xml:space="preserve"><value>自动</value></data>
+  <data name="UpdateDialog_TwrpNotSelected" xml:space="preserve"><value>未选择 TWRP</value></data>
+  <data name="UpdateDialog_AutoRecognize" xml:space="preserve"><value>自动识别</value></data>
+  <data name="UpdateDialog_AutoWaiting" xml:space="preserve"><value>等待识别</value></data>
+  <data name="UpdateDialog_AutoRecognizing" xml:space="preserve"><value>正在识别</value></data>
+  <data name="UpdateDialog_AutoReady" xml:space="preserve"><value>识别完成</value></data>
+  <data name="UpdateDialog_AutoFailed" xml:space="preserve"><value>识别失败</value></data>
+  <data name="UpdateDialog_AutoCodeMissing" xml:space="preserve"><value>设备代号为空，无法匹配资源。</value></data>
+  <data name="UpdateDialog_AutoMatchFailed" xml:space="preserve"><value>未找到该设备代号对应的 ROM 或 TWRP。</value></data>
+  <data name="UpdateDialog_WipeData" xml:space="preserve"><value>清除数据</value></data>
+  <data name="UpdateDialog_WipeDataDescription" xml:space="preserve"><value>刷入前格式化 Data 分区（将清空所有用户数据）</value></data>
+  <data name="UpdateDialog_WipeDataWarning" xml:space="preserve"><value>警告：清除数据会永久删除设备上的所有用户数据。</value></data>
+  <data name="UpdateDialog_FlashRom" xml:space="preserve"><value>刷入 ROM</value></data>
+  <data name="UpdateDialog_FlashTwrp" xml:space="preserve"><value>刷入 TWRP</value></data>
+  <data name="UpdateDialog_DetectedResources" xml:space="preserve"><value>识别到的型号与资源</value></data>
+  <data name="UpdateDialog_DeviceCount" xml:space="preserve"><value>{0} 台设备</value></data>
+  <data name="UpdateDialog_S7Series" xml:space="preserve"><value>S7系列</value></data>
+  <data name="UpdateDialog_S8Series" xml:space="preserve"><value>S8系列</value></data>
+  <data name="UpdateDialog_S9Series" xml:space="preserve"><value>S9系列</value></data>
 </root>

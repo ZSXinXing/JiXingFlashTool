@@ -34,7 +34,9 @@ namespace JiXingFlashTool.Tasks
             switch (commandType)
             {
                 case CommandType.RebootSystem:
-                    adb.ExecuteRemoteCommand("reboot system", ctx.CancellationToken);
+                    //需要获取手机所处的状态,处于recovery需要使用twrp的重启指令，否则就使用普通的指令
+                    if(adb.GetCurrentDeviceState() == JXAdbCore.Enums.DeviceState.Recovery) adb.ExecuteRemoteCommand("twrp reboot system", ctx.CancellationToken);
+                    else adb.ExecuteRemoteCommand("reboot system", ctx.CancellationToken);
                     break;
                 case CommandType.RebootRecovery:
                     adb.ExecuteRemoteCommand("reboot recovery", ctx.CancellationToken);

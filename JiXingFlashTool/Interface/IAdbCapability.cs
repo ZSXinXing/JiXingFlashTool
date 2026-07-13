@@ -82,6 +82,13 @@ namespace JiXingFlashTool.Interface
         bool HasBootableSystem();
 
         /// <summary>
+        /// 检查当前局域网设备的 IP 是否可以 Ping 通。
+        /// </summary>
+        /// <param name="cancellationToken">取消令牌。</param>
+        /// <returns>可以 Ping 通返回 true。</returns>
+        bool CanPingDevice(CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// 恢复当前网络 ADB 设备连接；未连接时执行 connect，离线时先 disconnect 再 connect。
         /// </summary>
         /// <param name="cancellationToken">取消令牌。</param>

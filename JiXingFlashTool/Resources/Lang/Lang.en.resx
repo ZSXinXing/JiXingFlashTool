@@ -38,6 +38,8 @@
   <data name="Toolbar_UpdateFile" xml:space="preserve"><value>Update File</value></data>
   <data name="UpdateDialog_StartTask" xml:space="preserve"><value>Start Task</value></data>
   <data name="UpdateDialog_SelectSystem" xml:space="preserve"><value>Select System</value></data>
+  <data name="FlashDialog_SelectFile" xml:space="preserve"><value>Select File</value></data>
+  <data name="FlashDialog_FileNotSelected" xml:space="preserve"><value>No file selected</value></data>
   <data name="UpdateDialog_SystemNotSelected" xml:space="preserve"><value>No system selected</value></data>
   <data name="Toolbar_DisableDeveloper" xml:space="preserve"><value>Disable Dev</value></data>
   <data name="Toolbar_SkipGuide" xml:space="preserve"><value>Skip Setup</value></data>
@@ -163,4 +165,24 @@
   <data name="TaskLog_KernelNodeNotFound" xml:space="preserve"><value>Kernel partition node not found</value></data>
   <data name="TaskLog_UpdateKernelStart" xml:space="preserve"><value>Starting kernel update</value></data>
   <data name="TaskLog_UpdateKernelSuccessManualBoot" xml:space="preserve"><value>Kernel update succeeded. Please boot the device manually.</value></data>
+  <data name="UpdateDialog_ManualTab" xml:space="preserve"><value>Manual</value></data>
+  <data name="UpdateDialog_AutomaticTab" xml:space="preserve"><value>Automatic</value></data>
+  <data name="UpdateDialog_TwrpNotSelected" xml:space="preserve"><value>No TWRP selected</value></data>
+  <data name="UpdateDialog_AutoRecognize" xml:space="preserve"><value>Detect</value></data>
+  <data name="UpdateDialog_AutoWaiting" xml:space="preserve"><value>Waiting</value></data>
+  <data name="UpdateDialog_AutoRecognizing" xml:space="preserve"><value>Detecting</value></data>
+  <data name="UpdateDialog_AutoReady" xml:space="preserve"><value>Ready</value></data>
+  <data name="UpdateDialog_AutoFailed" xml:space="preserve"><value>Failed</value></data>
+  <data name="UpdateDialog_AutoCodeMissing" xml:space="preserve"><value>The device code is empty and resources cannot be matched.</value></data>
+  <data name="UpdateDialog_AutoMatchFailed" xml:space="preserve"><value>No matching ROM or TWRP was found for this device code.</value></data>
+  <data name="UpdateDialog_WipeData" xml:space="preserve"><value>Wipe data</value></data>
+  <data name="UpdateDialog_WipeDataDescription" xml:space="preserve"><value>Format the Data partition before flashing (all user data will be erased)</value></data>
+  <data name="UpdateDialog_WipeDataWarning" xml:space="preserve"><value>Warning: wiping data permanently deletes all user data on the device.</value></data>
+  <data name="UpdateDialog_FlashRom" xml:space="preserve"><value>Flash ROM</value></data>
+  <data name="UpdateDialog_FlashTwrp" xml:space="preserve"><value>Flash TWRP</value></data>
+  <data name="UpdateDialog_DetectedResources" xml:space="preserve"><value>Detected models and resources</value></data>
+  <data name="UpdateDialog_DeviceCount" xml:space="preserve"><value>{0} devices</value></data>
+  <data name="UpdateDialog_S7Series" xml:space="preserve"><value>S7 Series</value></data>
+  <data name="UpdateDialog_S8Series" xml:space="preserve"><value>S8 Series</value></data>
+  <data name="UpdateDialog_S9Series" xml:space="preserve"><value>S9 Series</value></data>
 </root>

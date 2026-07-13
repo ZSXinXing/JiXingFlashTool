@@ -155,15 +155,6 @@
             <Setter Property="Foreground" Value="#FFFFFF" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Opacity" Value="0.4" />
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect BlurRadius="1.5"
-                                      ShadowDepth="1"
-                                      Direction="270"
-                                      Color="#1A000000"
-                                      Opacity="1" />
-                </Setter.Value>
-            </Setter>
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="True">
                     <Setter Property="Opacity" Value="1" />
@@ -236,6 +227,238 @@
                                 <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
                             </Trigger>
                         </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogTabItemStyle" TargetType="TabItem">
+            <Setter Property="Height" Value="33.5" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource UpdateDialogMutedTextBrush}" />
+            <Setter Property="FontFamily" Value="Noto Sans SC, Microsoft YaHei UI" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              ContentSource="Header" />
+                            <Border x:Name="SelectedLine"
+                                    Height="2"
+                                    VerticalAlignment="Bottom"
+                                    Background="{StaticResource UpdateDialogPrimaryBrush}"
+                                    Visibility="Collapsed" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource UpdateDialogPrimaryBrush}" />
+                                <Setter Property="Background" Value="#0D5C82FD" />
+                                <Setter TargetName="SelectedLine" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogTabControlStyle" TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="34.5" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Border BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                    BorderThickness="0,0,0,1">
+                                <TabPanel IsItemsHost="True" />
+                            </Border>
+                            <ContentPresenter Grid.Row="1"
+                                              ContentSource="SelectedContent"
+                                              HorizontalAlignment="Stretch"
+                                              VerticalAlignment="Stretch" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogBlueCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Width" Value="14" />
+            <Setter Property="Height" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="CheckBorder"
+                                Background="#FAFAFA"
+                                BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3.5">
+                            <Path x:Name="CheckMark"
+                                  Margin="2"
+                                  Data="M1.5,4.5 L3.7,6.7 L8,2"
+                                  Stroke="#FFFFFF"
+                                  StrokeThickness="1.4"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  Visibility="Collapsed" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBorder" Property="Background" Value="#2196F3" />
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="#2196F3" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogOrangeCheckBoxStyle"
+               TargetType="CheckBox"
+               BasedOn="{StaticResource UpdateDialogBlueCheckBoxStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="CheckBorder"
+                                Background="#FAFAFA"
+                                BorderBrush="{StaticResource UpdateDialogBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3.5">
+                            <Path x:Name="CheckMark"
+                                  Margin="2"
+                                  Data="M1.5,4.5 L3.7,6.7 L8,2"
+                                  Stroke="#FFFFFF"
+                                  StrokeThickness="1.4"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  Visibility="Collapsed" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBorder" Property="Background" Value="#FF9800" />
+                                <Setter TargetName="CheckBorder" Property="BorderBrush" Value="#FF9800" />
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogLoadingIconStyle" TargetType="ContentControl">
+            <Setter Property="Width" Value="12.25" />
+            <Setter Property="Height" Value="12.25" />
+            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+            <Setter Property="RenderTransform">
+                <Setter.Value>
+                    <RotateTransform />
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContentControl">
+                        <Canvas Width="12.25" Height="12.25">
+                            <Path Data="M6.125,1.02083 L6.125,3.0625" />
+                            <Path Data="M8.26875,3.98125 L9.74896,2.50104" />
+                            <Path Data="M9.1875,6.125 L11.2292,6.125" />
+                            <Path Data="M8.26875,8.26875 L9.74896,9.74896" />
+                            <Path Data="M6.125,9.1875 L6.125,11.2292" />
+                            <Path Data="M2.50104,9.74896 L3.98125,8.26875" />
+                            <Path Data="M1.02083,6.125 L3.0625,6.125" />
+                            <Path Data="M2.50104,2.50104 L3.98125,3.98125" />
+                        </Canvas>
+                        <ControlTemplate.Resources>
+                            <Style TargetType="Path">
+                                <Setter Property="Stroke" Value="#999999" />
+                                <Setter Property="StrokeThickness" Value="1.02083" />
+                                <Setter Property="StrokeStartLineCap" Value="Round" />
+                                <Setter Property="StrokeEndLineCap" Value="Round" />
+                                <Setter Property="StrokeLineJoin" Value="Round" />
+                            </Style>
+                        </ControlTemplate.Resources>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard RepeatBehavior="Forever">
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                             From="0"
+                                             To="360"
+                                             Duration="0:0:0.8" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="UpdateDialogFileButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="35" />
+            <Setter Property="Padding" Value="11.5,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="#80F5F5F5" />
+            <Setter Property="BorderBrush" Value="{StaticResource UpdateDialogBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3.5">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogAutomaticListStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+
+        <Style x:Key="UpdateDialogAutomaticItemStyle" TargetType="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,0,7" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="UpdateDialogResourceGroupItemStyle" TargetType="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <ContentPresenter />
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>

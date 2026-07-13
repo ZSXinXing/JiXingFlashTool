@@ -477,7 +477,7 @@ namespace JiXingFlashTool.ViewModels
                 return;
             }
 
-            var viewModel = new UpdateSystemDialogViewModel(selectList, EnqueueUpdateTask);
+            var viewModel = new UpdateSystemDialogViewModel(selectList, EnqueueUpdateTask, EnqueueUpdateBootRecoveryTask);
             var dialog = new UpdateSystemDialogView
             {
                 DataContext = viewModel
@@ -499,6 +499,21 @@ namespace JiXingFlashTool.ViewModels
 
             var viewModel = new LoginDialogViewModel(EnableProfessionalMode);
             var dialog = new LoginDialogView
+            {
+                DataContext = viewModel
+            };
+
+            viewModel.Dialog = Dialog.Show(dialog);
+        }
+
+        /// <summary>
+        /// 打开刷入文件弹窗，并通过手动或自动模式选择刷入文件。
+        /// </summary>
+        /// <param name="selectedDevices">当前选中的设备列表。</param>
+        private void OpenFlashFileDialog(IReadOnlyList<DeviceItemViewModel> selectedDevices)
+        {
+            var viewModel = new UpdateSystemDialogViewModel(selectedDevices, EnqueueFlashFileTask);
+            var dialog = new UpdateSystemDialogView
             {
                 DataContext = viewModel
             };
@@ -1263,7 +1278,7 @@ namespace JiXingFlashTool.ViewModels
                     EnqueueSingleCommand(selectList, CommandType.Format);
                     break;
                 case "FlashFile":
-                    ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_FlashPackage"), EnqueueFlashFileTask);
+                    OpenFlashFileDialog(selectList);
                     break;
                 case "FlashKernel":
                     ExecuteProfessionalFileCommand(selectList, GetLangText("FileFilter_All"), EnqueueUpdateBootRecoveryTaskForKernel);

@@ -980,7 +980,7 @@
                                                       ElementStyle="{StaticResource TableCellTextBlockStyle}"
                                                       Binding="{Binding BuildDate}" />
 
-                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_ConnectionType}" Width="120">
+                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_ConnectionType}" Width="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Height="21"
@@ -1018,7 +1018,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_State}" Width="120">
+                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_State}" Width="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Height="21"
@@ -1067,7 +1067,7 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_TaskMessage}" Width="2.5*">
+                                <DataGridTemplateColumn Header="{lang:Loc Key=Table_TaskMessage}" Width="3*">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding TaskDetailDisplayMessage}"

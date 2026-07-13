@@ -102,8 +102,8 @@ namespace JiXingFlashTool.Tasks
 
             //以下可能抓取不到状态-有可能它就不会让adb识别到adb然后直接进入twrp更新之后重新进入系统
 
-            //不断获取手机状态 || 目标刷机包的编译版本号  
-            while (adb.GetDeviceState() != JXAdbCore.Enums.DeviceState.Recovery)
+            //不断获取手机状态 || 目标刷机包的编译版本号 ,如果是局域网可能就局域网IP先断开 || 就是突然无法ping通说明它已经重启了
+            while (adb.GetDeviceState() != JXAdbCore.Enums.DeviceState.Recovery && adb.CanPingDevice())
             {
                 await Task.Delay(500);
                 adb.RestoreConnection();
