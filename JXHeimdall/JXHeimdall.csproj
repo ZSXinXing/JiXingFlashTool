@@ -59,21 +59,12 @@
     <Compile Include="Models\HeimdallFirmwareSlot.cs" />
     <Compile Include="Models\HeimdallFlashRequest.cs" />
     <Compile Include="Models\HeimdallFlashResult.cs" />
-    <Compile Include="Models\HeimdallPitPartitionModel.cs" />
     <Compile Include="Models\HeimdallProcessResult.cs" />
-    <Compile Include="Models\OdinPitEntryModel.cs" />
     <Compile Include="Services\HeimdallDebugLogService.cs" />
     <Compile Include="Services\HeimdallDeviceService.cs" />
-    <Compile Include="Services\HeimdallDriverService.cs" />
     <Compile Include="Services\HeimdallFirmwarePackageService.cs" />
     <Compile Include="Services\HeimdallFlashService.cs" />
-    <Compile Include="Services\HeimdallPitService.cs" />
     <Compile Include="Services\HeimdallProcessService.cs" />
-    <Compile Include="Services\OdinBinaryExtensions.cs" />
-    <Compile Include="Services\OdinPitParserService.cs" />
-    <Compile Include="Services\OdinSerialFlashService.cs" />
-    <Compile Include="Services\OdinSerialPortService.cs" />
-    <Compile Include="Services\OdinSerialProtocolService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

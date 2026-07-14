@@ -23,7 +23,7 @@ namespace JXHeimdall.Models
         public string WorkingDirectory { get; set; } = string.Empty;
 
         /// <summary>
-        /// 固件包内提取出的 PIT 文件路径，用于在设备读取 PIT 失败时本地解析分区表。
+        /// 固件包内用于重分区的 PIT 文件路径。
         /// </summary>
         public string PitFilePath { get; set; } = string.Empty;
 

@@ -4,160 +4,96 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace JXHeimdall.Services
 {
     /// <summary>
-    /// 负责解析 Odin tar、md5、tar.md5 固件包并提取可刷入文件。
+    /// 负责解压 Odin TAR/TAR.MD5 固件包，并将 LZ4 条目转换为 Heimdall 可读取的镜像文件。
     /// </summary>
     public sealed class HeimdallFirmwarePackageService
     {
         private const string ExtractRootDirectoryName = "JXHeimdallExtract";
 
-        private static readonly Dictionary<string, string> PartitionNameMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            { "boot.img", "BOOT" },
-            { "recovery.img", "RECOVERY" },
-            { "system.img", "SYSTEM" },
-            { "vendor.img", "VENDOR" },
-            { "product.img", "PRODUCT" },
-            { "odm.img", "ODM" },
-            { "userdata.img", "USERDATA" },
-            { "cache.img", "CACHE" },
-            { "modem.bin", "MODEM" },
-            { "cm.bin", "CM" },
-            { "sboot.bin", "SBOOT" },
-            { "vbmeta.img", "VBMETA" },
-            { "dtbo.img", "DTBO" },
-            { "vendor_boot.img", "VENDOR_BOOT" },
-            { "init_boot.img", "INIT_BOOT" }
-        };
+        private static readonly Dictionary<string, string> PartitionNameMap =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "sboot.bin", "SBOOT" },
+                { "cm.bin", "CM" },
+                { "param.bin", "PARAM" },
+                { "emmc_appsboot.mbn", "ABOOT" },
+                { "lksecapp.mbn", "LKSECAPP" },
+                { "xbl.elf", "XBL" },
+                { "tz.img", "TZ" },
+                { "tz.mbn", "TZ" },
+                { "hyp.mbn", "HYP" },
+                { "devcfg.mbn", "DEVCFG" },
+                { "pmic.elf", "PMIC" },
+                { "rpm.mbn", "RPM" },
+                { "cmnlib.mbn", "CMNLIB" },
+                { "cmnlib64.mbn", "CMNLIB64" },
+                { "keymaster.mbn", "KEYMASTER" },
+                { "apdp.mbn", "APDP" },
+                { "msadp.mbn", "MSADP" },
+                { "sec.dat", "SEC" },
+                { "NON-HLOS.bin", "APNHLOS" },
+                { "boot.img", "BOOT" },
+                { "recovery.img", "RECOVERY" },
+                { "system.img", "SYSTEM" },
+                { "system.img.ext4", "SYSTEM" },
+                { "persist.img.ext4", "PERSIST" },
+                { "vendor.img", "VENDOR" },
+                { "vendor.img.ext4", "VENDOR" },
+                { "modem.bin", "MODEM" },
+                { "cache.img", "CACHE" },
+                { "cache.img.ext4", "CACHE" },
+                { "hidden.img", "HIDDEN" },
+                { "hidden.img.ext4", "HIDDEN" },
+                { "userdata.img", "USERDATA" },
+                { "userdata.img.ext4", "USERDATA" }
+            };
 
         /// <summary>
-        /// 解析固件包并解包到临时目录。
+        /// 解压指定固件包并返回可刷入文件列表。
         /// </summary>
         /// <param name="slot">固件槽位。</param>
-        /// <param name="sourceFilePath">固件包路径。</param>
-        /// <returns>已解析固件包模型。</returns>
-        public HeimdallFirmwarePackageModel ParsePackage(HeimdallFirmwareSlot slot, string sourceFilePath)
+        /// <param name="sourceFilePath">固件包绝对路径。</param>
+        /// <returns>已解压固件包。</returns>
+        public HeimdallFirmwarePackageModel ParsePackage(
+            HeimdallFirmwareSlot slot,
+            string sourceFilePath)
         {
             if (string.IsNullOrWhiteSpace(sourceFilePath) || !File.Exists(sourceFilePath))
             {
                 throw new FileNotFoundException("固件文件不存在。", sourceFilePath);
             }
 
-            var workingDirectory = CreateWorkingDirectory();
-            Directory.CreateDirectory(workingDirectory);
-
             var package = new HeimdallFirmwarePackageModel
             {
                 Slot = slot,
                 SourceFilePath = sourceFilePath,
-                WorkingDirectory = workingDirectory
+                WorkingDirectory = CreateWorkingDirectory()
             };
+            Directory.CreateDirectory(package.WorkingDirectory);
 
             if (slot == HeimdallFirmwareSlot.TWRP && IsImageFile(sourceFilePath))
             {
-                var targetPath = Path.Combine(workingDirectory, "recovery.img");
-                File.Copy(sourceFilePath, targetPath, true);
-                package.Files.Add(new HeimdallFirmwareFileModel
-                {
-                    EntryName = "recovery.img",
-                    ExtractedFilePath = targetPath,
-                    Size = new FileInfo(targetPath).Length,
-                    SuggestedPartitionName = "RECOVERY"
-                });
+                AddDirectRecoveryFile(package, sourceFilePath);
                 return package;
             }
 
-            ExtractTarEntries(sourceFilePath, workingDirectory, package);
-            if (slot == HeimdallFirmwareSlot.TWRP && package.Files.Count == 0)
-            {
-                var targetPath = Path.Combine(workingDirectory, Path.GetFileName(sourceFilePath));
-                File.Copy(sourceFilePath, targetPath, true);
-                package.Files.Add(new HeimdallFirmwareFileModel
-                {
-                    EntryName = Path.GetFileName(sourceFilePath),
-                    ExtractedFilePath = targetPath,
-                    Size = new FileInfo(targetPath).Length,
-                    SuggestedPartitionName = "RECOVERY"
-                });
-            }
-
+            ExtractTarEntries(sourceFilePath, package);
             return package;
         }
 
         /// <summary>
-        /// 清理应用运行目录下的 Heimdall 固件解包目录。
+        /// 使用本地 TWRP 镜像替换包内 recovery 镜像。
         /// </summary>
-        public static void CleanupExtractRootDirectory()
-        {
-            DeleteDirectoryQuietly(GetExtractRootDirectory());
-        }
-
-        /// <summary>
-        /// 清理本次刷入解析出的固件包工作目录，避免刷机成功后继续占用大量磁盘空间。
-        /// </summary>
-        /// <param name="packages">本次刷入解析出的固件包集合。</param>
-        public static void CleanupPackageWorkingDirectories(IEnumerable<HeimdallFirmwarePackageModel> packages)
-        {
-            if (packages == null)
-            {
-                return;
-            }
-
-            foreach (var package in packages)
-            {
-                if (!string.IsNullOrWhiteSpace(package?.WorkingDirectory))
-                {
-                    DeleteDirectoryQuietly(package.WorkingDirectory);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 创建固件解包工作目录，目录固定在当前应用运行目录下。
-        /// </summary>
-        /// <returns>可用于本次解包的临时工作目录。</returns>
-        private static string CreateWorkingDirectory()
-        {
-            return Path.Combine(GetExtractRootDirectory(), Guid.NewGuid().ToString("N"));
-        }
-
-        /// <summary>
-        /// 获取当前应用运行目录下的 Heimdall 固件解包根目录。
-        /// </summary>
-        /// <returns>解包根目录路径。</returns>
-        private static string GetExtractRootDirectory()
-        {
-            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ExtractRootDirectoryName);
-        }
-
-        /// <summary>
-        /// 安静删除指定目录，清理失败时写入调试日志但不中断主流程。
-        /// </summary>
-        /// <param name="directoryPath">待删除目录路径。</param>
-        private static void DeleteDirectoryQuietly(string directoryPath)
-        {
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(directoryPath) && Directory.Exists(directoryPath))
-                {
-                    Directory.Delete(directoryPath, true);
-                }
-            }
-            catch (Exception ex)
-            {
-                HeimdallDebugLogService.Write("Package", "delete-extract-directory-failed Path=" + directoryPath + " Error=" + ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// 将 AP 包中的 recovery 刷入文件替换为指定的 TWRP 镜像。
-        /// </summary>
-        /// <param name="package">已解析的 AP 固件包。</param>
-        /// <param name="twrpFilePath">用于替换 recovery 的 TWRP 镜像路径。</param>
-        public void ApplyRecoveryOverride(HeimdallFirmwarePackageModel package, string twrpFilePath)
+        /// <param name="package">目标固件包。</param>
+        /// <param name="twrpFilePath">TWRP 镜像绝对路径。</param>
+        public void ApplyRecoveryOverride(
+            HeimdallFirmwarePackageModel package,
+            string twrpFilePath)
         {
             if (package == null)
             {
@@ -171,146 +107,79 @@ namespace JXHeimdall.Services
 
             if (!File.Exists(twrpFilePath))
             {
-                throw new FileNotFoundException("TWRP 镜像文件不存在。", twrpFilePath);
+                throw new FileNotFoundException("TWRP 镜像不存在。", twrpFilePath);
             }
 
-            var targetPath = Path.Combine(package.WorkingDirectory, "recovery_override.img");
+            var targetPath = Path.Combine(package.WorkingDirectory, "recovery.img");
             File.Copy(twrpFilePath, targetPath, true);
             var recoveryFile = package.Files.FirstOrDefault(item =>
-                item.EntryName.IndexOf("recovery", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 string.Equals(item.SuggestedPartitionName, "RECOVERY", StringComparison.OrdinalIgnoreCase));
-
             if (recoveryFile == null)
             {
-                package.Files.Add(new HeimdallFirmwareFileModel
-                {
-                    EntryName = "recovery.img",
-                    ExtractedFilePath = targetPath,
-                    Size = new FileInfo(targetPath).Length,
-                    SuggestedPartitionName = "RECOVERY"
-                });
-                HeimdallDebugLogService.Write("Package", "add-recovery-override File=" + targetPath);
-                return;
+                recoveryFile = new HeimdallFirmwareFileModel();
+                package.Files.Add(recoveryFile);
             }
 
             recoveryFile.EntryName = "recovery.img";
             recoveryFile.ExtractedFilePath = targetPath;
             recoveryFile.Size = new FileInfo(targetPath).Length;
             recoveryFile.SuggestedPartitionName = "RECOVERY";
-            HeimdallDebugLogService.Write("Package", "apply-recovery-override File=" + targetPath);
         }
 
         /// <summary>
-        /// 判断源文件是否为可直接刷入 Recovery 分区的 img 镜像。
+        /// 清理程序运行目录下的全部固件解压目录。
         /// </summary>
-        /// <param name="sourceFilePath">源文件路径。</param>
-        /// <returns>文件扩展名为 .img 时返回 true。</returns>
-        private static bool IsImageFile(string sourceFilePath)
+        public static void CleanupExtractRootDirectory()
         {
-            return string.Equals(Path.GetExtension(sourceFilePath), ".img", StringComparison.OrdinalIgnoreCase);
+            DeleteDirectoryQuietly(GetExtractRootDirectory());
         }
 
         /// <summary>
-        /// 根据 PIT 分区表过滤固件包内真正可刷入的文件。
+        /// 清理本次刷入创建的固件解压目录。
         /// </summary>
-        /// <param name="package">固件包。</param>
-        /// <param name="partitions">PIT 分区集合。</param>
-        /// <returns>分区名与文件路径映射。</returns>
-        public IReadOnlyDictionary<string, string> BuildFlashMap(HeimdallFirmwarePackageModel package, IReadOnlyList<HeimdallPitPartitionModel> partitions)
+        /// <param name="packages">本次解析的固件包。</param>
+        public static void CleanupPackageWorkingDirectories(
+            IEnumerable<HeimdallFirmwarePackageModel> packages)
         {
-            var availablePartitions = new HashSet<string>(
-                partitions.Select(item => item.PartitionName).Where(item => !string.IsNullOrWhiteSpace(item)),
-                StringComparer.OrdinalIgnoreCase);
-            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var firmwareFile in package.Files)
+            if (packages == null)
             {
-                var partitionName = firmwareFile.SuggestedPartitionName;
-                if (string.IsNullOrWhiteSpace(partitionName) || !availablePartitions.Contains(partitionName))
-                {
-                    continue;
-                }
-
-                result[partitionName] = firmwareFile.ExtractedFilePath;
+                return;
             }
 
-            return result;
+            foreach (var package in packages)
+            {
+                DeleteDirectoryQuietly(package?.WorkingDirectory);
+            }
         }
 
         /// <summary>
-        /// 根据 PIT 分区表构造 CP/Modem 基带固件刷入映射，兼容 MODEM 与 RADIO 分区命名。
+        /// 将直接选择的 TWRP 镜像复制为 recovery.img。
         /// </summary>
-        /// <param name="package">CP 固件包。</param>
-        /// <param name="partitions">PIT 分区集合。</param>
-        /// <returns>分区名与文件路径映射。</returns>
-        public IReadOnlyDictionary<string, string> BuildCpFlashMap(HeimdallFirmwarePackageModel package, IReadOnlyList<HeimdallPitPartitionModel> partitions)
+        /// <param name="package">目标固件包模型。</param>
+        /// <param name="sourceFilePath">TWRP 镜像路径。</param>
+        private static void AddDirectRecoveryFile(
+            HeimdallFirmwarePackageModel package,
+            string sourceFilePath)
         {
-            var availablePartitions = new HashSet<string>(
-                partitions.Select(item => item.PartitionName).Where(item => !string.IsNullOrWhiteSpace(item)),
-                StringComparer.OrdinalIgnoreCase);
-            var modemFile = package.Files.FirstOrDefault(item =>
-                item.EntryName.IndexOf("modem", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                string.Equals(item.SuggestedPartitionName, "MODEM", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(item.SuggestedPartitionName, "RADIO", StringComparison.OrdinalIgnoreCase));
-
-            if (modemFile == null)
+            var targetPath = Path.Combine(package.WorkingDirectory, "recovery.img");
+            File.Copy(sourceFilePath, targetPath, true);
+            package.Files.Add(new HeimdallFirmwareFileModel
             {
-                return BuildFlashMap(package, partitions);
-            }
-
-            if (availablePartitions.Contains("MODEM"))
-            {
-                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "MODEM", modemFile.ExtractedFilePath }
-                };
-            }
-
-            if (availablePartitions.Contains("RADIO"))
-            {
-                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "RADIO", modemFile.ExtractedFilePath }
-                };
-            }
-
-            return BuildFlashMap(package, partitions);
+                EntryName = "recovery.img",
+                ExtractedFilePath = targetPath,
+                Size = new FileInfo(targetPath).Length,
+                SuggestedPartitionName = "RECOVERY"
+            });
         }
 
         /// <summary>
-        /// 构造 TWRP 刷入映射，优先选择 recovery 镜像。
+        /// 逐条读取 TAR 内容，只提取固定 Heimdall 分区对应的文件。
         /// </summary>
-        /// <param name="package">TWRP 固件包。</param>
-        /// <param name="partitions">PIT 分区集合。</param>
-        /// <returns>TWRP 分区映射。</returns>
-        public IReadOnlyDictionary<string, string> BuildTwrpFlashMap(HeimdallFirmwarePackageModel package, IReadOnlyList<HeimdallPitPartitionModel> partitions)
-        {
-            var availablePartitions = new HashSet<string>(partitions.Select(item => item.PartitionName), StringComparer.OrdinalIgnoreCase);
-            var recoveryFile = package.Files.FirstOrDefault(item =>
-                item.EntryName.IndexOf("recovery", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                string.Equals(item.SuggestedPartitionName, "RECOVERY", StringComparison.OrdinalIgnoreCase));
-
-            if (recoveryFile != null && availablePartitions.Contains("RECOVERY"))
-            {
-                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "RECOVERY", recoveryFile.ExtractedFilePath }
-                };
-            }
-
-            var bootFile = package.Files.FirstOrDefault(item => string.Equals(item.SuggestedPartitionName, "BOOT", StringComparison.OrdinalIgnoreCase));
-            if (bootFile != null && availablePartitions.Contains("BOOT"))
-            {
-                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    { "BOOT", bootFile.ExtractedFilePath }
-                };
-            }
-
-            throw new InvalidOperationException("未在 TWRP/AP 包中找到可刷入的 recovery 或 boot 镜像。");
-        }
-
-        private static void ExtractTarEntries(string sourceFilePath, string workingDirectory, HeimdallFirmwarePackageModel package)
+        /// <param name="sourceFilePath">TAR 或 TAR.MD5 路径。</param>
+        /// <param name="package">目标固件包模型。</param>
+        private static void ExtractTarEntries(
+            string sourceFilePath,
+            HeimdallFirmwarePackageModel package)
         {
             using (var stream = File.OpenRead(sourceFilePath))
             {
@@ -331,103 +200,59 @@ namespace JXHeimdall.Services
                         continue;
                     }
 
-                    var safeFileName = Path.GetFileName(entryName);
-                    if (string.IsNullOrWhiteSpace(safeFileName))
+                    var fileName = Path.GetFileName(entryName);
+                    if (IsPitFile(fileName))
+                    {
+                        ExtractPitFile(stream, size, package, fileName);
+                        continue;
+                    }
+
+                    var imageName = RemoveLz4Suffix(fileName);
+                    var partitionName = GetPartitionName(imageName);
+                    if (string.IsNullOrWhiteSpace(partitionName))
                     {
                         SkipTarContent(stream, size);
                         continue;
                     }
 
-                    var targetPath = Path.Combine(workingDirectory, safeFileName);
-                    using (var output = File.Create(targetPath))
+                    var compressedPath = Path.Combine(package.WorkingDirectory, fileName);
+                    using (var output = File.Create(compressedPath))
                     {
                         CopyExactly(stream, output, size);
                     }
-
                     SkipPadding(stream, size);
 
-                    if (IsPitFile(safeFileName))
+                    var imagePath = compressedPath;
+                    if (fileName.EndsWith(".lz4", StringComparison.OrdinalIgnoreCase))
                     {
-                        package.PitFilePath = targetPath;
-                        continue;
+                        imagePath = DecompressLz4File(compressedPath, package.WorkingDirectory, imageName);
+                        File.Delete(compressedPath);
                     }
 
-                    var flashFileName = safeFileName;
-                    var flashFilePath = targetPath;
-                    var flashFileSize = size;
-                    if (IsLz4File(safeFileName))
+                    package.Files.Add(new HeimdallFirmwareFileModel
                     {
-                        flashFileName = RemoveKnownCompressionSuffix(safeFileName);
-                        flashFilePath = DecompressLz4File(targetPath, workingDirectory, flashFileName);
-                        flashFileSize = new FileInfo(flashFilePath).Length;
-                        TryDeleteTemporaryFile(targetPath);
-                    }
-
-                    var suggestedPartition = SuggestPartitionName(flashFileName);
-                    if (!string.IsNullOrWhiteSpace(suggestedPartition))
-                    {
-                        package.Files.Add(new HeimdallFirmwareFileModel
-                        {
-                            EntryName = flashFileName,
-                            ExtractedFilePath = flashFilePath,
-                            Size = flashFileSize,
-                            SuggestedPartitionName = suggestedPartition
-                        });
-                    }
+                        EntryName = imageName,
+                        ExtractedFilePath = imagePath,
+                        Size = new FileInfo(imagePath).Length,
+                        SuggestedPartitionName = partitionName
+                    });
                 }
             }
         }
 
-        private static string SuggestPartitionName(string fileName)
-        {
-            var normalizedName = RemoveKnownCompressionSuffix(fileName);
-            if (PartitionNameMap.TryGetValue(normalizedName, out var partitionName))
-            {
-                return partitionName;
-            }
-
-            var nameWithoutExtension = Path.GetFileNameWithoutExtension(normalizedName);
-            return string.IsNullOrWhiteSpace(nameWithoutExtension)
-                ? string.Empty
-                : nameWithoutExtension.ToUpperInvariant();
-        }
-
-        private static string RemoveKnownCompressionSuffix(string fileName)
-        {
-            if (fileName.EndsWith(".lz4", StringComparison.OrdinalIgnoreCase))
-            {
-                return fileName.Substring(0, fileName.Length - 4);
-            }
-
-            return fileName;
-        }
-
         /// <summary>
-        /// 判断固件包条目是否为 LZ4 压缩镜像。
+        /// 将 LZ4 文件解压为原始镜像。
         /// </summary>
-        /// <param name="fileName">固件包内文件名。</param>
-        /// <returns>是 LZ4 文件时返回 true。</returns>
-        private static bool IsLz4File(string fileName)
+        /// <param name="sourceFilePath">LZ4 文件路径。</param>
+        /// <param name="workingDirectory">解压目录。</param>
+        /// <param name="targetFileName">镜像文件名。</param>
+        /// <returns>解压后的镜像路径。</returns>
+        private static string DecompressLz4File(
+            string sourceFilePath,
+            string workingDirectory,
+            string targetFileName)
         {
-            return fileName.EndsWith(".lz4", StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// 将 Odin 固件包内的 LZ4 压缩镜像解压为 Heimdall 可直接刷入的镜像文件。
-        /// </summary>
-        /// <param name="sourceFilePath">临时目录中的 LZ4 压缩文件路径。</param>
-        /// <param name="workingDirectory">固件包临时工作目录。</param>
-        /// <param name="targetFileName">去掉 .lz4 后缀后的目标镜像文件名。</param>
-        /// <returns>解压后的镜像文件路径。</returns>
-        private static string DecompressLz4File(string sourceFilePath, string workingDirectory, string targetFileName)
-        {
-            if (string.IsNullOrWhiteSpace(targetFileName))
-            {
-                throw new InvalidDataException("LZ4 固件条目文件名无效，无法解压。");
-            }
-
             var targetPath = Path.Combine(workingDirectory, targetFileName);
-            HeimdallDebugLogService.Write("Package", "decompress-lz4 Source=" + sourceFilePath + " Target=" + targetPath);
             using (var input = File.OpenRead(sourceFilePath))
             using (var lz4Stream = LZ4Stream.Decode(input))
             using (var output = File.Create(targetPath))
@@ -439,21 +264,87 @@ namespace JXHeimdall.Services
         }
 
         /// <summary>
-        /// 删除已经完成解压的临时压缩文件，避免大体积固件重复占用磁盘空间。
+        /// 根据解压后的文件名获取固定 Heimdall 分区名。
         /// </summary>
-        /// <param name="filePath">待删除的临时文件路径。</param>
-        private static void TryDeleteTemporaryFile(string filePath)
+        /// <param name="fileName">镜像文件名。</param>
+        /// <returns>分区名，未匹配时返回空字符串。</returns>
+        private static string GetPartitionName(string fileName)
+        {
+            return PartitionNameMap.TryGetValue(fileName ?? string.Empty, out var partitionName)
+                ? partitionName
+                : string.Empty;
+        }
+
+        private static bool IsImageFile(string filePath)
+        {
+            return string.Equals(Path.GetExtension(filePath), ".img", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 判断 TAR 条目是否为 Odin 固件包内的 PIT 分区表文件。
+        /// </summary>
+        /// <param name="fileName">固件包内文件名。</param>
+        /// <returns>文件扩展名为 .pit 时返回 true。</returns>
+        private static bool IsPitFile(string fileName)
+        {
+            return string.Equals(Path.GetExtension(fileName), ".pit", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 提取固件包内的 PIT 文件，用于 Heimdall 重分区刷入。
+        /// </summary>
+        /// <param name="stream">TAR 数据流。</param>
+        /// <param name="size">PIT 条目大小。</param>
+        /// <param name="package">目标固件包模型。</param>
+        /// <param name="fileName">PIT 文件名。</param>
+        private static void ExtractPitFile(
+            Stream stream,
+            long size,
+            HeimdallFirmwarePackageModel package,
+            string fileName)
+        {
+            var targetPath = Path.Combine(package.WorkingDirectory, fileName);
+            using (var output = File.Create(targetPath))
+            {
+                CopyExactly(stream, output, size);
+            }
+
+            SkipPadding(stream, size);
+            package.PitFilePath = targetPath;
+            HeimdallDebugLogService.Write("Package", "extract-pit Slot=" + package.Slot + " File=" + targetPath);
+        }
+
+        private static string RemoveLz4Suffix(string fileName)
+        {
+            return fileName != null && fileName.EndsWith(".lz4", StringComparison.OrdinalIgnoreCase)
+                ? fileName.Substring(0, fileName.Length - 4)
+                : fileName ?? string.Empty;
+        }
+
+        private static string CreateWorkingDirectory()
+        {
+            return Path.Combine(GetExtractRootDirectory(), Guid.NewGuid().ToString("N"));
+        }
+
+        private static string GetExtractRootDirectory()
+        {
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ExtractRootDirectoryName);
+        }
+
+        private static void DeleteDirectoryQuietly(string directoryPath)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
+                if (!string.IsNullOrWhiteSpace(directoryPath) && Directory.Exists(directoryPath))
                 {
-                    File.Delete(filePath);
+                    Directory.Delete(directoryPath, true);
                 }
             }
             catch (Exception ex)
             {
-                HeimdallDebugLogService.Write("Package", "delete-temp-lz4-failed File=" + filePath + " Error=" + ex.Message);
+                HeimdallDebugLogService.Write(
+                    "Package",
+                    "delete-directory-failed Path=" + directoryPath + " Error=" + ex.Message);
             }
         }
 
@@ -462,21 +353,6 @@ namespace JXHeimdall.Services
             return header.All(value => value == 0);
         }
 
-        /// <summary>
-        /// 判断固件包条目是否为 PIT 分区表文件。
-        /// </summary>
-        /// <param name="fileName">固件包内文件名。</param>
-        /// <returns>是 PIT 文件时返回 true。</returns>
-        private static bool IsPitFile(string fileName)
-        {
-            return fileName.EndsWith(".pit", StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
-        /// 判断 tar 条目是否为目录，目录项不应创建为刷入文件。
-        /// </summary>
-        /// <param name="header">tar 条目头。</param>
-        /// <returns>是目录项时返回 true。</returns>
         private static bool IsDirectoryEntry(byte[] header)
         {
             return header != null && header.Length > 156 && header[156] == (byte)'5';
@@ -490,7 +366,7 @@ namespace JXHeimdall.Services
                 end++;
             }
 
-            return System.Text.Encoding.ASCII.GetString(bytes, offset, end - offset);
+            return Encoding.ASCII.GetString(bytes, offset, end - offset);
         }
 
         private static void CopyExactly(Stream input, Stream output, long bytesToCopy)
@@ -499,8 +375,7 @@ namespace JXHeimdall.Services
             var remaining = bytesToCopy;
             while (remaining > 0)
             {
-                var readSize = (int)Math.Min(buffer.Length, remaining);
-                var read = input.Read(buffer, 0, readSize);
+                var read = input.Read(buffer, 0, (int)Math.Min(buffer.Length, remaining));
                 if (read <= 0)
                 {
                     throw new EndOfStreamException("固件包内容不完整。");
@@ -519,7 +394,7 @@ namespace JXHeimdall.Services
 
         private static void SkipPadding(Stream stream, long size)
         {
-            var padding = (512 - (size % 512)) % 512;
+            var padding = (512 - size % 512) % 512;
             if (padding > 0)
             {
                 stream.Seek(padding, SeekOrigin.Current);

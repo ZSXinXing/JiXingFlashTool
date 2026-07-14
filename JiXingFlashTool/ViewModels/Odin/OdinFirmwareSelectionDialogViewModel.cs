@@ -18,9 +18,9 @@ namespace JiXingFlashTool.ViewModels.Odin
         private string _apFilePath = string.Empty;
         private string _twrpFilePath = string.Empty;
         private string _systemPackageFilePath = string.Empty;
-        private bool _wipeDataBeforeSystemFlash = true;
-        private bool _wipeSystemBeforeSystemFlash = true;
-        private bool _formatDataBeforeSystemFlash = true;
+        private bool _wipeDataBeforeSystemFlash;
+        private bool _wipeSystemBeforeSystemFlash;
+        private bool _formatDataBeforeSystemFlash;
         private string _cpFilePath = string.Empty;
         private string _cscFilePath = string.Empty;
         private string _userdataFilePath = string.Empty;
@@ -91,25 +91,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         public string TwrpFilePath
         {
             get => _twrpFilePath;
-            set
-            {
-                if (SetFirmwarePath(ref _twrpFilePath, value, nameof(TwrpFilePath), nameof(TwrpFileName), nameof(TwrpFileSizeText), nameof(HasTwrpFile)))
-                {
-                    OnPropertyChanged(nameof(IsSystemPackageSectionVisible));
-                    if (!HasTwrpFile)
-                    {
-                        SystemPackageFilePath = string.Empty;
-                        WipeDataBeforeSystemFlash = false;
-                        WipeSystemBeforeSystemFlash = false;
-                        FormatDataBeforeSystemFlash = false;
-                        return;
-                    }
-
-                    WipeDataBeforeSystemFlash = true;
-                    WipeSystemBeforeSystemFlash = true;
-                    FormatDataBeforeSystemFlash = true;
-                }
-            }
+            set => SetFirmwarePath(ref _twrpFilePath, value, nameof(TwrpFilePath), nameof(TwrpFileName), nameof(TwrpFileSizeText), nameof(HasTwrpFile));
         }
 
         /// <summary>
@@ -118,7 +100,15 @@ namespace JiXingFlashTool.ViewModels.Odin
         public string SystemPackageFilePath
         {
             get => _systemPackageFilePath;
-            set => SetFirmwarePath(ref _systemPackageFilePath, value, nameof(SystemPackageFilePath), nameof(SystemPackageFileName), nameof(SystemPackageFileSizeText), nameof(HasSystemPackageFile));
+            set
+            {
+                if (SetFirmwarePath(ref _systemPackageFilePath, value, nameof(SystemPackageFilePath), nameof(SystemPackageFileName), nameof(SystemPackageFileSizeText), nameof(HasSystemPackageFile)))
+                {
+                    WipeDataBeforeSystemFlash = HasSystemPackageFile;
+                    WipeSystemBeforeSystemFlash = HasSystemPackageFile;
+                    FormatDataBeforeSystemFlash = HasSystemPackageFile;
+                }
+            }
         }
 
         /// <summary>
@@ -261,9 +251,9 @@ namespace JiXingFlashTool.ViewModels.Odin
         public bool HasTwrpFile => !string.IsNullOrWhiteSpace(TwrpFilePath);
 
         /// <summary>
-        /// 是否显示系统包选择区域。
+        /// 系统包选择区域是否常驻显示。
         /// </summary>
-        public bool IsSystemPackageSectionVisible => HasTwrpFile;
+        public bool IsSystemPackageSectionVisible => true;
 
         /// <summary>
         /// 是否已经选择 TWRP 侧载系统包。

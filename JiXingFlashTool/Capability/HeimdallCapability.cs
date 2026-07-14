@@ -13,7 +13,6 @@ namespace JiXingFlashTool.Capability
     public sealed class HeimdallCapability : IHeimdallCapability
     {
         private readonly HeimdallFlashService _flashService;
-        private readonly OdinSerialFlashService _odinSerialFlashService;
 
         /// <summary>
         /// 初始化 Heimdall 刷机能力。
@@ -21,13 +20,8 @@ namespace JiXingFlashTool.Capability
         public HeimdallCapability()
         {
             var processService = new HeimdallProcessService();
-            var pitService = new HeimdallPitService(processService);
             var firmwarePackageService = new HeimdallFirmwarePackageService();
-            _flashService = new HeimdallFlashService(processService, pitService, firmwarePackageService);
-            _odinSerialFlashService = new OdinSerialFlashService(
-                firmwarePackageService,
-                new OdinSerialPortService(),
-                new OdinPitParserService());
+            _flashService = new HeimdallFlashService(processService, firmwarePackageService);
         }
 
         /// <summary>
@@ -43,7 +37,7 @@ namespace JiXingFlashTool.Capability
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return _odinSerialFlashService.FlashFirmwareAsync(request, cancellationToken);
+            return _flashService.FlashFirmwareAsync(request, cancellationToken);
         }
 
         /// <summary>
@@ -59,7 +53,7 @@ namespace JiXingFlashTool.Capability
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return _odinSerialFlashService.FlashTwrpAndRebootRecoveryAsync(request, cancellationToken);
+            return _flashService.FlashTwrpAndBootRecoveryAsync(request, cancellationToken);
         }
     }
 }

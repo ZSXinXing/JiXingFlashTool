@@ -7,7 +7,6 @@ using JiXingFlashTool.Model.Payload;
 using JiXingFlashTool.Services;
 using JiXingFlashTool.TaskCoreBridge;
 using JiXingFlashTool.Tasks;
-using JiXingFlashTool.Views.Odin;
 using JXHeimdall.Models;
 using JXHeimdall.Services;
 using System;
@@ -51,8 +50,9 @@ namespace JiXingFlashTool.ViewModels.Odin
             _taskScheduler = new DeviceTaskScheduler(new EphemeralDeviceSessionProvider(sessionFactory));
             _taskScheduler.Log += OnTaskSchedulerLog;
             _taskScheduler.TaskStateChanged += OnTaskStateChanged;
+            FirmwareSelection = new OdinFirmwareSelectionDialogViewModel(0, null);
+            FirmwareSelection.PropertyChanged += (_, __) => RefreshCommandState();
             RefreshDevicesCommand = new AsyncRelayCommand(RefreshDevicesAsync);
-            OpenFirmwareDialogCommand = new RelayCommand(OpenFirmwareDialog, HasSelectedDevices);
             StopSelectedDevicesCommand = new RelayCommand(StopSelectedDevices, HasSelectedDevices);
             StartFlashCommand = new AsyncRelayCommand(StartFlashAsync, CanStartFlash);
             FlashTwrpCommand = new AsyncRelayCommand(FlashTwrpAsync, CanStartTwrpFlash);
@@ -68,6 +68,11 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// Heimdall 设备扫描服务。
         /// </summary>
         public HeimdallDeviceService DeviceService { get; }
+
+        /// <summary>
+        /// Odin 页面中的固件选择区域。
+        /// </summary>
+        public OdinFirmwareSelectionDialogViewModel FirmwareSelection { get; }
 
         /// <summary>
         /// 搜索关键字，保留属性以兼容页面旧绑定。
@@ -135,9 +140,9 @@ namespace JiXingFlashTool.ViewModels.Odin
         public bool HasSelectedDevicesForFirmware => SelectedDeviceCount > 0;
 
         /// <summary>
-        /// 选择固件按钮显示文本。
+        /// 刷入按钮显示文本。
         /// </summary>
-        public string SelectFirmwareButtonText => SelectedDeviceCount > 0 ? $"选择固件（{SelectedDeviceCount} 台）" : "选择固件";
+        public string FlashButtonText => SelectedDeviceCount > 0 ? $"刷入（{SelectedDeviceCount} 台）" : "刷入";
 
         /// <summary>
         /// 停止按钮显示文本。
@@ -157,11 +162,6 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// 刷新 Download 设备命令。
         /// </summary>
         public AsyncRelayCommand RefreshDevicesCommand { get; }
-
-        /// <summary>
-        /// 打开固件选择弹窗命令。
-        /// </summary>
-        public RelayCommand OpenFirmwareDialogCommand { get; }
 
         /// <summary>
         /// 停止当前选中设备刷机任务命令。
@@ -246,46 +246,6 @@ namespace JiXingFlashTool.ViewModels.Odin
         }
 
         /// <summary>
-        /// 打开固件选择弹窗，并把选择结果分配给当前选中设备。
-        /// </summary>
-        private void OpenFirmwareDialog()
-        {
-            var selectedDevices = Devices.Where(item => item.IsSelected).ToList();
-            if (selectedDevices.Count == 0)
-            {
-                Growl.Warning("请先选择需要分配固件的设备。");
-                return;
-            }
-
-            var viewModel = new OdinFirmwareSelectionDialogViewModel(selectedDevices.Count, async dialogViewModel =>
-            {
-                foreach (var device in selectedDevices)
-                {
-                    device.AssignFirmware(
-                        dialogViewModel.BlFilePath,
-                        dialogViewModel.ApFilePath,
-                        dialogViewModel.TwrpFilePath,
-                        dialogViewModel.SystemPackageFilePath,
-                        dialogViewModel.WipeDataBeforeSystemFlash,
-                        dialogViewModel.WipeSystemBeforeSystemFlash,
-                        dialogViewModel.FormatDataBeforeSystemFlash,
-                        dialogViewModel.CpFilePath,
-                        dialogViewModel.CscFilePath,
-                        dialogViewModel.UserdataFilePath);
-                }
-
-                RefreshCommandState();
-                RefreshSummary();
-                await EnqueueSelectedDevicesAsync(ResolveFlashMode(dialogViewModel));
-            });
-            var view = new OdinFirmwareSelectionDialogView
-            {
-                DataContext = viewModel
-            };
-            viewModel.Dialog = Dialog.Show(view);
-        }
-
-        /// <summary>
         /// 停止当前选中设备的 TaskCore Odin 刷机任务。
         /// </summary>
         private void StopSelectedDevices()
@@ -327,7 +287,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// <returns>可刷入时返回 true。</returns>
         private bool CanStartFlash()
         {
-            return !IsFlashing && Devices.Any(item => item.IsSelected && !string.IsNullOrWhiteSpace(item.ApFilePath));
+            return !IsFlashing && HasSelectedDevices() && FirmwareSelection.HasApFile;
         }
 
         /// <summary>
@@ -345,7 +305,32 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// <returns>异步入队任务。</returns>
         private async Task StartFlashAsync()
         {
-            await EnqueueSelectedDevicesAsync();
+            AssignSelectedFirmware();
+            await EnqueueSelectedDevicesAsync(ResolveFlashMode(FirmwareSelection));
+        }
+
+        /// <summary>
+        /// 将页面当前选择的固件分配给所有勾选设备。
+        /// </summary>
+        private void AssignSelectedFirmware()
+        {
+            foreach (var device in Devices.Where(item => item.IsSelected))
+            {
+                device.AssignFirmware(
+                    FirmwareSelection.BlFilePath,
+                    FirmwareSelection.ApFilePath,
+                    FirmwareSelection.TwrpFilePath,
+                    FirmwareSelection.SystemPackageFilePath,
+                    FirmwareSelection.WipeDataBeforeSystemFlash,
+                    FirmwareSelection.WipeSystemBeforeSystemFlash,
+                    FirmwareSelection.FormatDataBeforeSystemFlash,
+                    FirmwareSelection.CpFilePath,
+                    FirmwareSelection.CscFilePath,
+                    FirmwareSelection.UserdataFilePath);
+            }
+
+            RefreshCommandState();
+            RefreshSummary();
         }
 
         /// <summary>
@@ -399,21 +384,21 @@ namespace JiXingFlashTool.ViewModels.Odin
         }
 
         /// <summary>
-        /// 根据弹窗选择内容判断本次刷入模式，单独选择 TWRP AP 包时进入 TWRP Recovery 流程。
+        /// 根据页面选择内容判断本次刷入模式，单独选择 TWRP AP 包时进入 TWRP Recovery 流程。
         /// </summary>
-        /// <param name="dialogViewModel">固件选择弹窗 ViewModel。</param>
+        /// <param name="selectionViewModel">固件选择区域 ViewModel。</param>
         /// <returns>本次 Odin 刷机模式。</returns>
-        private static OdinFlashMode ResolveFlashMode(OdinFirmwareSelectionDialogViewModel dialogViewModel)
+        private static OdinFlashMode ResolveFlashMode(OdinFirmwareSelectionDialogViewModel selectionViewModel)
         {
             return OdinFlashModeResolver.Resolve(
-                dialogViewModel.HasBlFile,
-                dialogViewModel.HasApFile,
-                dialogViewModel.ApFileName,
-                dialogViewModel.HasTwrpFile,
-                dialogViewModel.HasSystemPackageFile,
-                dialogViewModel.HasCpFile,
-                dialogViewModel.HasCscFile,
-                dialogViewModel.HasUserdataFile);
+                selectionViewModel.HasBlFile,
+                selectionViewModel.HasApFile,
+                selectionViewModel.ApFileName,
+                selectionViewModel.HasTwrpFile,
+                selectionViewModel.HasSystemPackageFile,
+                selectionViewModel.HasCpFile,
+                selectionViewModel.HasCscFile,
+                selectionViewModel.HasUserdataFile);
         }
 
         /// <summary>
@@ -689,7 +674,7 @@ namespace JiXingFlashTool.ViewModels.Odin
         {
             OnPropertyChanged(nameof(SelectedDeviceCount));
             OnPropertyChanged(nameof(HasSelectedDevicesForFirmware));
-            OnPropertyChanged(nameof(SelectFirmwareButtonText));
+            OnPropertyChanged(nameof(FlashButtonText));
             OnPropertyChanged(nameof(StopButtonText));
             RefreshCommandState();
         }
@@ -699,7 +684,6 @@ namespace JiXingFlashTool.ViewModels.Odin
         /// </summary>
         private void RefreshCommandState()
         {
-            OpenFirmwareDialogCommand.NotifyCanExecuteChanged();
             StopSelectedDevicesCommand.NotifyCanExecuteChanged();
             StartFlashCommand.NotifyCanExecuteChanged();
             FlashTwrpCommand.NotifyCanExecuteChanged();
