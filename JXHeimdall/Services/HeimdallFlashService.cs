@@ -40,6 +40,7 @@ namespace JXHeimdall.Services
             "VENDOR",
             "PERSIST",
             "MODEM",
+            "DSP",
             "CACHE",
             "HIDDEN",
             "USERDATA"
@@ -159,11 +160,26 @@ namespace JXHeimdall.Services
                     };
                 }
 
+                var pitFilePath = FindPitFilePath(packages);
+                var shouldRepartition = false;
+                var usbSelector = request.Device?.UsbSelector ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(usbSelector))
+                {
+                    return new HeimdallFlashResult
+                    {
+                        IsSuccess = false,
+                        Message = "缺少 Heimdall USB 设备选择器，无法执行多设备并发刷入。"
+                    };
+                }
+
+                HeimdallDebugLogService.Write(
+                    "Flash",
+                    "repartition Enabled=" + shouldRepartition + " Pit=" + pitFilePath + " UsbSelector=" + usbSelector);
                 var skipSizeCheck = await ShouldSkipSystemSizeCheckAsync(
                     flashMap,
-                    packages,
+                    pitFilePath,
                     cancellationToken).ConfigureAwait(false);
-                var arguments = BuildFlashArguments(flashMap, skipSizeCheck);
+                var arguments = BuildFlashArguments(flashMap, pitFilePath, shouldRepartition, skipSizeCheck, usbSelector);
                 var result = await _processService
                     .ExecuteAsync(arguments, request.Log, cancellationToken)
                     .ConfigureAwait(false);
@@ -377,9 +393,24 @@ namespace JXHeimdall.Services
         /// <returns>Heimdall 命令参数。</returns>
         private static string BuildFlashArguments(
             IReadOnlyDictionary<string, string> flashMap,
-            bool skipSizeCheck)
+            string pitFilePath,
+            bool shouldRepartition,
+            bool skipSizeCheck,
+            string usbSelector)
         {
             var builder = new StringBuilder("flash");
+            if (!string.IsNullOrWhiteSpace(usbSelector))
+            {
+                builder.Append(" --usb-selector ");
+                builder.Append(HeimdallProcessService.Quote(usbSelector));
+            }
+
+            if (shouldRepartition && !string.IsNullOrWhiteSpace(pitFilePath))
+            {
+                builder.Append(" --repartition --pit ");
+                builder.Append(HeimdallProcessService.Quote(pitFilePath));
+            }
+
             foreach (var partition in PartitionOrder)
             {
                 if (!flashMap.TryGetValue(partition, out var filePath))
@@ -410,7 +441,7 @@ namespace JXHeimdall.Services
         /// <returns>需要追加 --skip-size-check 时返回 true。</returns>
         private async Task<bool> ShouldSkipSystemSizeCheckAsync(
             IReadOnlyDictionary<string, string> flashMap,
-            IEnumerable<HeimdallFirmwarePackageModel> packages,
+            string pitFilePath,
             CancellationToken cancellationToken)
         {
             if (!flashMap.TryGetValue("SYSTEM", out var systemImagePath) ||
@@ -420,7 +451,6 @@ namespace JXHeimdall.Services
                 return false;
             }
 
-            var pitFilePath = FindPitFilePath(packages);
             if (string.IsNullOrWhiteSpace(pitFilePath))
             {
                 return false;

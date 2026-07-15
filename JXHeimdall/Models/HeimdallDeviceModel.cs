@@ -11,14 +11,34 @@ namespace JXHeimdall.Models
         public int DisplayIndex { get; set; }
 
         /// <summary>
-        /// Windows 设备实例标识。
+        /// 设备实例标识，多设备刷入时使用 Heimdall USB 选择器。
         /// </summary>
         public string InstanceId { get; set; } = string.Empty;
 
         /// <summary>
-        /// Windows USB 容器标识，同一台物理设备的多个接口通常共享该值。
+        /// 设备容器标识，多设备刷入时使用 Heimdall USB 选择器。
         /// </summary>
         public string ContainerId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Heimdall 多设备并发刷入时用于锁定具体 USB 设备的选择器。
+        /// </summary>
+        public string UsbSelector { get; set; } = string.Empty;
+
+        /// <summary>
+        /// libusb 识别到的 USB 端口路径。
+        /// </summary>
+        public string UsbPortPath { get; set; } = string.Empty;
+
+        /// <summary>
+        /// libusb 识别到的 USB 总线号。
+        /// </summary>
+        public string UsbBusNumber { get; set; } = string.Empty;
+
+        /// <summary>
+        /// libusb 识别到的 USB 地址。
+        /// </summary>
+        public string UsbAddress { get; set; } = string.Empty;
 
         /// <summary>
         /// 设备名称或系统展示名称。

@@ -37,6 +37,7 @@ namespace JXHeimdall.Services
                 { "msadp.mbn", "MSADP" },
                 { "sec.dat", "SEC" },
                 { "NON-HLOS.bin", "APNHLOS" },
+                { "adspso.bin", "DSP" },
                 { "boot.img", "BOOT" },
                 { "recovery.img", "RECOVERY" },
                 { "system.img", "SYSTEM" },

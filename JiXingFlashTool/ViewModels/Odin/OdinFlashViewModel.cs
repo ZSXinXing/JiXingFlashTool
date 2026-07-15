@@ -188,12 +188,21 @@ namespace JiXingFlashTool.ViewModels.Odin
             try
             {
                 var devices = await DeviceService.GetDownloadModeDevicesAsync(_cancellationTokenSource.Token);
+                var existingDevicesByTaskId = Devices
+                    .GroupBy(GetTaskDeviceId, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(group => group.Key, group => group.First(), StringComparer.OrdinalIgnoreCase);
                 Devices.Clear();
                 _downloadDevicesByTaskId.Clear();
                 foreach (var device in devices)
                 {
                     var item = new OdinDeviceItemViewModel(device);
-                    _downloadDevicesByTaskId[GetTaskDeviceId(item)] = device;
+                    var taskDeviceId = GetTaskDeviceId(item);
+                    if (existingDevicesByTaskId.TryGetValue(taskDeviceId, out var existingItem))
+                    {
+                        ApplyExistingDeviceState(item, existingItem);
+                    }
+
+                    _downloadDevicesByTaskId[taskDeviceId] = device;
                     item.PropertyChanged += (_, args) =>
                     {
                         if (args.PropertyName == nameof(OdinDeviceItemViewModel.IsSelected))
@@ -227,6 +236,33 @@ namespace JiXingFlashTool.ViewModels.Odin
                 IsLoading = false;
                 RefreshCommandState();
             }
+        }
+
+        /// <summary>
+        /// 设备刷新重建列表行时保留原有刷机状态和固件分配，避免失败信息被自动刷新清空。
+        /// </summary>
+        /// <param name="targetItem">刷新后新创建的设备行。</param>
+        /// <param name="sourceItem">刷新前已有的设备行。</param>
+        private static void ApplyExistingDeviceState(OdinDeviceItemViewModel targetItem, OdinDeviceItemViewModel sourceItem)
+        {
+            if (targetItem == null || sourceItem == null)
+            {
+                return;
+            }
+
+            targetItem.AssignFirmware(
+                sourceItem.BlFilePath,
+                sourceItem.ApFilePath,
+                sourceItem.TwrpFilePath,
+                sourceItem.SystemPackageFilePath,
+                sourceItem.WipeDataBeforeSystemFlash,
+                sourceItem.WipeSystemBeforeSystemFlash,
+                sourceItem.FormatDataBeforeSystemFlash,
+                sourceItem.CpFilePath,
+                sourceItem.CscFilePath,
+                sourceItem.UserdataFilePath);
+            targetItem.IsSelected = sourceItem.IsSelected;
+            targetItem.StatusText = sourceItem.StatusText;
         }
 
         /// <summary>
