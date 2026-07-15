@@ -140,6 +140,7 @@
     <Compile Include="Model\SocketPackageModel.cs" />
     <Compile Include="Model\TwrpPackageManifest.cs" />
     <Compile Include="Model\TwrpRecoveryImage.cs" />
+    <Compile Include="Model\TwrpResourceOptionModel.cs" />
     <Compile Include="Model\YuvModel.cs" />
     <Compile Include="Capability\AdbCapability.cs" />
     <Compile Include="Capability\HeimdallCapability.cs" />

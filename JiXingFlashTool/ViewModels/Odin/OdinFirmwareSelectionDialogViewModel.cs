@@ -1,8 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using HandyControl.Controls;
+using JiXingFlashTool.Model;
+using JiXingFlashTool.Utils;
 using Microsoft.Win32;
 using System;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -17,6 +20,11 @@ namespace JiXingFlashTool.ViewModels.Odin
         private string _blFilePath = string.Empty;
         private string _apFilePath = string.Empty;
         private string _twrpFilePath = string.Empty;
+        private bool _isManualTwrpMode = true;
+        private bool _isLoadingAutomaticTwrpResources;
+        private bool _hasLoadedAutomaticTwrpResources;
+        private int _automaticTwrpSelectionVersion;
+        private TwrpResourceOptionModel _selectedAutomaticTwrpItem;
         private string _systemPackageFilePath = string.Empty;
         private bool _wipeDataBeforeSystemFlash;
         private bool _wipeSystemBeforeSystemFlash;
@@ -36,7 +44,11 @@ namespace JiXingFlashTool.ViewModels.Odin
             _confirmAction = confirmAction;
             SelectBlCommand = new RelayCommand(() => SelectFirmwareFile(value => BlFilePath = value, false));
             SelectApCommand = new RelayCommand(() => SelectFirmwareFile(value => ApFilePath = value, true));
-            SelectTwrpCommand = new RelayCommand(() => SelectImageFile(value => TwrpFilePath = value));
+            SelectTwrpCommand = new RelayCommand(() =>
+            {
+                IsManualTwrpMode = true;
+                SelectImageFile(value => TwrpFilePath = value);
+            });
             SelectSystemPackageCommand = new RelayCommand(() => SelectSystemPackageFile(value => SystemPackageFilePath = value));
             SelectCpCommand = new RelayCommand(() => SelectFirmwareFile(value => CpFilePath = value, false));
             SelectCscCommand = new RelayCommand(() => SelectFirmwareFile(value => CscFilePath = value, false));
@@ -45,7 +57,7 @@ namespace JiXingFlashTool.ViewModels.Odin
             CancelCommand = new RelayCommand(Cancel);
             ClearBlCommand = new RelayCommand(() => BlFilePath = string.Empty);
             ClearApCommand = new RelayCommand(() => ApFilePath = string.Empty);
-            ClearTwrpCommand = new RelayCommand(() => TwrpFilePath = string.Empty);
+            ClearTwrpCommand = new RelayCommand(ClearTwrpSelection);
             ClearSystemPackageCommand = new RelayCommand(() => SystemPackageFilePath = string.Empty);
             ClearCpCommand = new RelayCommand(() => CpFilePath = string.Empty);
             ClearCscCommand = new RelayCommand(() => CscFilePath = string.Empty);
@@ -92,6 +104,76 @@ namespace JiXingFlashTool.ViewModels.Odin
         {
             get => _twrpFilePath;
             set => SetFirmwarePath(ref _twrpFilePath, value, nameof(TwrpFilePath), nameof(TwrpFileName), nameof(TwrpFileSizeText), nameof(HasTwrpFile));
+        }
+
+        /// <summary>
+        /// TWRP 手动选择模式是否启用，启用时通过本地文件选择器选择 .img。
+        /// </summary>
+        public bool IsManualTwrpMode
+        {
+            get => _isManualTwrpMode;
+            set
+            {
+                if (SetProperty(ref _isManualTwrpMode, value))
+                {
+                    OnPropertyChanged(nameof(IsAutomaticTwrpMode));
+                    if (value)
+                    {
+                        _automaticTwrpSelectionVersion++;
+                        SelectedAutomaticTwrpItem = null;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// TWRP 自动选择模式是否启用，启用时从资源包下拉选择版本。
+        /// </summary>
+        public bool IsAutomaticTwrpMode
+        {
+            get => !IsManualTwrpMode;
+            set
+            {
+                if (value)
+                {
+                    IsManualTwrpMode = false;
+                    _ = LoadAutomaticTwrpResourcesAsync();
+                }
+                else
+                {
+                    IsManualTwrpMode = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 自动模式下可选择的 TWRP 资源条目集合。
+        /// </summary>
+        public ObservableCollection<TwrpResourceOptionModel> AutomaticTwrpItems { get; } = new ObservableCollection<TwrpResourceOptionModel>();
+
+        /// <summary>
+        /// 自动模式下当前选中的 TWRP 资源条目。
+        /// </summary>
+        public TwrpResourceOptionModel SelectedAutomaticTwrpItem
+        {
+            get => _selectedAutomaticTwrpItem;
+            set
+            {
+                if (SetProperty(ref _selectedAutomaticTwrpItem, value))
+                {
+                    int selectionVersion = ++_automaticTwrpSelectionVersion;
+                    _ = ApplyAutomaticTwrpItemAsync(value, selectionVersion);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 是否正在读取或提取自动 TWRP 资源。
+        /// </summary>
+        public bool IsLoadingAutomaticTwrpResources
+        {
+            get => _isLoadingAutomaticTwrpResources;
+            set => SetProperty(ref _isLoadingAutomaticTwrpResources, value);
         }
 
         /// <summary>
@@ -384,6 +466,129 @@ namespace JiXingFlashTool.ViewModels.Odin
         private void Cancel()
         {
             Dialog?.Close();
+        }
+
+        /// <summary>
+        /// 清除当前 TWRP 选择，手动文件与自动资源选中项都会同步清空。
+        /// </summary>
+        private void ClearTwrpSelection()
+        {
+            SelectedAutomaticTwrpItem = null;
+            TwrpFilePath = string.Empty;
+        }
+
+        /// <summary>
+        /// 异步读取已配置资源包中的 TWRP 镜像条目，避免切换自动模式时阻塞界面。
+        /// </summary>
+        /// <returns>异步加载任务。</returns>
+        private async Task LoadAutomaticTwrpResourcesAsync()
+        {
+            if (_hasLoadedAutomaticTwrpResources || IsLoadingAutomaticTwrpResources)
+            {
+                return;
+            }
+
+            IsLoadingAutomaticTwrpResources = true;
+            try
+            {
+                var items = await Task.Run(() => RomUtil.Instance.GetTwrpResourceOptions());
+                AutomaticTwrpItems.Clear();
+                foreach (TwrpResourceOptionModel item in items)
+                {
+                    AutomaticTwrpItems.Add(item);
+                }
+
+                _hasLoadedAutomaticTwrpResources = true;
+            }
+            catch (Exception exception)
+            {
+                WriteTwrpResourceLog(nameof(LoadAutomaticTwrpResourcesAsync), exception);
+                Growl.Warning("未读取到 TWRP 资源，请先在资源中配置 TWRP。");
+            }
+            finally
+            {
+                IsLoadingAutomaticTwrpResources = false;
+            }
+        }
+
+        /// <summary>
+        /// 将自动模式选中的 TWRP 资源提取到运行目录，并写入 Odin 刷机使用的 TWRP 路径。
+        /// </summary>
+        /// <param name="item">当前下拉选中的 TWRP 资源条目。</param>
+        /// <returns>异步提取任务。</returns>
+        private async Task ApplyAutomaticTwrpItemAsync(TwrpResourceOptionModel item, int selectionVersion)
+        {
+            if (item == null)
+            {
+                if (selectionVersion == _automaticTwrpSelectionVersion)
+                {
+                    TwrpFilePath = string.Empty;
+                }
+
+                return;
+            }
+
+            IsLoadingAutomaticTwrpResources = true;
+            try
+            {
+                string targetDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "JXHeimdallExtract", "OdinTwrpResource", CreateTwrpResourceCacheDirectoryName(item));
+                string extractedTwrpPath = await Task.Run(() => RomUtil.Instance.ExtractTwrpResource(item, targetDirectory));
+                if (selectionVersion == _automaticTwrpSelectionVersion && ReferenceEquals(item, SelectedAutomaticTwrpItem))
+                {
+                    TwrpFilePath = extractedTwrpPath;
+                }
+            }
+            catch (Exception exception)
+            {
+                WriteTwrpResourceLog(nameof(ApplyAutomaticTwrpItemAsync), exception);
+                if (selectionVersion == _automaticTwrpSelectionVersion)
+                {
+                    TwrpFilePath = string.Empty;
+                    Growl.Error("TWRP 资源提取失败。");
+                }
+            }
+            finally
+            {
+                if (selectionVersion == _automaticTwrpSelectionVersion)
+                {
+                    IsLoadingAutomaticTwrpResources = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 为自动 TWRP 资源生成独立缓存目录名，避免不同版本同名镜像互相复用。
+        /// </summary>
+        /// <param name="item">TWRP 资源条目。</param>
+        /// <returns>可作为本地目录名使用的缓存键。</returns>
+        private static string CreateTwrpResourceCacheDirectoryName(TwrpResourceOptionModel item)
+        {
+            string rawName = $"{item.Series}_{item.Board}_{item.BuildDate}_{Path.GetFileNameWithoutExtension(item.ImageFile)}";
+            foreach (char invalidChar in Path.GetInvalidFileNameChars())
+            {
+                rawName = rawName.Replace(invalidChar, '_');
+            }
+
+            return string.IsNullOrWhiteSpace(rawName) ? "default" : rawName;
+        }
+
+        /// <summary>
+        /// 记录 Odin TWRP 自动资源读取与提取异常，便于后续根据日志定位问题。
+        /// </summary>
+        /// <param name="methodName">发生异常的方法名。</param>
+        /// <param name="exception">异常对象。</param>
+        private static void WriteTwrpResourceLog(string methodName, Exception exception)
+        {
+            try
+            {
+                string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "debug_log");
+                Directory.CreateDirectory(logDirectory);
+                string logPath = Path.Combine(logDirectory, $"odin_twrp_resource_{DateTime.Now:yyyyMMdd}.log");
+                File.AppendAllText(logPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} ERROR OdinFirmwareSelectionDialogViewModel.{methodName}{Environment.NewLine}{exception}{Environment.NewLine}");
+            }
+            catch
+            {
+            }
         }
 
         /// <summary>

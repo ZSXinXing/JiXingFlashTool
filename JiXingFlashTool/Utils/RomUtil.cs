@@ -233,6 +233,66 @@ namespace JiXingFlashTool.Utils
         }
 
         /// <summary>
+        /// 读取当前资源配置中的全部 TWRP 镜像条目，供 Odin 页面自动模式下拉选择。
+        /// </summary>
+        /// <returns>已保存 TWRP 资源包中的镜像条目集合。</returns>
+        public IReadOnlyList<TwrpResourceOptionModel> GetTwrpResourceOptions()
+        {
+            lock (_syncRoot)
+            {
+                EnsureInitialized();
+                var options = new List<TwrpResourceOptionModel>();
+                foreach (RomPackageArchiveSource source in _packageSources)
+                {
+                    TwrpPackageManifest manifest = ReadManifest<TwrpPackageManifest>(source.TwrpPackagePath, TwrpPackagePassword);
+                    foreach (TwrpRecoveryImage image in manifest.RecoveryImages ?? Enumerable.Empty<TwrpRecoveryImage>())
+                    {
+                        if (string.IsNullOrWhiteSpace(image.ImageFile))
+                        {
+                            continue;
+                        }
+
+                        options.Add(new TwrpResourceOptionModel
+                        {
+                            Series = source.Series,
+                            Board = image.Board,
+                            BuildDate = image.BuildDate,
+                            ImageFile = image.ImageFile,
+                            ArchivePath = source.TwrpPackagePath
+                        });
+                    }
+                }
+
+                return options
+                    .OrderBy(option => option.Series, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(option => option.Board, StringComparer.OrdinalIgnoreCase)
+                    .ThenByDescending(option => option.BuildDate, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+            }
+        }
+
+        /// <summary>
+        /// 从 TWRP 资源压缩包中提取下拉选中的镜像文件。
+        /// </summary>
+        /// <param name="option">下拉框选中的 TWRP 资源条目。</param>
+        /// <param name="targetDirectory">提取到的目标目录。</param>
+        /// <returns>提取后的本地 TWRP 镜像路径。</returns>
+        public string ExtractTwrpResource(TwrpResourceOptionModel option, string targetDirectory)
+        {
+            if (option == null)
+            {
+                throw new ArgumentNullException(nameof(option));
+            }
+
+            lock (_syncRoot)
+            {
+                EnsureInitialized();
+                var match = new ArchivePackageMatch(option.ArchivePath, option.ImageFile, option.Board, option.BuildDate, string.Empty);
+                return ExtractArchiveFile(match, TwrpPackagePassword, targetDirectory);
+            }
+        }
+
+        /// <summary>
         /// 确认当前实例已完成压缩包初始化。
         /// </summary>
         private void EnsureInitialized()

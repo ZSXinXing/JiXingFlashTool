@@ -179,7 +179,11 @@
                         <TextBlock Text="TWRP" FontSize="10.5" FontWeight="Bold" Foreground="#607D8B" VerticalAlignment="Center" />
                         <TextBlock Margin="7,0,0,0" Text=".img 文件，替换 AP 内置 recovery，并自动重启到 recovery" FontSize="10.5" Foreground="{StaticResource DialogMutedBrush}" VerticalAlignment="Center" />
                     </StackPanel>
-                    <Grid Height="35" Margin="0,5.25,0,0">
+                    <StackPanel Orientation="Horizontal" Height="20" Margin="0,5.25,0,0">
+                        <RadioButton Content="手动" FontSize="10.5" Foreground="#333333" GroupName="TwrpSelectMode" IsChecked="{Binding IsManualTwrpMode, Mode=TwoWay}" VerticalAlignment="Center" />
+                        <RadioButton Margin="16,0,0,0" Content="自动" FontSize="10.5" Foreground="#333333" GroupName="TwrpSelectMode" IsChecked="{Binding IsAutomaticTwrpMode, Mode=TwoWay}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid Height="35" Margin="0,5.25,0,0" Visibility="{Binding IsManualTwrpMode, Converter={StaticResource VisibilityBoolConverter}}">
                         <Button Style="{StaticResource TransparentIconButtonStyle}" Command="{Binding SelectTwrpCommand}">
                             <Grid>
                                 <Rectangle RadiusX="3.5" RadiusY="3.5" Fill="#4DF5F5F5" Stroke="{StaticResource DialogBorderBrush}" StrokeDashArray="2 2" Visibility="{Binding HasTwrpFile, Converter={StaticResource InverseVisibilityBoolConverter}}" />
@@ -203,9 +207,17 @@
                             <TextBlock Text="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="8.5" Foreground="#999999" />
                         </Button>
                     </Grid>
+                    <Grid Height="35" Margin="0,5.25,0,0" Visibility="{Binding IsAutomaticTwrpMode, Converter={StaticResource VisibilityBoolConverter}}">
+                        <ComboBox ItemsSource="{Binding AutomaticTwrpItems}"
+                                  SelectedItem="{Binding SelectedAutomaticTwrpItem, Mode=TwoWay}"
+                                  DisplayMemberPath="DisplayName"
+                                  FontSize="10.5"
+                                  Foreground="#333333"
+                                  BorderBrush="{StaticResource DialogBorderBrush}" />
+                    </Grid>
                 </StackPanel>
 
-                <StackPanel Margin="0,0,0,20">
+                <StackPanel Margin="0,0,0,20" Visibility="Collapsed">
                     <StackPanel Orientation="Horizontal" Height="14">
                         <TextBlock Text="系统包" FontSize="10.5" FontWeight="Bold" Foreground="#009688" VerticalAlignment="Center" />
                         <TextBlock Margin="7,0,0,0" Text=".zip / .ps，TWRP 侧载刷入 LineageOS 后自动重启系统" FontSize="10.5" Foreground="{StaticResource DialogMutedBrush}" VerticalAlignment="Center" />
